@@ -90,7 +90,8 @@ public class LoginService {
         //jwt토큰 사용자 쿠키에 저장
         String jwtToken = jwtTokenProvider.generateToken(id);
         String refreshToken = jwtTokenProvider.generateRefreshToken(id);
-
+        System.out.println("jwtToken = " + jwtToken);
+        System.out.println("refreshToken = " + refreshToken);
         Cookie jwtCookie = new Cookie("jwtCookie",jwtToken);
         jwtCookie.setPath("/");
         jwtCookie.setMaxAge(Math.toIntExact(tokenMillisecond));

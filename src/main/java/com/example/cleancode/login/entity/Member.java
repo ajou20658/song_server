@@ -1,9 +1,6 @@
 package com.example.cleancode.login.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
@@ -11,6 +8,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,6 +16,7 @@ public class Member {
     @Id
     private Long id;
     private String email;
+    @Column(name = "nickname", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String nickname;
     private Set<String> preferences;
     @Enumerated(EnumType.STRING)

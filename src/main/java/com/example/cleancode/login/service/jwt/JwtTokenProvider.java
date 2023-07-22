@@ -26,12 +26,12 @@ public class JwtTokenProvider {
     @Value("${jwt.token.refresh-expiration-time}")
     private Long refreshMillisecond;
 
+
     public final String BEARER_PREFIX = "Bearer ";
     public String generateToken(Long id){
         Date now = new Date();
         Date expirationDate= new Date(now.getTime()+tokenMillisecond*1000l);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
-
         String token = Jwts.builder()
                 .setSubject(id.toString())
                 .setIssuedAt(now)
@@ -44,7 +44,6 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expirationDate= new Date(now.getTime()+refreshMillisecond*1000l);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
-
         String token = Jwts.builder()
                 .setSubject(id.toString())
                 .setIssuedAt(now)
@@ -55,8 +54,8 @@ public class JwtTokenProvider {
     }
     //토큰 형식만 검증
     public boolean validateToken(String token){
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
-            Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             if(claims.getExpiration().before(new Date())){
                 return false;
@@ -68,28 +67,26 @@ public class JwtTokenProvider {
             return false;
         }
     }
-    //Subject(email)얻기
-    public String getEmailFromJwt(String token){
-        try{
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey.getBytes())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            return claims.getSubject();
-        }catch (Exception e){
-            return null;
-        }
-    }
-    public Claims getClaim(String jwt){
+
+    public Long getClaim(String jwt){
         if(validateToken(jwt)){
-            Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(jwt)
-                .getBody();
-            return claims;
+            try{
+                log.info(jwt);
+                Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+                String idString = Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(jwt)
+                        .getBody().getSubject();
+                log.info(idString);
+                Long id = Long.parseLong(idString);
+                return id;
+            }catch(Exception ex){
+                log.error("Failed to parse The JWT token.", ex);
+                return null;
+            }
         }
         return null;
     }
+
 }

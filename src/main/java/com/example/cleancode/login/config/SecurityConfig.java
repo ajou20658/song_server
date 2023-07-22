@@ -16,7 +16,8 @@ public class SecurityConfig {
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer
                         .disable())
                 .authorizeRequests()
-                .requestMatchers(HttpMethod.POST,"/**").permitAll();
+                .requestMatchers(HttpMethod.POST,"/**").permitAll()
+                .requestMatchers("/admin").authenticated();
         return http.build();
     }
 }

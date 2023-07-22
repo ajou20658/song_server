@@ -1,11 +1,11 @@
-package com.example.cleancode.api.service.jwt;
+package com.example.cleancode.login.service.jwt;
 
 import org.springframework.data.redis.core.RedisTemplate;
 
-public class RedisService {
+public class RedisLogout {
     private final RedisTemplate<String ,Object> redisTemplate;
 
-    public RedisService(RedisTemplate<String,Object> redisTemplate){
+    public RedisLogout(RedisTemplate<String,Object> redisTemplate){
         this.redisTemplate = redisTemplate;
     }
 
