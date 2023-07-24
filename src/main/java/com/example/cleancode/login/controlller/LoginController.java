@@ -26,6 +26,7 @@ public class LoginController {
 
     @Autowired
     private MemberRequest memberRequest;
+
     @PostMapping("/login")
     public void login(@RequestParam String authorizationCode, HttpServletResponse response){
         System.out.println("loginService = " + loginService);
@@ -34,6 +35,7 @@ public class LoginController {
         kakaoLoginParam.setAuthorizationCode(authorizationCode);
         loginService.steps(kakaoLoginParam, response);
     }
+
     @GetMapping("/member")
     public ResponseEntity<Member> memberinfo(HttpServletRequest request){
         Optional<Member> member = memberRequest.findMember(request);

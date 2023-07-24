@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class WebConfig {
+public class LogConfig {
     @Autowired
     private LoginFilter loginFilter;
     @Bean
@@ -31,6 +31,7 @@ public class WebConfig {
         filterFilterRegistrationBean.addUrlPatterns("/v2/*");
         return filterFilterRegistrationBean;
     }
+
     @Bean
     public WebClient webClient() {
         return WebClient.create();
