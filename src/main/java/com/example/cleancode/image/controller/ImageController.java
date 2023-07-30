@@ -2,6 +2,7 @@ package com.example.cleancode.image.controller;
 
 import com.example.cleancode.image.entity.Chart;
 import com.example.cleancode.image.entity.Song;
+import com.example.cleancode.image.repository.ChartRepository;
 import com.example.cleancode.image.repository.SongRepository;
 //import com.example.cleancode.image.service.MelonService;
 import com.example.cleancode.image.service.MelonService;
@@ -22,7 +23,8 @@ import java.util.List;
 public class ImageController {
     @Autowired
     private MelonService melonService;
-
+    @Autowired
+    private ChartRepository chartRepository;
     @Autowired
     private SongRepository songRepository;
 
@@ -65,7 +67,8 @@ public class ImageController {
     public String getList(Model model){
 //        List<Song> songs = songRepository.findAll();
 //        model.addAttribute("songs",songs);
-//        List<Chart> charts =
-        return "/song-list";
+        List<Chart> charts = chartRepository.findAll();
+        model.addAttribute("charts",charts);
+        return "/chart-list";
     }
 }

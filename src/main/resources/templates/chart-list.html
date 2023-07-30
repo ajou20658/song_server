@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>노래 목록</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+          border: 1px solid black;
+          padding: 8px;
+
+          max-width: 200px;
+          word-break; break-all;
+
+          white-space: nowrap;
+          overflow: hidden;
+          test-overflow: ellipsis;
+      }
+    </style>
+</head>
+<body>
+<h1>노래 목록</h1>
+<table>
+    <thead>
+    <tr>
+        <th>SongId</th>
+        <th>Title</th>
+        <th>imgUrl</th>
+        <th>artist</th>
+        <th>albumId</th>
+        <th>genre</th>
+        <!-- 추가 필드가 있다면 여기에 추가 -->
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 회원 데이터를 순회하며 테이블에 추가 -->
+    <tr th:each="member : ${charts}">
+        <td th:text="${member.songId}"></td>
+        <td th:text="${member.title}"></td>
+        <td th:text="${member.imgUrl}"></td>
+        <td th:text="${member.artist}"></td>
+        <td th:text="${member.albumId}"></td>
+        <td th:text="${member.genre}"></td>
+
+        <!-- 추가 필드가 있다면 여기에 추가 -->
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

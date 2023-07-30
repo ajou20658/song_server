@@ -110,7 +110,7 @@ public class MelonService {
         for(ChartDTO chart: pList){
             String getGenreParam = chart.getSongId();
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
-            String genre = genreDoc.select("div.meta dd").eq(3).text();
+            String genre = genreDoc.select("div.meta dd").eq(2).text();
             chart.setGenre(genre);
             chartRepository.save(DtoToEntity(chart));
             res+=1;
