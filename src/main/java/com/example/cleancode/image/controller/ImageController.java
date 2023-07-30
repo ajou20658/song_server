@@ -47,20 +47,7 @@ public class ImageController {
         } else {
             model.addAttribute("message", "파일 업로드 실패: 업로드할 파일이 없습니다.");
         }
-        return "uploadForm";
-    }
-    @PostMapping("/add-song")
-    public void login(@RequestParam Song song){
-        songRepository.save(song);
-    }
-    @GetMapping("/do-crawl")
-    public @ResponseBody Long crawl(){
-        try{
-            return melonService.collectMelonSong();
-        }catch(Exception ex){
-            log.error(ex.toString());
-        }
-        return 0l;
+        return "uploadForm";//이곳은 성공후 리다이렉트 될 페이지
     }
 
     @GetMapping("/showall")
