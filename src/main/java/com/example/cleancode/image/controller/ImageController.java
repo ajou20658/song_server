@@ -71,4 +71,9 @@ public class ImageController {
         model.addAttribute("charts",charts);
         return "/chart-list";
     }
+    @GetMapping("/chartjson")
+    @ResponseBody
+    public List<Chart> giveList(){
+        return chartRepository.findAll();
+    }
 }
