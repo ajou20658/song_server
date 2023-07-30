@@ -1,26 +1,23 @@
 package com.example.cleancode.login.controlller;
 
-import com.example.cleancode.login.dto.MemberDto;
 import com.example.cleancode.login.entity.Member;
 import com.example.cleancode.login.service.LoginService;
 import com.example.cleancode.login.service.MemberRequest;
-import com.example.cleancode.login.service.jwt.JwtTokenProvider;
 import com.example.cleancode.login.service.oauth.KakaoLoginParam;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
 @Slf4j
 @RequestMapping("/v2")
-public class LoginController {
+public class UserController {
     @Autowired
     private LoginService loginService;
 
@@ -41,6 +38,10 @@ public class LoginController {
         Optional<Member> member = memberRequest.findMember(request);
         log.info(member.toString());
         return ResponseEntity.ok(member.orElse(null));
+    }
+    @PostMapping("/prefer")
+    public void login(@RequestBody ArrayList<String> preferences){
+
     }
     @GetMapping("/test")
     public @ResponseBody String test(){

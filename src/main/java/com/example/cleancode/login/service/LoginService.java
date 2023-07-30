@@ -2,11 +2,12 @@ package com.example.cleancode.login.service;
 
 import com.example.cleancode.login.JpaRepository.MemberRepository;
 import com.example.cleancode.login.JpaRepository.TokenRepository;
+import com.example.cleancode.login.dto.JwtDto;
 import com.example.cleancode.login.service.oauth.KakaoInfoResponse;
 import com.example.cleancode.login.entity.KakaoToken;
 import com.example.cleancode.login.entity.Member;
 import com.example.cleancode.login.entity.Role;
-import com.example.cleancode.login.service.jwt.JwtTokenProvider;
+import com.example.cleancode.utils.jwt.JwtTokenProvider;
 import com.example.cleancode.login.service.oauth.KakaoLoginParam;
 import com.example.cleancode.login.service.oauth.KakaoTokenProvider;
 import com.example.cleancode.login.service.oauth.KakaoTokenResponse;
@@ -18,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @Slf4j
@@ -49,8 +50,6 @@ public class LoginService {
         System.out.println("kakaoLoginParam = " + kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenProvider.requestAccessToken(kakaoLoginParam);
-        //System.out.println("kakaoTokenResponse access = " + kakaoTokenResponse.getAccessToken());
-        //System.out.println("kakaoTokenResponse refresh= " + kakaoTokenResponse.getRefreshToken());
         if(kakaoTokenResponse == null){
             //예외 코드 추가 필요
             return;
@@ -85,19 +84,22 @@ public class LoginService {
 //사용자가 있다면
         }
         //jwt토큰 사용자 쿠키에 저장
-        String jwtToken = jwtTokenProvider.generateToken(id);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(id);
-        System.out.println("jwtToken = " + jwtToken);
-        System.out.println("refreshToken = " + refreshToken);
-        Cookie jwtCookie = new Cookie("jwtCookie",jwtToken);
+
+        JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
+        System.out.println("jwtToken = " + jwtDto.getAccessToken());
+        System.out.println("refreshToken = " + jwtDto.getRefreshToken());
+        setCookie(response,jwtDto);
+    }
+    public void setCookie(HttpServletResponse response, JwtDto jwtDto){
+        Cookie jwtCookie = new Cookie("jwtCookie",jwtDto.getAccessToken());
         jwtCookie.setPath("/");
         jwtCookie.setMaxAge(Math.toIntExact(tokenMillisecond));
         response.addCookie(jwtCookie);
-        Cookie jwtRefresh = new Cookie("jwtRefresh",refreshToken);
+        Cookie jwtRefresh = new Cookie("jwtRefresh",jwtDto.getRefreshToken());
         jwtRefresh.setPath("/");
         jwtRefresh.setMaxAge(Math.toIntExact(refreshMillisecond));
         response.addCookie(jwtRefresh);
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3000"); // 클라이언트 도메인 설정
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // 클라이언트 도메인 설정
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"); // CORS 허용 설정
     }
 

@@ -26,7 +26,7 @@ public class AdminController {
         List<Member> members = memberRepository.findAll();
 
         model.addAttribute("members",members);
-        return "/member-list";
+        return "member-list";
     }
 
     @GetMapping("/tokens")
@@ -34,6 +34,6 @@ public class AdminController {
         List<KakaoToken> tokens = tokenRepository.findAll();
 
         model.addAttribute("tokens",tokens);
-        return "/token-list";
+        return "token-list";
     }
 }

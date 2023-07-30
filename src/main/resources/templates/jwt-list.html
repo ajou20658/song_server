@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>jwt 토큰 리스트</title>
+  <style>
+      table {
+          border-collapse: collapse;
+          width: 100%;
+      }
+
+      th, td {
+          border: 1px solid black;
+          padding: 8px;
+
+          max-width: 200px;
+          word-break; break-all;
+
+          white-space: nowrap;
+          overflow: hidden;
+          test-overflow: ellipsis;
+      }
+    </style>
+</head>
+<body>
+<h1>jwt 목록</h1>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>accessToken</th>
+    <th>expiresIn</th>
+    <th>refreshToken</th>
+    <th>expiresIn</th>
+    <th>scope</th>
+    <!-- 추가 필드가 있다면 여기에 추가 -->
+  </tr>
+  </thead>
+  <tbody>
+  <!-- 회원 데이터를 순회하며 테이블에 추가 -->
+  <tr th:each="token : ${tokens}">
+    <td th:text="${token.id}"></td>
+    <td th:text="${token.token}"></td>
+    <td th:text="${token.expire}"></td>
+    <td th:text="${token.refreshToken}"></td>
+    <td th:text="${token.refreshExpire}"></td>
+    <td th:text="${token.scope}"></td>
+    <!-- 추가 필드가 있다면 여기에 추가 -->
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

@@ -1,9 +1,9 @@
 package com.example.cleancode.login.service;
 
 import com.example.cleancode.login.JpaRepository.MemberRepository;
-import com.example.cleancode.login.dto.MemberDto;
+import com.example.cleancode.login.dto.JwtDto;
 import com.example.cleancode.login.entity.Member;
-import com.example.cleancode.login.service.jwt.JwtTokenProvider;
+import com.example.cleancode.utils.jwt.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +22,23 @@ public class MemberRequest {
 
     public Optional<Member> findMember(HttpServletRequest request){
         Cookie[] cookies = request.getCookies();
-        String jwt=null;
+
+        String access="";
+        String refresh="";
         for(Cookie cookie: cookies){
             if("jwtCookie".equals(cookie.getName())){
-                jwt = cookie.getValue();
-                break;
+                 access = cookie.getValue();
+            } else if ("jwtRefresh".equals(cookie.getName())) {
+                refresh = cookie.getValue();
             }
         }
-        log.info("member jwt: "+jwt);
-        Long id = jwtTokenProvider.getClaim(jwt);
+        JwtDto jwtDto = new JwtDto(access,refresh);
+        Long id = jwtTokenProvider.getId(jwtDto);
         log.info(id.toString());
         return memberRepository.findById(id);
     }
+
+//    public boolean updatePrefer(HttpServletRequest request){
+//        request.get
+//    }
 }

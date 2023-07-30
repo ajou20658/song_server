@@ -1,4 +1,4 @@
-package com.example.cleancode.login.service.jwt;
+package com.example.cleancode.utils.jwt;
 
 import org.springframework.data.redis.core.RedisTemplate;
 

@@ -1,4 +1,4 @@
-package com.example.cleancode.login.filter;
+package com.example.cleancode.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

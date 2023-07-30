@@ -1,4 +1,4 @@
-package com.example.cleancode.login.config;
+package com.example.cleancode.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

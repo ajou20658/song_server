@@ -12,6 +12,4 @@ import lombok.RequiredArgsConstructor;
 public class JwtDto {
     private String accessToken;
     private String refreshToken;
-    private Long expires;
-    private Long refreshExpires;
 }
