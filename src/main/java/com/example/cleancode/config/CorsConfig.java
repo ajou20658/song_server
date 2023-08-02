@@ -19,8 +19,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsFilter(){
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:8080"));
+        config.setAllowedOrigins(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
         config.setExposedHeaders(List.of("*"));
@@ -33,7 +32,6 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedHeaders("*")
-                .allowedMethods("*")
-                .allowCredentials(true);
+                .allowedMethods("*");
     }
 }

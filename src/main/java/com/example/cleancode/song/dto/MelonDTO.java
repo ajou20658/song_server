@@ -1,4 +1,4 @@
-package com.example.cleancode.image.dto;
+package com.example.cleancode.song.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;

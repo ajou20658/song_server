@@ -1,6 +1,6 @@
-package com.example.cleancode.image.repository;
+package com.example.cleancode.song.repository;
 
-import com.example.cleancode.image.entity.Chart;
+import com.example.cleancode.song.entity.Chart;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

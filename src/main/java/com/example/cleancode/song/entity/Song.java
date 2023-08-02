@@ -1,4 +1,4 @@
-package com.example.cleancode.image.entity;
+package com.example.cleancode.song.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

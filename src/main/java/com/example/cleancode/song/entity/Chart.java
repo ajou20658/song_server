@@ -1,8 +1,7 @@
-package com.example.cleancode.image.entity;
+package com.example.cleancode.song.entity;
 
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @ToString

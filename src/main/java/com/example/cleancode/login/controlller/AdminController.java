@@ -1,6 +1,6 @@
 package com.example.cleancode.login.controlller;
 
-import com.example.cleancode.image.service.MelonService;
+import com.example.cleancode.song.service.MelonService;
 import com.example.cleancode.login.JpaRepository.MemberRepository;
 import com.example.cleancode.login.JpaRepository.TokenRepository;
 import com.example.cleancode.login.entity.KakaoToken;
@@ -8,9 +8,7 @@ import com.example.cleancode.login.entity.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;

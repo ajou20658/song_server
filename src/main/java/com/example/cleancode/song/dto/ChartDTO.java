@@ -1,4 +1,4 @@
-package com.example.cleancode.image.dto;
+package com.example.cleancode.song.dto;
 
 import lombok.Builder;
 import lombok.Data;

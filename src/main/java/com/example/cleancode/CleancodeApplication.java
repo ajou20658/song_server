@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @ComponentScan(basePackages = {
 		"com.example.cleancode"})
-@EnableMongoRepositories("com.example.cleancode.image.repository")
+@EnableMongoRepositories("com.example.cleancode.song.repository")
 @SpringBootApplication
 public class CleancodeApplication {
 

@@ -1,13 +1,13 @@
-package com.example.cleancode.image.service;
+package com.example.cleancode.song.service;
 
-import com.example.cleancode.image.dto.ChartDTO;
-import com.example.cleancode.image.dto.MelonDTO;
-import com.example.cleancode.image.entity.Album;
-import com.example.cleancode.image.entity.Chart;
-import com.example.cleancode.image.entity.Song;
-import com.example.cleancode.image.repository.AlbumRepository;
-import com.example.cleancode.image.repository.ChartRepository;
-import com.example.cleancode.image.repository.SongRepository;
+import com.example.cleancode.song.dto.ChartDTO;
+import com.example.cleancode.song.dto.SearchDto;
+import com.example.cleancode.song.entity.Album;
+import com.example.cleancode.song.entity.Chart;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.song.repository.AlbumRepository;
+import com.example.cleancode.song.repository.ChartRepository;
+import com.example.cleancode.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -31,10 +31,7 @@ public class MelonService {
     private SongRepository songRepository;
     @Autowired
     private ChartRepository chartRepository;
-//    @Autowired
-//    public MelonService(ChartRepository chartRepository){
-//        this.chartRepository = chartRepository;
-//    }
+
     public ChartDTO findById(String Id){
         Optional<Chart> opt = chartRepository.findById(Id);
         if(opt.isEmpty()){
@@ -119,6 +116,20 @@ public class MelonService {
         log.debug(this.getClass().getName() + ".collectionMelonSong End");
 
         return res;
+    }
+    public List<SearchDto> search_artist(String artist) throws Exception{
+        Long res =0l;
+        List<SearchDto> list = new LinkedList<>();
+        String url = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=artist&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+        Document doc = Jsoup.connect(url).get();
+        Elements element = doc.select("div.service_list_song");
+        Elements navigate = doc.select("#pageObjNavgation > div > span");
+        System.out.println("doc = " + doc);
+        System.out.println("element = " + element);
+        System.out.println("navigate = " + navigate);
+
+
+        return list;
     }
     public List<Chart> getAllChart() throws Exception{
         return chartRepository.findAll();
