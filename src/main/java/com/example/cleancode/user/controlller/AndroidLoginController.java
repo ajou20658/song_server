@@ -1,9 +1,9 @@
-package com.example.cleancode.login.controlller;
+package com.example.cleancode.user.controlller;
 
-import com.example.cleancode.login.JpaRepository.MemberRepository;
-import com.example.cleancode.login.entity.Member;
-import com.example.cleancode.login.service.AndroidLoginService;
-import com.example.cleancode.login.service.oauth.AndroidRequestParam;
+import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.entity.Member;
+import com.example.cleancode.user.service.AndroidLoginService;
+import com.example.cleancode.user.service.oauth.AndroidRequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 //http://3.34.194.47:8080/v1/login

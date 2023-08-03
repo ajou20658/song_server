@@ -1,23 +1,18 @@
 package com.example.cleancode.utils.jwt;
 
-import com.example.cleancode.login.dto.JwtDto;
-import com.example.cleancode.login.entity.Role;
+import com.example.cleancode.user.dto.JwtDto;
+import com.example.cleancode.user.entity.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.atn.LL1Analyzer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component

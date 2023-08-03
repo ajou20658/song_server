@@ -1,6 +1,6 @@
-package com.example.cleancode.login.JpaRepository;
+package com.example.cleancode.user.JpaRepository;
 
-import com.example.cleancode.login.entity.KakaoToken;
+import com.example.cleancode.user.entity.KakaoToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

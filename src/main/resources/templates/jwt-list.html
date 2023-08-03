@@ -28,23 +28,22 @@
   <thead>
   <tr>
     <th>ID</th>
+    <th>name</th>
+    <th>email</th>
     <th>accessToken</th>
-    <th>expiresIn</th>
     <th>refreshToken</th>
-    <th>expiresIn</th>
-    <th>scope</th>
+
     <!-- 추가 필드가 있다면 여기에 추가 -->
   </tr>
   </thead>
   <tbody>
   <!-- 회원 데이터를 순회하며 테이블에 추가 -->
-  <tr th:each="token : ${tokens}">
+  <tr th:each="token : ${jwts}">
     <td th:text="${token.id}"></td>
-    <td th:text="${token.token}"></td>
-    <td th:text="${token.expire}"></td>
+    <td th:text="${token.name}"></td>
+    <td th:text="${token.email}"></td>
+    <td th:text="${token.accessToken}"></td>
     <td th:text="${token.refreshToken}"></td>
-    <td th:text="${token.refreshExpire}"></td>
-    <td th:text="${token.scope}"></td>
     <!-- 추가 필드가 있다면 여기에 추가 -->
   </tr>
   </tbody>

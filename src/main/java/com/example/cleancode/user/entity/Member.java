@@ -1,4 +1,4 @@
-package com.example.cleancode.login.entity;
+package com.example.cleancode.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

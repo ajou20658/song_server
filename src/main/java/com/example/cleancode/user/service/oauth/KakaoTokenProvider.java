@@ -1,4 +1,4 @@
-package com.example.cleancode.login.service.oauth;
+package com.example.cleancode.user.service.oauth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

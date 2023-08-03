@@ -38,35 +38,6 @@ public class SongController {
     @Autowired
     private SongRepository songRepository;
 
-    @GetMapping("/form")
-    public String showUploadForm(){
-        return "uploadForm";
-    }
-    public static final String UPLOAD_DIR = "upload-dir";//절대 경로로
-    @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
-        // 업로드된 파일 처리 로직
-        if (!file.isEmpty()) {
-            try {
-                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-                Path uploadPath = Paths.get(UPLOAD_DIR);
-                if(!Files.exists(uploadPath)){
-                    Files.createDirectories(uploadPath);
-                }
-
-                Path filePath=uploadPath.resolve(fileName);
-                Files.copy(file.getInputStream(),filePath);
-            } catch (IOException e) {
-//                model.addAttribute("message", "파일 업로드 실패: " + e.getMessage());
-            }
-        } else {
-//            model.addAttribute("message", "파일 업로드 실패: 업로드할 파일이 없습니다.");
-            //실패 페이지로 리다이렉트 필요
-        }
-        return "uploadForm";//이곳은 성공후 리다이렉트 될 페이지
-    }
-
     @GetMapping("/showall")
     public String getList(Model model){
 //        List<Song> songs = songRepository.findAll();

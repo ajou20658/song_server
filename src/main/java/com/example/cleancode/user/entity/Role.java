@@ -1,4 +1,4 @@
-package com.example.cleancode.login.entity;
+package com.example.cleancode.user.entity;
 
 public enum Role {
     ROLE_USER,

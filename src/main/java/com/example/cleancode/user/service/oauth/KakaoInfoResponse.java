@@ -1,4 +1,4 @@
-package com.example.cleancode.login.service.oauth;
+package com.example.cleancode.user.service.oauth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

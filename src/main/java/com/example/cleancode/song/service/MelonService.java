@@ -34,6 +34,11 @@ public class MelonService {
     @Autowired
     private ChartRepository chartRepository;
 
+    /**
+     * 현재는 미사용
+     * @param Id
+     * @return
+     */
     public ChartDTO findById(String Id){
         Optional<Chart> opt = chartRepository.findById(Id);
         if(opt.isEmpty()){
@@ -67,6 +72,13 @@ public class MelonService {
         }
         return chartDTOList;
     }
+
+    /**
+     * do-crawl에서 사용
+     * 실행시 이전에 존재하는 데이터는 삭제
+     * @return mongodb에 저장됨
+     * @throws Exception
+     */
     public Long collectMelonSong() throws Exception {
         chartRepository.deleteAll();
         Long res = 0l;
@@ -119,6 +131,13 @@ public class MelonService {
 
         return res;
     }
+    /**
+     * search에서 사용
+     * @param artist 검색할 내용
+     * @param mode 검색 방법
+     * @return json 형태로 반환
+     * @throws Exception
+     */
     public List<SearchDto> search_artist(String artist,String mode) throws Exception{
         Long res =0l;
         List<SearchDto> list = new LinkedList<>();

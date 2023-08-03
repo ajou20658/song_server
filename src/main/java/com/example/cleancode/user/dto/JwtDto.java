@@ -1,4 +1,4 @@
-package com.example.cleancode.login.dto;
+package com.example.cleancode.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,17 +1,19 @@
-package com.example.cleancode.login.service;
+package com.example.cleancode.user.service;
 
-import com.example.cleancode.login.JpaRepository.MemberRepository;
-import com.example.cleancode.login.JpaRepository.TokenRepository;
-import com.example.cleancode.login.dto.JwtDto;
-import com.example.cleancode.login.service.oauth.KakaoInfoResponse;
-import com.example.cleancode.login.entity.KakaoToken;
-import com.example.cleancode.login.entity.Member;
-import com.example.cleancode.login.entity.Role;
+import com.example.cleancode.user.JpaRepository.JwtRepository;
+import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.JpaRepository.TokenRepository;
+import com.example.cleancode.user.dto.JwtDto;
+import com.example.cleancode.user.entity.Jwt;
+import com.example.cleancode.user.service.oauth.KakaoInfoResponse;
+import com.example.cleancode.user.entity.KakaoToken;
+import com.example.cleancode.user.entity.Member;
+import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.utils.jwt.JwtTokenProvider;
-import com.example.cleancode.login.service.oauth.KakaoLoginParam;
-import com.example.cleancode.login.service.oauth.KakaoTokenProvider;
-import com.example.cleancode.login.service.oauth.KakaoTokenResponse;
-import com.example.cleancode.login.service.oauth.KakaoValidateResponse;
+import com.example.cleancode.user.service.oauth.KakaoLoginParam;
+import com.example.cleancode.user.service.oauth.KakaoTokenProvider;
+import com.example.cleancode.user.service.oauth.KakaoTokenResponse;
+import com.example.cleancode.user.service.oauth.KakaoValidateResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ public class LoginService {
     private MemberRepository memberRepository;
     @Autowired
     private TokenRepository tokenRepository;
+    @Autowired//Only For Test
+    private JwtRepository jwtRepository;
     @Autowired
     private KakaoTokenProvider kakaoTokenProvider;
     @Autowired
@@ -61,6 +65,7 @@ public class LoginService {
         System.out.println("id = " + id);
         KakaoInfoResponse kakaoInfoResponse = kakaoTokenProvider.requestUserInfo(kakaoTokenResponse.getAccessToken());
         Optional<Member> isExist = memberRepository.findById(id);
+
         //3-1. 유저DB에 일치하는 사람이 없을 경우
         if(isExist.isEmpty()){
             //사용자 추가
@@ -81,14 +86,23 @@ public class LoginService {
                     .expire(Long.parseLong(kakaoTokenResponse.getExpiresIn())).refreshExpire(Long.parseLong(kakaoTokenResponse.getRefreshTokenExpiresIn()))
                     .scope(kakaoTokenResponse.getScope())
                     .build());
+            JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
+            System.out.println("jwtToken = " + jwtDto.getAccessToken());
+            System.out.println("refreshToken = " + jwtDto.getRefreshToken());
+            setCookie(response,jwtDto);
+
+            forTest(jwtDto,member);
 //사용자가 있다면
+        }else{
+            JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
+            System.out.println("jwtToken = " + jwtDto.getAccessToken());
+            System.out.println("refreshToken = " + jwtDto.getRefreshToken());
+            setCookie(response,jwtDto);
+
+            forTest(jwtDto,isExist.get());
         }
         //jwt토큰 사용자 쿠키에 저장
 
-        JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
-        System.out.println("jwtToken = " + jwtDto.getAccessToken());
-        System.out.println("refreshToken = " + jwtDto.getRefreshToken());
-        setCookie(response,jwtDto);
     }
     public void setCookie(HttpServletResponse response, JwtDto jwtDto){
         Cookie jwtCookie = new Cookie("jwtCookie",jwtDto.getAccessToken());
@@ -102,5 +116,15 @@ public class LoginService {
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*"); // 클라이언트 도메인 설정
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"); // CORS 허용 설정
     }
-
+    public void forTest(JwtDto jwtDto,Member member){
+        Jwt jwt = Jwt.builder()
+                .accessToken(jwtDto.getAccessToken())
+                .name(member.getNickname())
+                .email(member.getEmail())
+                .refreshToken(jwtDto.getRefreshToken())
+                .id(member.getId())
+                .build();
+        log.info(jwt.toString());
+        jwtRepository.save(jwt);
+    }
 }

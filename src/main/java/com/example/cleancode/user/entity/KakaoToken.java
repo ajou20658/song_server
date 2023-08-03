@@ -1,6 +1,6 @@
-package com.example.cleancode.login.entity;
+package com.example.cleancode.user.entity;
 
-import com.example.cleancode.login.dto.KakaoTokenDto;
+import com.example.cleancode.user.dto.KakaoTokenDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;

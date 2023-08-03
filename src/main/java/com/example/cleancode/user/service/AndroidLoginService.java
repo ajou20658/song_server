@@ -1,13 +1,12 @@
-package com.example.cleancode.login.service;
+package com.example.cleancode.user.service;
 
-import com.example.cleancode.login.JpaRepository.MemberRepository;
-import com.example.cleancode.login.JpaRepository.TokenRepository;
-import com.example.cleancode.login.entity.KakaoToken;
-import com.example.cleancode.login.entity.Member;
-import com.example.cleancode.login.entity.Role;
-import com.example.cleancode.login.service.oauth.*;
+import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.JpaRepository.TokenRepository;
+import com.example.cleancode.user.entity.KakaoToken;
+import com.example.cleancode.user.entity.Member;
+import com.example.cleancode.user.entity.Role;
+import com.example.cleancode.user.service.oauth.*;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,6 @@
-package com.example.cleancode.login.service.oauth;
+package com.example.cleancode.user.service.oauth;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
