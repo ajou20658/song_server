@@ -61,6 +61,6 @@
 ````
 - URL : /v3/search?target=검색할 내용&mode=검색방법
 - METHOD : GET
-- PARAM : 0:전체 | 1:가수 | 2:제목 | 3:앨범제목 
+- PARAM(mode) : 0:전체 | 1:가수 | 2:제목 | 3:앨범제목 
 - DESC : target과 mode를 받아서 요청에 맞는 크롤링을 하여 json형태로 반환한다.
 ````
