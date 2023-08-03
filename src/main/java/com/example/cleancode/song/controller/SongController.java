@@ -83,28 +83,11 @@ public class SongController {
 
     @GetMapping("/search")
     @ResponseBody
-    public List<SearchDto> getList2(@RequestParam @Nullable String artist, @RequestParam String mode, Model model){
+    public List<SearchDto> getList2(@RequestParam @Nullable String target, @RequestParam String mode, Model model){
         try{
-            String decodedArtist = URLDecoder.decode(artist, "UTF-8");
-
-            System.out.println("artist = " + decodedArtist);
-            System.out.println("한글 안돼나");
-            System.out.println("mode = " + mode);
-            switch (mode){
-                case "0":
-                    log.info("전체에서");
-                case "1":
-                    log.info("아티스트명에서");
-                    try {
-                        return melonService.search_artist(artist);
-                    }catch (Exception ex){
-                        log.info(ex.toString());
-                    }
-                case "2":
-                    log.info("곡명에서");
-                case "3":
-                    log.info("앨범명에서");
-            }
+            String decodedArtist = URLDecoder.decode(target, "UTF-8");
+            log.info("아티스트명에서");
+            return melonService.search_artist(target,mode);
         }catch(Exception ex){
             log.info("decode err: "+ex.toString());
         }

@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -117,18 +119,59 @@ public class MelonService {
 
         return res;
     }
-    public List<SearchDto> search_artist(String artist) throws Exception{
+    public List<SearchDto> search_artist(String artist,String mode) throws Exception{
         Long res =0l;
         List<SearchDto> list = new LinkedList<>();
-        String url = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=artist&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+
+//        String all = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=all&searchGnbYn=Y&kkoSpl=N&kkoDpType=#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=all&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=51";
+        String m ="";
+        switch(mode){
+            case "0":
+                m="all";
+                break;
+            case "1":
+                m="artist";
+                break;
+            case "2":
+                m="song";
+                break;
+            case "3":
+                m="album";
+                break;
+        }
+        String url = "https://www.melon.com/search/song/index.htm?q="+artist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+        log.info(url);
         Document doc = Jsoup.connect(url).get();
-        Elements element = doc.select("div.service_list_song");
-        Elements navigate = doc.select("#pageObjNavgation > div > span");
-        System.out.println("doc = " + doc);
-        System.out.println("element = " + element);
-        System.out.println("navigate = " + navigate);
+        Elements rows = doc.select("#frm_defaultList > div > table > tbody>tr");
+        for (Element row : rows) {
+            Elements tds = row.select("td");
+            Element td1 = tds.get(1);
+            Element td2 = tds.get(2);
+            String title = td2.select("div>div>a.fc_gray").first().text();
+//            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
+            Element td3 = tds.get(3);
+            String singer = td3.select("div>div>a").first().text();
+            Element td4 = tds.get(4);
+            String album = td4.text();
+            String href = td4.select("div>div>a").attr("href");
+            String onClickValue4 = td3.select("a").attr("onclick");
+            log.info(onClickValue4);
+            System.out.println("No: "+td1.text());
+            System.out.println("title: "+title);
+            System.out.println("singer: "+singer);
+            System.out.println("album: "+album);
+            String[] parse = parser(href);
+            System.out.println("songID: "+parse[4]);
+            System.out.println("albumID: " +parse[5]);
 
-
+            list.add(SearchDto.builder()
+                    .title(title)
+                    .artist(singer)
+                    .albumId(parse[5])
+                    .albumTitle(album)
+                    .songId(parse[4])
+                    .build());
+        }
         return list;
     }
     public List<Chart> getAllChart() throws Exception{
@@ -175,5 +218,16 @@ public class MelonService {
                 .albumId(chart.albumId)
                 .build();
     }
+    private String[] parser(String href){
+        Pattern pattern = Pattern.compile("'([^']*)'"); // This pattern captures the text inside single quotes
+        Matcher matcher = pattern.matcher(href);
 
+        // Find the first three matches and extract the values
+        String[] values = new String[9];
+        int index = 0;
+        while (matcher.find()) {
+            values[index++] = matcher.group(1);
+        }
+        return values;
+    }
 }
