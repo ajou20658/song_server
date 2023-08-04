@@ -1,7 +1,9 @@
 package com.example.cleancode.user.controlller;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
+import com.example.cleancode.user.entity.Jwt;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.service.LoginService;
@@ -76,6 +78,15 @@ public class UserController {
         memberDto.setId(member.getId());
         memberDto.setRole(Role.ROLE_USER);
         memberRepository.save(memberDto.makeMember());
+    }
+    @PostMapping("/jwtUpdate")
+    public void jwtUpdate(HttpServletRequest request,HttpServletResponse response){
+        Optional<JwtDto> jwtDtoE = memberRequest.updateJwt(request);
+        if(jwtDtoE.isEmpty()){
+            return;
+        }
+        JwtDto jwtDto = jwtDtoE.get();
+        loginService.setCookie(response,jwtDto);
     }
     @GetMapping("/test")
     public @ResponseBody String test(){

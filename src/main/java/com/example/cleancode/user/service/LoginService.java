@@ -87,16 +87,14 @@ public class LoginService {
                     .scope(kakaoTokenResponse.getScope())
                     .build());
             JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
-            System.out.println("jwtToken = " + jwtDto.getAccessToken());
-            System.out.println("refreshToken = " + jwtDto.getRefreshToken());
+            System.out.println("토큰 발급완료");
             setCookie(response,jwtDto);
 
             forTest(jwtDto,member);
 //사용자가 있다면
         }else{
             JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
-            System.out.println("jwtToken = " + jwtDto.getAccessToken());
-            System.out.println("refreshToken = " + jwtDto.getRefreshToken());
+            System.out.println("토큰 발급완료");
             setCookie(response,jwtDto);
 
             forTest(jwtDto,isExist.get());

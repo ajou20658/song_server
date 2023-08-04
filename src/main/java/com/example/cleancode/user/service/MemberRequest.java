@@ -3,6 +3,7 @@ package com.example.cleancode.user.service;
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
+import com.example.cleancode.user.entity.Jwt;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.utils.jwt.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @Slf4j
@@ -22,18 +24,12 @@ public class MemberRequest {
     private MemberRepository memberRepository;
 
     public MemberDto findMember(HttpServletRequest request){
-        Cookie[] cookies = request.getCookies();
-
-        String access="";
-        String refresh="";
-        for(Cookie cookie: cookies){
-            if("jwtCookie".equals(cookie.getName())){
-                 access = cookie.getValue();
-            } else if ("jwtRefresh".equals(cookie.getName())) {
-                refresh = cookie.getValue();
-            }
+        Optional<JwtDto> jwtDtoE = jwtTokenProvider.resolveJwt(request);
+        if(jwtDtoE.isEmpty()){
+            return null;
         }
-        JwtDto jwtDto = new JwtDto(access,refresh);
+        JwtDto jwtDto = jwtDtoE.get();
+        log.info(jwtDto.getAccessToken(),jwtDto.getRefreshToken());
         Long id = jwtTokenProvider.getId(jwtDto);
         log.info(id.toString());
         Optional<Member> mem = memberRepository.findById(id);
@@ -46,8 +42,21 @@ public class MemberRequest {
                 .nickname(member.getNickname())
                 .build();
     }
-
+    public Optional<JwtDto> updateJwt(HttpServletRequest request){
+        Optional<JwtDto> jwtDtoE = jwtTokenProvider.resolveJwt(request);
+        if(jwtDtoE.isEmpty()){
+            return Optional.empty();
+        }
+        JwtDto jwtDto = jwtDtoE.get();
+        boolean OK = jwtTokenProvider.validateRefresh(jwtDto);
+        if(OK = true){//Collections.singletonList(Role.ROLE_USER)
+            return Optional.of(jwtTokenProvider.generate(jwtTokenProvider.getId(jwtDto), Collections.singletonList(jwtTokenProvider.getRole(jwtDto))));
+        }else{
+            return Optional.empty();
+        }
+    }
 //    public boolean updatePrefer(HttpServletRequest request){
 //        request.get
 //    }
+
 }

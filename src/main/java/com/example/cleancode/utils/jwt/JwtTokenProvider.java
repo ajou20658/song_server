@@ -4,6 +4,9 @@ import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.entity.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +16,7 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -102,19 +106,38 @@ public class JwtTokenProvider {
             return null;
         }
     }
-    public String getRole(JwtDto jwtDto){
+    public Role getRole(JwtDto jwtDto){
         try{
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                     .build()
                     .parseClaimsJws(jwtDto.getAccessToken())
                     .getBody();
-            ArrayList<String> a =  claims.get("roles", ArrayList.class);
+            ArrayList<Role> a =  claims.get("roles", ArrayList.class);
             return a.get(0);
         }catch (Exception ex){
             log.info("getRole err: "+ex.toString());
-            return "ANONYMOUS";
+            return Role.ROLE_ANONYMOUS;
         }
     }
+    public Optional<JwtDto> resolveJwt(HttpServletRequest request){
+        try{
+            Cookie[] cookies = request.getCookies();
 
+            String access="";
+            String refresh="";
+            for(Cookie cookie: cookies){
+                if("jwtCookie".equals(cookie.getName())){
+                    access = cookie.getValue();
+                } else if ("jwtRefresh".equals(cookie.getName())) {
+                    refresh = cookie.getValue();
+                }
+            }
+            JwtDto jwtDto = new JwtDto(access,refresh);
+            return Optional.of(jwtDto);
+        }catch(Exception ex){
+            log.info("invalid");
+            return Optional.empty();
+        }
+    }
 }
