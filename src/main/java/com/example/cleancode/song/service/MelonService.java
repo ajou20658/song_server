@@ -163,33 +163,37 @@ public class MelonService {
         Document doc = Jsoup.connect(url).get();
         Elements rows = doc.select("#frm_defaultList > div > table > tbody>tr");
         for (Element row : rows) {
-            Elements tds = row.select("td");
-            Element td1 = tds.get(1);
-            Element td2 = tds.get(2);
-            String title = td2.select("div>div>a.fc_gray").first().text();
-//            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
-            Element td3 = tds.get(3);
-            String singer = td3.select("div>div>a").first().text();
-            Element td4 = tds.get(4);
-            String album = td4.text();
-            String href = td4.select("div>div>a").attr("href");
-            String onClickValue4 = td3.select("a").attr("onclick");
-            log.info(onClickValue4);
-            System.out.println("No: "+td1.text());
-            System.out.println("title: "+title);
-            System.out.println("singer: "+singer);
-            System.out.println("album: "+album);
-            String[] parse = parser(href);
-            System.out.println("songID: "+parse[4]);
-            System.out.println("albumID: " +parse[5]);
+            try {
+                Elements tds = row.select("td");
+                Element td1 = tds.get(1);
+                Element td2 = tds.get(2);
+                String title = td2.select("div>div>a.fc_gray").first().text();
+                //            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
+                Element td3 = tds.get(3);
+                String singer = td3.select("div>div>a").first().text();
+                Element td4 = tds.get(4);
+                String album = td4.text();
+                String href = td4.select("div>div>a").attr("href");
+                String onClickValue4 = td3.select("a").attr("onclick");
+                log.info(onClickValue4);
+                System.out.println("No: " + td1.text());
+                System.out.println("title: " + title);
+                System.out.println("singer: " + singer);
+                System.out.println("album: " + album);
+                String[] parse = parser(href);
+                System.out.println("songID: " + parse[4]);
+                System.out.println("albumID: " + parse[5]);
 
-            list.add(SearchDto.builder()
-                    .title(title)
-                    .artist(singer)
-                    .albumId(parse[5])
-                    .albumTitle(album)
-                    .songId(parse[4])
-                    .build());
+                list.add(SearchDto.builder()
+                        .title(title)
+                        .artist(singer)
+                        .albumId(parse[5])
+                        .albumTitle(album)
+                        .songId(parse[4])
+                        .build());
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
         return list;
     }
