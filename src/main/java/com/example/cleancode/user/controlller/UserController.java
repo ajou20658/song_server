@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -55,14 +52,20 @@ public class UserController {
 
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 검색후 유저 선호 장르 업데이트
-     * @param preferences
+     * @param artist
+     * @param genre
+     * @param title
      * @param request
      */
     @PostMapping("/update_prefer")
-    public void preferUpdate(@RequestBody ArrayList<String> preferences,HttpServletRequest request){
+    public void preferUpdate(@RequestBody List<String> artist,@RequestBody List<String> genre,@RequestBody List<String> title,HttpServletRequest request){
         MemberDto member = memberRequest.findMember(request);
-        Set<String> set = new HashSet<>(preferences);
-        member.setPreferences(set);
+        Set<String> set_artist = new HashSet<>(artist);
+        Set<String> set_genre = new HashSet<>(genre);
+        Set<String> set_title = new HashSet<>(title);
+        member.setPreference_Genre(set_genre);
+        member.setPreference_Singer(set_artist);
+        member.setPreference_Title(set_title);
         memberRepository.save(member.makeMember());
     }
 
@@ -80,7 +83,7 @@ public class UserController {
         memberRepository.save(memberDto.makeMember());
     }
     @PostMapping("/jwtUpdate")
-    public void jwtUpdate(HttpServletRequest request,HttpServletResponse response){
+    public void jwtUpdate(HttpServletRequest request, HttpServletResponse response){
         Optional<JwtDto> jwtDtoE = memberRequest.updateJwt(request);
         if(jwtDtoE.isEmpty()){
             return;
@@ -88,6 +91,8 @@ public class UserController {
         JwtDto jwtDto = jwtDtoE.get();
         loginService.setCookie(response,jwtDto);
     }
+
+
     @GetMapping("/test")
     public @ResponseBody String test(){
         return "hello";

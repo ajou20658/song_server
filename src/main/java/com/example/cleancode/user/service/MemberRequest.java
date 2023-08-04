@@ -38,7 +38,9 @@ public class MemberRequest {
         return MemberDto.builder()
                 .email(member.getEmail())
                 .id(member.getId())
-                .preferences(member.getPreferences())
+                .preference_Genre(member.getPreference_Genre())
+                .preference_Singer(member.getPreference_Singer())
+                .preference_Title(member.getPreference_Title())
                 .nickname(member.getNickname())
                 .build();
     }

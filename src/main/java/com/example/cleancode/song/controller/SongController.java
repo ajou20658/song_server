@@ -44,7 +44,7 @@ public class SongController {
 //        model.addAttribute("songs",songs);
         List<Chart> charts = chartRepository.findAll();
         model.addAttribute("charts",charts);
-        return "/chart-list";
+        return "chart-list";
     }
     @GetMapping("/chartjson")
     @ResponseBody

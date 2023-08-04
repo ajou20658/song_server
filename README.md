@@ -37,13 +37,19 @@
 - expire시간만큼 쿠키값 저장
 
 ## Member
-````agsl
+````
 - URL /v2/member
 - METHOD : GET
+- 사용자의 쿠키값을 파싱하여 정보 반환
 ````
 - RequestParam : Null
 - Response : Member Info Json
-- 사용자의 쿠키값을 파싱하여 정보 반환
+
+## AndroidLogin
+````
+-URL : /v3/login
+````
+
 # melon기능 API
 ## showall
 ````
