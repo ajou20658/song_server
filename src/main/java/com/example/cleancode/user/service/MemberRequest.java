@@ -52,8 +52,11 @@ public class MemberRequest {
         JwtDto jwtDto = jwtDtoE.get();
         boolean OK = jwtTokenProvider.validateRefresh(jwtDto);
         if(OK = true){//Collections.singletonList(Role.ROLE_USER)
+            //리프레시 토큰이 유효함
+            log.info("발급 완료");
             return Optional.of(jwtTokenProvider.generate(jwtTokenProvider.getId(jwtDto), Collections.singletonList(jwtTokenProvider.getRole(jwtDto))));
         }else{
+            log.info("발급 실패 유효하지 않음");
             return Optional.empty();
         }
     }
