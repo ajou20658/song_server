@@ -7,6 +7,7 @@ import com.example.cleancode.user.JpaRepository.TokenRepository;
 import com.example.cleancode.user.entity.Jwt;
 import com.example.cleancode.user.entity.KakaoToken;
 import com.example.cleancode.user.entity.Member;
+import com.example.cleancode.user.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,8 @@ public class AdminController {
     private JwtRepository jwtRepository;
     @Autowired
     private MelonService melonService;
+    @Autowired
+    private LoginService loginService;
 
     @GetMapping("/members")
     public String getMemberList(Model model){
@@ -56,6 +59,7 @@ public class AdminController {
         model.addAttribute("jwts",lists);
         return "jwt-list";
     }
+
     @GetMapping("/do-crawl")
     public @ResponseBody Long crawl(){
         try{

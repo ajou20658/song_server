@@ -61,8 +61,4 @@ public class MemberRequest {
             return Optional.empty();
         }
     }
-//    public boolean updatePrefer(HttpServletRequest request){
-//        request.get
-//    }
-
 }

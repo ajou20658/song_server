@@ -147,4 +147,10 @@ public class LoginService {
         jwt.setRefreshToken(jwtDto.getRefreshToken());
         jwtRepository.save(jwt);
     }
+    public void cleanMember(){
+        memberRepository.deleteAll();
+    }
+    public void cleanJwt(){
+        jwtRepository.deleteAll();
+    }
 }
