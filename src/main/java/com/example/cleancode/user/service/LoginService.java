@@ -110,26 +110,41 @@ public class LoginService {
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"); // CORS 허용 설정
     }
     public void forTest(JwtDto jwtDto,Member member){
-        Jwt jwt = Jwt.builder()
-                .accessToken(jwtDto.getAccessToken())
-                .name(member.getNickname())
-                .email(member.getEmail())
-                .refreshToken(jwtDto.getRefreshToken())
-                .id(member.getId())
-                .build();
-        log.info(jwt.toString());
+        Optional<Jwt> jwt1 = jwtRepository.findById(member.getId());
+        if(jwt1.isEmpty()){
+            Jwt jwt = Jwt.builder()
+                    .accessToken(jwtDto.getAccessToken())
+                    .name(member.getNickname())
+                    .email(member.getEmail())
+                    .refreshToken(jwtDto.getRefreshToken())
+                    .id(member.getId())
+                    .build();
+            jwtRepository.save(jwt);
+            return;
+        }
+        Jwt jwt = jwt1.get();
+        jwt.setAccessToken(jwtDto.getAccessToken());
+        jwt.setRefreshToken(jwtDto.getRefreshToken());
         jwtRepository.save(jwt);
     }
     public void forTest(JwtDto jwtDto,Long id){
         Member member = memberRepository.findById(id).get();
-        Jwt jwt = Jwt.builder()
-                .accessToken(jwtDto.getAccessToken())
-                .name(member.getNickname())
-                .email(member.getEmail())
-                .refreshToken(jwtDto.getRefreshToken())
-                .id(member.getId())
-                .build();
-        log.info(jwt.toString());
+        Optional<Jwt> jwt1 = jwtRepository.findById(member.getId());
+        if(jwt1.isEmpty()){
+            Jwt jwt = Jwt.builder()
+                    .accessToken(jwtDto.getAccessToken())
+                    .name(member.getNickname())
+                    .email(member.getEmail())
+                    .refreshToken(jwtDto.getRefreshToken())
+                    .id(member.getId())
+                    .build();
+            log.info(jwt.toString());
+            jwtRepository.save(jwt);
+            return;
+        }
+        Jwt jwt = jwt1.get();
+        jwt.setAccessToken(jwtDto.getAccessToken());
+        jwt.setRefreshToken(jwtDto.getRefreshToken());
         jwtRepository.save(jwt);
     }
 }
