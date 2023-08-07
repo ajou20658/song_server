@@ -47,6 +47,7 @@ public class MemberRequest {
     public Optional<JwtDto> updateJwt(HttpServletRequest request){
         Optional<JwtDto> jwtDtoE = jwtTokenProvider.resolveJwt(request);
         if(jwtDtoE.isEmpty()){
+            log.info("토큰 비어있음");
             return Optional.empty();
         }
         JwtDto jwtDto = jwtDtoE.get();
