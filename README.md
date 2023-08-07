@@ -13,6 +13,7 @@
 - METHOD : GET
 - DESC : 회원가입한 유저들 kakao accesstoken조회
          이후 회원 탈퇴구현시 사용예정
+- REPOSITORY에 등록된 모든 KAKAOOAUTH토큰 조회가능
 ````
 
 ## do-crawl
@@ -24,8 +25,6 @@
          현재는 cron기능 추가안함
 ````
 
-- REPOSITORY에 등록된 모든 KAKAOOAUTH토큰 조회가능
-
 # 유저 로그인 API
 ## Login
 ````
@@ -36,19 +35,33 @@
 - Response : jwtCookie, jwtRefresh
 - expire시간만큼 쿠키값 저장
 
-## Member
-````
-- URL /v2/member
-- METHOD : GET
-- 사용자의 쿠키값을 파싱하여 정보 반환
-````
-- RequestParam : Null
-- Response : Member Info Json
+
 
 ## AndroidLogin
 ````
 -URL : /v3/login
 ````
+# 유저 사용 API
+## Member
+````
+- URL /member
+- METHOD : GET
+- 사용자의 쿠키값을 파싱하여 유저 정보 json으로 반환
+````
+
+## 선호도 업데이트
+````
+- URL /update_prefer
+- METHOD : POST
+- PARAM : artist = 가수배열, genre = 장르배열, title = 제목배열
+````
+## 노래 업로드
+````
+- URL /upload
+- METHOD : POST
+- PARAM : file = {파일내용}
+````
+
 
 # melon기능 API
 ## showall
