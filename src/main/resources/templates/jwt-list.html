@@ -24,14 +24,19 @@
 </head>
 <body>
 <h1>jwt 목록</h1>
+<h2>jwt 만료되어 오류 발생시 아래의 주소로 요청</h2>
+<h2>jwtCookie와 jwtRefresh가 쿠키에 설정되어있어야됨</h2>
+<div>
+  <form action="http://localhost:8080/v2/jwtupdate" method="post">jwt재발급</form>
+</div>
 <table>
   <thead>
   <tr>
     <th>ID</th>
     <th>name</th>
     <th>email</th>
-    <th>accessToken</th>
-    <th>refreshToken</th>
+    <th>jwtCookie</th>
+    <th>jwtRefresh</th>
 
     <!-- 추가 필드가 있다면 여기에 추가 -->
   </tr>

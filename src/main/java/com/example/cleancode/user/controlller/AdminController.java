@@ -7,6 +7,7 @@ import com.example.cleancode.user.JpaRepository.TokenRepository;
 import com.example.cleancode.user.entity.Jwt;
 import com.example.cleancode.user.entity.KakaoToken;
 import com.example.cleancode.user.entity.Member;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -75,7 +76,7 @@ public class AdminController {
     }
     public static final String UPLOAD_DIR = "upload-dir";//절대 경로로
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         // 업로드된 파일 처리 로직
         if (!file.isEmpty()) {
             try {
@@ -96,5 +97,9 @@ public class AdminController {
             //실패 페이지로 리다이렉트 필요
         }
         return "uploadForm";//이곳은 성공후 리다이렉트 될 페이지
+    }
+    @GetMapping("/upload")
+    public void seeFileV1(){
+
     }
 }

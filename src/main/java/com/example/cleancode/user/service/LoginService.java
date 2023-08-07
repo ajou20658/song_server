@@ -45,13 +45,13 @@ public class LoginService {
 
     //jwt 토큰이 없거나 만료된 유저들
     public void steps(KakaoLoginParam kakaoLoginParam, HttpServletResponse response){
-        System.out.println("memberRepository = " + memberRepository);
-        System.out.println("tokenRepository = " + tokenRepository);
-        System.out.println("kakaoTokenProvider = " + kakaoTokenProvider);
-        System.out.println("jwtTokenProvider = " + jwtTokenProvider);
-        System.out.println("tokenMillisecond = " + tokenMillisecond);
-        System.out.println("refreshMillisecond = " + refreshMillisecond);
-        System.out.println("kakaoLoginParam = " + kakaoLoginParam);
+//        System.out.println("memberRepository = " + memberRepository);
+//        System.out.println("tokenRepository = " + tokenRepository);
+//        System.out.println("kakaoTokenProvider = " + kakaoTokenProvider);
+//        System.out.println("jwtTokenProvider = " + jwtTokenProvider);
+//        System.out.println("tokenMillisecond = " + tokenMillisecond);
+//        System.out.println("refreshMillisecond = " + refreshMillisecond);
+//        System.out.println("kakaoLoginParam = " + kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenProvider.requestAccessToken(kakaoLoginParam);
         if(kakaoTokenResponse == null){
@@ -89,15 +89,17 @@ public class LoginService {
             JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
             System.out.println("토큰 발급완료");
             setCookie(response,jwtDto);
-
+            //-------------------테스트 용도
             forTest(jwtDto,member);
+            //-------------------테스트 용도
 //사용자가 있다면
         }else{
             JwtDto jwtDto = jwtTokenProvider.generate(id,Collections.singletonList(Role.ROLE_USER));
             System.out.println("토큰 발급완료");
             setCookie(response,jwtDto);
-
+            //-------------------테스트 용도
             forTest(jwtDto,isExist.get());
+            //-------------------테스트 용도
         }
         //jwt토큰 사용자 쿠키에 저장
 
@@ -115,6 +117,18 @@ public class LoginService {
         response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"); // CORS 허용 설정
     }
     public void forTest(JwtDto jwtDto,Member member){
+        Jwt jwt = Jwt.builder()
+                .accessToken(jwtDto.getAccessToken())
+                .name(member.getNickname())
+                .email(member.getEmail())
+                .refreshToken(jwtDto.getRefreshToken())
+                .id(member.getId())
+                .build();
+        log.info(jwt.toString());
+        jwtRepository.save(jwt);
+    }
+    public void forTest(JwtDto jwtDto,Long id){
+        Member member = memberRepository.findById(id).get();
         Jwt jwt = Jwt.builder()
                 .accessToken(jwtDto.getAccessToken())
                 .name(member.getNickname())
