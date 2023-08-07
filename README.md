@@ -31,9 +31,10 @@
 - URL : /v2/login
 - METHOD : POST
 - RequestParam : ?authorizationCode={인가 코드}
-````
 - Response : jwtCookie, jwtRefresh
 - expire시간만큼 쿠키값 저장
+
+````
 
 
 
@@ -46,7 +47,7 @@
 ````
 - URL /member
 - METHOD : GET
-- 사용자의 쿠키값을 파싱하여 유저 정보 json으로 반환
+- RESPONSE : 유저 정보 json 반환
 ````
 
 ## 선호도 업데이트

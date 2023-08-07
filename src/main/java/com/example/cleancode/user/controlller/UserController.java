@@ -77,7 +77,6 @@ public class UserController {
                 Path filePath = uploadPath.resolve(fileName);
                 Files.copy(file.getInputStream(),filePath);
                  */
-
             }
             log.info("success");
         }catch (Exception ex){

@@ -2,7 +2,8 @@
 jwt:
   secret-key: ad861fbe42d6d4517997caaac85748c7b33ac43b0eb3d6fe19126eba998c1bb5c29f6110dd5e5d45c287462bc2cbd90865485e93e313717260b3a054c9d355a7
   token:
-    expiration-time: 3600 #1시간
+#    expiration-time: 3600 #1시간
+    expiration-time: 2592000
     refresh-expiration-time: 2592000
 
 oauth:
@@ -38,7 +39,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
