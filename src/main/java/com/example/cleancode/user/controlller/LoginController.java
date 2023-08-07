@@ -65,6 +65,7 @@ public class LoginController {
     public void jwtUpdate(HttpServletRequest request, HttpServletResponse response){
         Optional<JwtDto> jwtDtoE = memberRequest.updateJwt(request);
         if(jwtDtoE.isEmpty()){
+
             return;
         }
         JwtDto jwtDto = jwtDtoE.get();

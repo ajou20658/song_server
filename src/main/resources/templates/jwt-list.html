@@ -27,7 +27,7 @@
 <h2>jwt 만료되어 오류 발생시 아래의 주소로 요청</h2>
 <h2>jwtCookie와 jwtRefresh가 쿠키에 설정되어있어야됨</h2>
 <div>
-  <form action="http://54.180.204.139:8080/v2/jwtupdate" method="post">
+  <form action="/v2/jwtupdate" method="post">
     <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
     <p>
       <input type="submit" value="Update Token">
@@ -59,4 +59,10 @@
   </tbody>
 </table>
 </body>
+
+<script>
+
+
+</script>
+
 </html>
