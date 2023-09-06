@@ -77,8 +77,10 @@ public class SongController {
     @GetMapping("/artist_50Song")
     @ResponseBody
     public void get50SongPerArtist(){
-        String filePath="C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt";
-        String newFile = "C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\data.csv";
+        String filePath="./src/main/resources/static/artist.txt";
+        String newFile ="./src/main/resources/static/data.csv";
+//        String filePath="C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt";
+//        String newFile = "C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\data.csv";
         List<String> lines = new ArrayList<>();
         Map<String,Integer> likeIDSumCntMap;
         try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
