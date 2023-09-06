@@ -9,6 +9,7 @@ import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import dev.failsafe.internal.util.RandomDelay;
 import jakarta.annotation.Nullable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletContext;
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +43,8 @@ import java.util.stream.Collectors;
 public class SongController {
     @Autowired
     private MelonCrawlService melonService;
+    @Autowired
+    private ServletContext servletContext;
     @Autowired
     private ChartRepository chartRepository;
     @Autowired
@@ -77,8 +81,9 @@ public class SongController {
     @GetMapping("/artist_50Song")
     @ResponseBody
     public void get50SongPerArtist(){
-        String filePath="./src/main/resources/static/artist.txt";
-        String newFile ="./src/main/resources/static/data.csv";
+        String path = servletContext.getRealPath("/static/");
+        String filePath=path+"artist.txt";
+        String newFile =path+"data.csv";
 //        String filePath="C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt";
 //        String newFile = "C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\data.csv";
         List<String> lines = new ArrayList<>();
