@@ -10,9 +10,4 @@ import lombok.*;
 @AllArgsConstructor
 public class AndroidRequestParam {
     private String accessToken;
-    private String accessTokenExpiresAt;
-    private String refreshToken;
-    private String refreshTokenExpiresAt;
-    private Long idToken;
-    private String scopes;
 }

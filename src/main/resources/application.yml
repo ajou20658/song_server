@@ -14,27 +14,31 @@ oauth:
       api: https://kapi.kakao.com
 
 spring:
-  #security:
-  #  oauth2:
-  #    client:
-  #      registration:
-  #        kakao:
-  #          client-id: f3474b073f9c02883e0b9ac53d7cbead   # REST API 키
-  #          redirect-uri: "<http:localhost:3000>"
-  #          client-authentication-method: POST
-  #          authorization-grant-type: authorization_code
-  #          scope: profile_nickname, account_email  # 동의 항목
-  #          client-name: Kakao
-  #      provider:
-  #        kakao:
-  #          authorization-uri: <https://kauth.kakao.com/oauth/authorize>
-  #          token-uri: <https://kauth.kakao.com/oauth/token>
-  #          user-info-uri: <https://kapi.kakao.com/v2/user/me>
-  #          user-name-attribute: id
+  autoconfigure:
+    exclude : org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          kakao:
+#            client-id: f3474b073f9c02883e0b9ac53d7cbead   # REST API 키
+#            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+#            client-authentication-method: POST
+#            authorization-grant-type: authorization_code
+#            scope:
+#              - account_email  # 동의 항목
+#              - profile_nickname
+#            client-name: Kakao
+#        provider:
+#          kakao:
+#            authorization-uri: https://kauth.kakao.com/oauth/authorize
+#            token-uri: https://kauth.kakao.com/oauth/token
+#            user-info-uri: https://kapi.kakao.com/v2/user/me
+#            user-name-attribute: id
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=UTF-8
-    username: admin
+    username: root #root - local admin- aws
     password: password
   jpa:
     open-in-view: true
@@ -64,6 +68,3 @@ spring:
 
 file:
   dir: C:\Users\kwy\Documents\2023하계\cleancode
-server:
-  address: 0.0.0.0
-  port: 8080

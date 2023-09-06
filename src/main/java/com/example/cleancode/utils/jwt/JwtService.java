@@ -1,7 +1,11 @@
 package com.example.cleancode.utils.jwt;
 
+import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.JwtDto;
+import com.example.cleancode.user.dto.MemberDto;
+import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
+import com.example.cleancode.user.entity.UserPrinciple;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
@@ -9,19 +13,27 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import javax.naming.AuthenticationException;
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class JwtService{
+    @Autowired
+    private MemberRepository memberRepository;
     @Value("${jwt.secret-key}")
     private String secretKey;
     @Value("${jwt.token.expiration-time}")
@@ -31,16 +43,25 @@ public class JwtTokenProvider {
 
 
     public final String BEARER_PREFIX = "Bearer ";
-    public JwtDto generate(Long id,List<Role>roles){
-        return new JwtDto(generateToken(id,roles),generateRefreshToken(id));
+    public JwtDto generate(MemberDto memberDto,Role roles){
+        return new JwtDto(generateToken(memberDto,roles),generateRefreshToken(memberDto.getId()));
     }
-    public String generateToken(Long id, List<Role> roles){
+    public JwtDto refresh(JwtDto jwtDto){
+        Long id = getId(jwtDto);
+        MemberDto memberDto = memberRepository.findById(id).get().toMemberDto();
+        return new JwtDto(generateToken(memberDto, memberDto.getRole()),generateRefreshToken(id));
+    }
+    //유효기간은 기간+현재시각
+    public String generateToken(MemberDto memberDto, Role role){
         Date now = new Date();
         Date expirationDate= new Date(now.getTime()+tokenMillisecond*1000l);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
-        Claims claims = Jwts.claims().setSubject(id.toString());
-        claims.put("roles",roles);
+        Claims claims = Jwts.claims().setSubject(memberDto.getId().toString());
+        claims.put("roles",memberDto.getRole());
+        claims.put("email",memberDto.getEmail());
+        claims.put("profile",memberDto.getProfile());
+        claims.put("nickname",memberDto.getNickname());
 
         String token = Jwts.builder()
                 .setClaims(claims)
@@ -62,7 +83,7 @@ public class JwtTokenProvider {
                 .compact();
         return token;
     }
-    //토큰 형식만 검증
+    //토큰 검증 - 필터에서 사용해야됨 -----------------------------------------------------
     public boolean validateToken(JwtDto jwtDto){
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
@@ -91,6 +112,7 @@ public class JwtTokenProvider {
             return false;
         }
     }
+    //토큰 검증 - 필터에서 사용해야됨 -----------------------------------------------------
     public Long getId(JwtDto jwtDto){
         try {
             Claims claims = Jwts.parserBuilder()
@@ -106,18 +128,31 @@ public class JwtTokenProvider {
             return null;
         }
     }
-    public Role getRole(JwtDto jwtDto){
+    public Claims getClaim(JwtDto jwtDto){
         try{
+            return Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .build()
+                    .parseClaimsJws(jwtDto.getAccessToken())
+                    .getBody();
+        }catch(Exception ex){
+            log.info("getClaim err");
+            return null;
+        }
+    }
+    public Long getExpiration(JwtDto jwtDto){
+        try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                     .build()
                     .parseClaimsJws(jwtDto.getAccessToken())
                     .getBody();
-            ArrayList<Role> a =  claims.get("roles", ArrayList.class);
-            return a.get(0);
-        }catch (Exception ex){
-            log.info("getRole err: "+ex.toString());
-            return Role.ROLE_ANONYMOUS;
+            Long now = new Date().getTime();
+            return claims.getExpiration().getTime() - now;
+        }
+        catch(Exception ex){
+            log.info("getExpiration err");
+            return null;
         }
     }
     public Optional<JwtDto> resolveJwt(HttpServletRequest request){
@@ -139,5 +174,25 @@ public class JwtTokenProvider {
             log.info("invalid");
             return Optional.empty();
         }
+    }
+    public Authentication authenticate(JwtDto jwtDto) throws AuthenticationException{
+        Long id = getId(jwtDto);
+        log.info("Member id = {}",id);
+        Optional<Member> tmp = memberRepository.findByid(id);
+        if(tmp.isEmpty()){
+            log.info("It empty");
+            return null;
+        }
+        MemberDto memberDto = tmp.get().toMemberDto();
+
+        Claims claims = getClaim(jwtDto);
+        List<? extends GrantedAuthority> authorities = Arrays.stream(
+                claims.get("roles").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        UserPrinciple principle = new UserPrinciple(String.valueOf(id), memberDto.getNickname(),authorities);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =  new UsernamePasswordAuthenticationToken(principle,jwtDto.getAccessToken(),authorities);
+//        return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        return usernamePasswordAuthenticationToken;
     }
 }

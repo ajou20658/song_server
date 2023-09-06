@@ -34,10 +34,11 @@ dependencies {
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'org.jsoup:jsoup:1.15.4'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb:3.1.2'
+	implementation 'org.springframework.boot:spring-boot-starter-security:3.1.2'
+	implementation 'org.mockito:mockito-core:5.4.0'
+	implementation 'org.seleniumhq.selenium:selenium:2.0rc2'
+	implementation 'org.gaixie.json:json:1.0.0'
 
-//	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client:3.1.2'
-//	implementation 'org.mongodb:mongodb-driver-core:4.10.2'
-//	implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 

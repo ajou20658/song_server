@@ -11,4 +11,5 @@ public class SearchDto {
     private String albumTitle;
     private String songId;
     private String albumId;
+    private String likeId;
 }

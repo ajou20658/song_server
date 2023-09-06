@@ -15,18 +15,6 @@ import java.util.List;
 
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
-    @Bean
-    public CorsConfigurationSource corsFilter(){
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("*"));
-        config.setExposedHeaders(List.of("*"));
-
-        source.registerCorsConfiguration("/**",config);
-        return source;
-    }
     @Override
     public void addCorsMappings(CorsRegistry registry){
         registry.addMapping("/**")

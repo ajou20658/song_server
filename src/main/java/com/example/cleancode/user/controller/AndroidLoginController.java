@@ -1,11 +1,10 @@
-package com.example.cleancode.user.controlller;
+package com.example.cleancode.user.controller;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.MemberDto;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.service.AndroidLoginService;
 import com.example.cleancode.user.service.oauth.AndroidRequestParam;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,12 +34,7 @@ public class AndroidLoginController {
     @PostMapping("/update_prefer")
     public void preferUpdate(@RequestBody List<String> artist, @RequestBody List<String> genre, @RequestBody List<String> title, @RequestBody String id){
         Member memberE = memberRepository.findById(Long.parseLong(id)).get();
-        MemberDto member = MemberDto.builder()
-                .email(memberE.getEmail())
-                .nickname(memberE.getNickname())
-                .id(memberE.getId())
-                .role(memberE.getRole())
-                .build();
+        MemberDto member = memberE.toMemberDto();
         Set<String> set_artist = new HashSet<>(artist);
         Set<String> set_genre = new HashSet<>(genre);
         Set<String> set_title = new HashSet<>(title);

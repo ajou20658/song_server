@@ -1,11 +1,9 @@
 package com.example.cleancode.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder

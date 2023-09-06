@@ -41,8 +41,6 @@ public class KakaoTokenProvider {
         }catch(WebClientResponseException ex){
             return null;
         }
-
-
     }
 
     public KakaoInfoResponse requestUserInfo(String accessToken) {
@@ -68,11 +66,6 @@ public class KakaoTokenProvider {
                     .header("Authorization","Bearer "+ accessToken)
                     .retrieve()
                     .bodyToMono(KakaoValidateResponse.class).block();
-//            if(kakaoValidateResponse != null){
-//                return kakaoValidateResponse;
-//            }else{
-//                return null;
-//            }
             System.out.println("kakaoValidateResponse.toString() = " + kakaoValidateResponse.toString());
             return kakaoValidateResponse;
         }catch (WebClientResponseException ex){
