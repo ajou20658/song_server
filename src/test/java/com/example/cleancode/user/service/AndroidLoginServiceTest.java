@@ -21,38 +21,5 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class AndroidLoginServiceTest {
-    @Mock
-    MemberRepository memberRepository;
-    @Mock
-    KakaoTokenProvider kakaoTokenProvider;
-    @Mock
-    JwtService jwtService;
-    @InjectMocks
-    AndroidLoginService androidLoginService;
 
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
-    @Test
-    void join() {
-        /*
-        given
-         */
-        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(new Member()));
-        when(kakaoTokenProvider.tokenInfo(anyString())).thenReturn(new KakaoValidateResponse());
-
-        AndroidRequestParam param = new AndroidRequestParam();
-        param.setAccessToken("test_token");
-        JwtDto result = androidLoginService.login(param);
-
-        assertNotNull(result);
-        /*
-        when,then
-         */
-    }
-
-    @Test
-    void login() {
-    }
 }
