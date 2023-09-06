@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 public class SongController {
     @Autowired
     private MelonCrawlService melonService;
-    @Autowired
-    private ServletContext servletContext;
+//    @Autowired
+//    private ServletContext servletContext;
     @Autowired
     private ChartRepository chartRepository;
     @Autowired
@@ -81,7 +81,7 @@ public class SongController {
     @GetMapping("/artist_50Song")
     @ResponseBody
     public void get50SongPerArtist(){
-        String path = servletContext.getRealPath("/static/");
+        String path = "/home/ubuntu/2023-2/paran/song_server/src/main/resources/static/";
         String filePath=path+"artist.txt";
         String newFile =path+"data.csv";
 //        String filePath="C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt";
