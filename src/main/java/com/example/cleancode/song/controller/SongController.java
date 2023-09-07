@@ -122,7 +122,7 @@ public class SongController {
                                 String genre = genreDoc.select("div.meta dd").eq(2).text();
 
                                 //제목,가수,장르,좋아요
-                                if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")){
+                                if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("MR")){
                                     Thread.sleep(2000);
                                     log.info("제외된 제목 : {}",searchDto.getTitle());
                                 } else if (!searchDto.getArtist().equals(artist)) {
