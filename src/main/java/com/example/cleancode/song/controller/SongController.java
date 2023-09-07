@@ -100,7 +100,7 @@ public class SongController {
                     List<String> likeString=songlist.stream()
                             .map(SearchDto::getLikeId)
                             .collect(Collectors.toList());
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                     JSONObject jsonObject = melonService.getLikeNum(likeString);
                     JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
                     for(int i=0;i<contsLikeArray.length();i++){
@@ -123,10 +123,10 @@ public class SongController {
 
                                 //제목,가수,장르,좋아요
                                 if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
-                                    Thread.sleep(2000);
+                                    Thread.sleep(3000);
                                     log.info("제외된 제목 : {}",searchDto.getTitle());
                                 } else if (!searchDto.getArtist().equals(artist)) {
-                                    Thread.sleep(1500);
+                                    Thread.sleep(2500);
                                     log.info("제외된 가수 : {}",searchDto.getArtist());
                                 }else{
                                     Thread.sleep(2500);
