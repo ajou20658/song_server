@@ -132,7 +132,8 @@ public class SongController {
                             try {
                                 Document genreDoc = Jsoup.connect(genreUrl + getGenreParam).get();
                                 String genre = genreDoc.select("div.meta dd").eq(2).text();
-                                genre.replace(",","");
+                                genre = genre.replace(", "," ");
+                                System.out.println("genre = " + genre);
                                 //제목,가수,장르,좋아요
 
                                 Thread.sleep(2500);
