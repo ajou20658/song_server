@@ -84,7 +84,7 @@ public class JwtService{
         return token;
     }
     //토큰 검증 - 필터에서 사용해야됨 -----------------------------------------------------
-    public boolean validateToken(JwtDto jwtDto){
+    public boolean validateToken(JwtDto jwtDto) {
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtDto.getAccessToken()).getBody();

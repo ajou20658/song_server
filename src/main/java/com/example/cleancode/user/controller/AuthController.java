@@ -27,6 +27,7 @@ public class AuthController {
         KakaoLoginParam kakaoLoginParam = new KakaoLoginParam();
         kakaoLoginParam.setAuthorizationCode(authorizationCode);
         try {
+
             return loginService.join(kakaoLoginParam);
         }catch (Exception ex){
             log.info("Exception");

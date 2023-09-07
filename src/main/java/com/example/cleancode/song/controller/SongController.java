@@ -111,30 +111,31 @@ public class SongController {
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
                     for(SearchDto searchDto:songlist){
+                        if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
+                            log.info("제외된 제목 : {}",searchDto.getTitle());
+                        } else if (!searchDto.getArtist().equals(artist)) {
+                            log.info("제외된 가수 : {}",searchDto.getArtist());
+                        }
+                        searchDto.setTitle(searchDto.getTitle().replace(","," "));
                         String likeId = searchDto.getLikeId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             List<String> genreList = new ArrayList<>();
                             String getGenreParam = searchDto.getSongId();
+
                             try {
                                 Document genreDoc = Jsoup.connect(genreUrl + getGenreParam).get();
                                 String genre = genreDoc.select("div.meta dd").eq(2).text();
-
+                                genre.replace(",","");
                                 //제목,가수,장르,좋아요
-                                if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
-                                    Thread.sleep(3000);
-                                    log.info("제외된 제목 : {}",searchDto.getTitle());
-                                } else if (!searchDto.getArtist().equals(artist)) {
-                                    Thread.sleep(2500);
-                                    log.info("제외된 가수 : {}",searchDto.getArtist());
-                                }else{
-                                    Thread.sleep(2500);
-                                    String csvRow = searchDto.getTitle()+","+searchDto.getArtist()+","+sumCnt+","+"\""+genre+"\"";
-                                    log.info(csvRow);
-                                    writer.write(csvRow);
-                                    writer.newLine();
-                                }
+
+                                Thread.sleep(2500);
+                                String csvRow = searchDto.getTitle()+","+searchDto.getArtist()+","+sumCnt+","+"\""+genre+"\"";
+                                log.info(csvRow);
+                                writer.write(csvRow);
+                                writer.newLine();
+
                             }catch(RuntimeException ex){
                                 log.info("예외 발생 songId = {}",getGenreParam);
                             }
