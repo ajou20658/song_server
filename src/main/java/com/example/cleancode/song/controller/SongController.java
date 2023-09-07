@@ -131,7 +131,7 @@ public class SongController {
                                 //제목,가수,장르,좋아요
 
                                 Thread.sleep(2500);
-                                String csvRow = searchDto.getTitle()+","+searchDto.getArtist()+","+sumCnt+","+"\""+genre+"\"";
+                                String csvRow = searchDto.getTitle()+","+searchDto.getArtist()+","+sumCnt+","+genre;
                                 log.info(csvRow);
                                 writer.write(csvRow);
                                 writer.newLine();

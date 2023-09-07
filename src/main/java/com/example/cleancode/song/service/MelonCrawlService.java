@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -167,11 +168,12 @@ public class MelonCrawlService {
                 m="album";
                 break;
         }
-        String url = "https://www.melon.com/search/song/index.htm?q="+artist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+
+        String url = "https://www.melon.com/search/song/index.htm?q="+URLEncoder.encode(artist, "UTF-8")+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+URLEncoder.encode(artist, "UTF-8")+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
         Connection connection = Jsoup.connect(url);
         try{
-            Thread.sleep(5000);
+            Thread.sleep(3000);
             Document doc = connection.get();
             Elements rows = doc.select("#frm_defaultList > div > table > tbody>tr");
             for (Element row : rows) {
