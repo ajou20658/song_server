@@ -97,14 +97,17 @@ public class SongController {
                 for(String artist : lines){
                     likeIDSumCntMap = new HashMap<>();
                     List<SearchDto> songlist = melonService.search_artist(artist,"1");
+
                     List<String> likeString=songlist.stream()
                             .map(SearchDto::getLikeId)
                             .collect(Collectors.toList());
+                    System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
                     JSONObject jsonObject = melonService.getLikeNum(likeString);
                     JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
                     for(int i=0;i<contsLikeArray.length();i++){
                         JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
+                        System.out.println("contsLikeObject = " + contsLikeObject);
                         String likeId = String.valueOf(contsLikeObject.getInt("CONTSID"));
 
                         int sumCnt = contsLikeObject.getInt("SUMMCNT");
