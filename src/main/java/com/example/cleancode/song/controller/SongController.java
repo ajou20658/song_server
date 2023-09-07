@@ -116,8 +116,10 @@ public class SongController {
                     for(SearchDto searchDto:songlist){
                         if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
                             log.info("제외된 제목 : {}",searchDto.getTitle());
+                            continue;
                         } else if (!searchDto.getArtist().equals(artist)) {
                             log.info("제외된 가수 : {}",searchDto.getArtist());
+                            continue;
                         }
                         searchDto.setTitle(searchDto.getTitle().replace(","," "));
                         String likeId = searchDto.getLikeId();
