@@ -22,6 +22,8 @@ public class KakaoTokenProvider {
     private String apiUrl;
     @Value("${oauth.kakao.client-id}")
     private String clientId;
+    @Value("${oauth.kakao.redirect-url}")
+    private String redirectUrl;
     @Autowired
     private final WebClient webClient;
     public KakaoTokenResponse requestAccessToken(KakaoLoginParam params){
@@ -29,7 +31,9 @@ public class KakaoTokenProvider {
         MultiValueMap<String, String> body = params.makeBody();
         body.add("grant_type", GRANT_TYPE);
         body.add("client_id", clientId);
+        body.add("redirect_uri",redirectUrl);
         try{
+            log.info(params.getAuthorizationCode());
             KakaoTokenResponse kakaoToken = webClient.post()
                     .uri(url)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)

@@ -25,11 +25,10 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ApiResponseJson login(@RequestBody String authorizationCode, HttpServletResponse response){
+    public ApiResponseJson login(@RequestBody String authorizationCode){
         KakaoLoginParam kakaoLoginParam = new KakaoLoginParam();
         kakaoLoginParam.setAuthorizationCode(authorizationCode);
         try {
-
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
             ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
             log.info(apiResponseJson.toString());
