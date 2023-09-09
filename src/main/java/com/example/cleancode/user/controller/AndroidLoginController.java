@@ -32,6 +32,7 @@ public class AndroidLoginController {
     private MemberRepository memberRepository;
 
     @PostMapping("/login")
+    @ResponseBody
     public ApiResponseJson login(@RequestBody AndroidRequestParam androidRequestParam){
         JwtDto jwtDto = androidLoginService.join(androidRequestParam);
         log.info("Token Issued : {}",jwtDto);
