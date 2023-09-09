@@ -5,11 +5,13 @@ import com.example.cleancode.user.service.LoginService;
 import com.example.cleancode.user.service.oauth.KakaoLoginParam;
 import com.example.cleancode.utils.ApiResponseJson;
 import com.example.cleancode.utils.jwt.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -25,13 +27,15 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ApiResponseJson login(@RequestBody KakaoLoginParam kakaoLoginParam){
+    public ResponseEntity<String> login(@RequestBody KakaoLoginParam kakaoLoginParam){
 
         try {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
             ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
             log.info(apiResponseJson.toString());
-            return apiResponseJson;
+            ObjectMapper mapper = new ObjectMapper();
+
+            return new ResponseEntity<>(mapper.writeValueAsString(apiResponseJson),HttpStatus.OK);
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();
