@@ -39,6 +39,7 @@ public class KakaoTokenProvider {
                     .block();
             return kakaoToken;
         }catch(WebClientResponseException ex){
+            log.info("Kakao server err");
             return null;
         }
     }
