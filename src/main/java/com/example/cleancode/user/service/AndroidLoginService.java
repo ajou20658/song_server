@@ -1,10 +1,8 @@
 package com.example.cleancode.user.service;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
-import com.example.cleancode.user.JpaRepository.TokenRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
-import com.example.cleancode.user.entity.KakaoToken;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.service.oauth.*;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Optional;
 
 @Slf4j
@@ -32,6 +29,7 @@ public class AndroidLoginService {
     @Transactional
     public JwtDto join(AndroidRequestParam androidRequestParam){
         KakaoValidateResponse kakaoValidateResponse = kakaoTokenProvider.tokenInfo(androidRequestParam.getAccessToken());
+        System.out.println(kakaoValidateResponse);
         Long id = kakaoValidateResponse.getId();
         //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기
         System.out.println("id = " + id);

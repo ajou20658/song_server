@@ -25,6 +25,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/android")
 public class AndroidLoginController {
+
     @Autowired
     private AndroidLoginService androidLoginService;
     @Autowired
@@ -34,40 +35,6 @@ public class AndroidLoginController {
     public ApiResponseJson login(@RequestBody AndroidRequestParam androidRequestParam){
         JwtDto jwtDto = androidLoginService.join(androidRequestParam);
         log.info("Token Issued : {}",jwtDto);
-        return new ApiResponseJson(HttpStatus.OK,jwtDto);
+        return new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
     }
-
-//    @GetMapping("/member")
-//    public ApiResponseJson member(@AuthenticationPrincipal UserPrinciple userPrinciple){
-//        Long id = Long.valueOf(userPrinciple.getId());
-//        Member member =  memberRepository.findById(id).orElse(null);
-//        if(member==null){
-//            return new ApiResponseJson(HttpStatus.NOT_FOUND, null);
-//        }
-//        return new ApiResponseJson(HttpStatus.OK,member);
-//    }
-//
-//    @PostMapping("/update_prefer")
-//    public ApiResponseJson preferUpdate(@RequestBody List<String> artist, @RequestBody List<String> genre, @RequestBody List<String> title, @AuthenticationPrincipal UserPrinciple userPrinciple){
-//        Member memberE = memberRepository.findById(Long.parseLong(userPrinciple.getId())).get();
-//        MemberDto member = memberE.toMemberDto();
-//        Set<String> set_artist = new HashSet<>(artist);
-//        Set<String> set_genre = new HashSet<>(genre);
-//        Set<String> set_title = new HashSet<>(title);
-//        member.setPreference_Genre(set_genre);
-//        member.setPreference_Singer(set_artist);
-//        member.setPreference_Title(set_title);
-//        try {
-//            Member result = memberRepository.save(member.makeMember());
-//            log.info("유저 선호도 업데이트 : {}",result);
-//            return new ApiResponseJson(HttpStatus.OK,result);
-//        }catch(IllegalArgumentException ex){
-//            log.info("유저 선호도 업뎃 실패(IllegalArgu) {}",member);
-//            return new ApiResponseJson(HttpStatus.BAD_REQUEST,null);
-//        }catch(OptimisticLockingFailureException ex){
-//            log.info("유저 선호도 업뎃 실패(낙관적 Locking) {}",member);
-//            return new ApiResponseJson(HttpStatus.CONFLICT,null);
-//        }
-//
-//    }
 }

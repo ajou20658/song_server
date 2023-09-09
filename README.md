@@ -7,15 +7,6 @@
 - REPOSITORY에 등록된 모든 유저들 조회
 ````
 
-## Token-lst
-````
-- URL : /admin/tokens
-- METHOD : GET
-- DESC : 회원가입한 유저들 kakao accesstoken조회
-         이후 회원 탈퇴구현시 사용예정
-- REPOSITORY에 등록된 모든 KAKAOOAUTH토큰 조회가능
-````
-
 ## do-crawl
 ````
 - URL : /admin/do-crawl
@@ -26,21 +17,35 @@
 ````
 
 # 유저 로그인 API
-## Login
+## web
 ````
-- URL : /v2/login
+- URL : /auth/login
 - METHOD : POST
-- RequestParam : ?authorizationCode={인가 코드}
-- Response : jwtCookie, jwtRefresh
-- expire시간만큼 쿠키값 저장
+- RequestBody : "authorizationCode":"인가 코드"
+- Response : {
+    "httpStatus": "OK",
+    "code": 0,
+    "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyOTAxMzE5NTczIiwicm9sZXMiOiJST0xFX1VTRVIiLCJlbWFpbCI6InBkczA1MTc5QG5hdmVyLmNvbSIsIm5pY2tuYW1lIjoi7Jqw7JiBIiwiaWF0IjoxNjk0MTc4MDY1LCJleHAiOjE2OTY3NzAwNjV9.oeK8UQzSJOJDaPnyDNfR6VaPYGgv6PyjQhIDcdQaR4E",
+        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyOTAxMzE5NTczIiwiaWF0IjoxNjk0MTc4MDY1LCJleHAiOjE2OTY3NzAwNjV9.rB8u0bxhdYQ16NefT3pmo_rDBMI2HlhcjX3_xMPI8kY"
+    }
+}
+- 로그인
 
 ````
-
-
-
-## AndroidLogin
+## Android
 ````
--URL : /v3/login
+-URL : /android/login
+- METHOD : POST
+- RequestBody : "authorizationCode":"인가 코드"
+- Response : {
+    "httpStatus": "OK",
+    "code": 0,
+    "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyOTAxMzE5NTczIiwicm9sZXMiOiJST0xFX1VTRVIiLCJlbWFpbCI6InBkczA1MTc5QG5hdmVyLmNvbSIsIm5pY2tuYW1lIjoi7Jqw7JiBIiwiaWF0IjoxNjk0MTc4MDY1LCJleHAiOjE2OTY3NzAwNjV9.oeK8UQzSJOJDaPnyDNfR6VaPYGgv6PyjQhIDcdQaR4E",
+        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyOTAxMzE5NTczIiwiaWF0IjoxNjk0MTc4MDY1LCJleHAiOjE2OTY3NzAwNjV9.rB8u0bxhdYQ16NefT3pmo_rDBMI2HlhcjX3_xMPI8kY"
+    }
+}
 ````
 # 유저 사용 API
 ## Member

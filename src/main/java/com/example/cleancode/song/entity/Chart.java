@@ -1,6 +1,7 @@
 package com.example.cleancode.song.entity;
 
 import com.example.cleancode.song.dto.ChartDTO;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,8 @@ public class Chart {
     public String imgUrl;
     public String artist;
     public String albumId;
+
+    @ElementCollection
     public List<String> genre;
 
     public ChartDTO toChartDto(){

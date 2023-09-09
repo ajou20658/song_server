@@ -1,11 +1,9 @@
 package com.example.cleancode.user.service;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
-import com.example.cleancode.user.JpaRepository.TokenRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
 import com.example.cleancode.user.service.oauth.KakaoInfoResponse;
-import com.example.cleancode.user.entity.KakaoToken;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.utils.jwt.JwtService;
@@ -19,13 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -52,6 +47,7 @@ public class LoginService {
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenProvider.requestAccessToken(kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         //1-2 토큰 유효성 검사 + 회원번호 획득
+        log.info(kakaoTokenResponse.getAccessToken());
         KakaoValidateResponse kakaoValidateResponse = kakaoTokenProvider.tokenInfo(kakaoTokenResponse.getAccessToken());
         Long id = kakaoValidateResponse.getId();
         //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기

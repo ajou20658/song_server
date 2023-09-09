@@ -44,13 +44,10 @@ class JwtServiceTest {
     @Test
     void generateToken() {
         MemberDto memberDto = MemberDto.builder()
-                .preference_Title(Set.of("뉴진스","BTS"))
-                .preference_Singer(Set.of("NewJeans","BTSS"))
                 .profile("이것은 프로필")
                 .email("이것은 이메일")
                 .nickname("이것은 닉네임")
                 .id(12345l)
-                .preference_Genre(Set.of("팝","힙합"))
                 .role(Role.ROLE_USER)
                 .build();
         Date now = new Date();

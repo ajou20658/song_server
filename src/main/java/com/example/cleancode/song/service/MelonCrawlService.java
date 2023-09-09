@@ -2,14 +2,8 @@ package com.example.cleancode.song.service;
 
 import com.example.cleancode.song.dto.ChartDTO;
 import com.example.cleancode.song.dto.SearchDto;
-import com.example.cleancode.song.entity.Album;
 import com.example.cleancode.song.entity.Chart;
-import com.example.cleancode.song.entity.Song;
-import com.example.cleancode.song.repository.AlbumRepository;
 import com.example.cleancode.song.repository.ChartRepository;
-import com.example.cleancode.song.repository.SongRepository;
-import jakarta.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.json.JSONObject;
@@ -24,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,10 +26,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class MelonCrawlService {
-    @Autowired
-    private AlbumRepository albumRepository;
-    @Autowired
-    private SongRepository songRepository;
     @Autowired
     private ChartRepository chartRepository;
 
@@ -225,18 +214,8 @@ public class MelonCrawlService {
         return chartRepository.findAll();
     }
 
-    public Long saveSong(Song song) throws Exception{
-        boolean isExits = songRepository.existsById(song.getSongId());
-        songRepository.save(song);
-        return 1L; //O.K.
-    }
-
     public Long getNumChart() throws Exception{
         return chartRepository.count();
-    }
-
-    public List<Album> getAllAlbum() throws Exception {
-        return albumRepository.findAll();
     }
 
     public JSONObject getLikeNum(List<String> likeList)throws Exception{
@@ -263,9 +242,6 @@ public class MelonCrawlService {
         }else{
             throw new Exception("HTTP GET 요청 실패. 응답 코드 : "+responseCode);
         }
-    }
-    public List<Song> getSongByAlbum(Long albumId) throws Exception {
-        return null;
     }
     private String[] parser(String href){
         Pattern pattern = Pattern.compile("'([^']*)'"); // This pattern captures the text inside single quotes

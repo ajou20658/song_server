@@ -3,11 +3,13 @@ package com.example.cleancode.user.controller;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.service.LoginService;
 import com.example.cleancode.user.service.oauth.KakaoLoginParam;
+import com.example.cleancode.utils.ApiResponseJson;
 import com.example.cleancode.utils.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,14 +23,15 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     @ResponseBody
-    public JwtDto login(@RequestParam String authorizationCode, HttpServletResponse response){
+    public ApiResponseJson login(@RequestBody String authorizationCode, HttpServletResponse response){
         KakaoLoginParam kakaoLoginParam = new KakaoLoginParam();
         kakaoLoginParam.setAuthorizationCode(authorizationCode);
         try {
 
-            return loginService.join(kakaoLoginParam);
+            JwtDto jwtDto = loginService.join(kakaoLoginParam);
+            return new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();

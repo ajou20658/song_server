@@ -8,6 +8,7 @@ public class ApiResponseJson {
     public Object data;
     public ApiResponseJson(HttpStatus httpStatus,int code, Object data){
         this.httpStatus = httpStatus;
+        this.code = code;
         this.data = data;
     }
     public ApiResponseJson(HttpStatus httpStatus,Object data){

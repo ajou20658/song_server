@@ -1,15 +1,11 @@
 package com.example.cleancode.song.controller;
 
-import com.example.cleancode.song.dto.ChartDTO;
 import com.example.cleancode.song.dto.SearchDto;
 import com.example.cleancode.song.entity.Chart;
 import com.example.cleancode.song.repository.ChartRepository;
-import com.example.cleancode.song.repository.SongRepository;
 //import com.example.cleancode.image.service.MelonService;
 import com.example.cleancode.song.service.MelonCrawlService;
-import dev.failsafe.internal.util.RandomDelay;
 import jakarta.annotation.Nullable;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,17 +14,11 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletContext;
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,8 +37,6 @@ public class SongController {
 //    private ServletContext servletContext;
     @Autowired
     private ChartRepository chartRepository;
-    @Autowired
-    private SongRepository songRepository;
 
 
     @GetMapping("/chartjson")
@@ -114,7 +102,8 @@ public class SongController {
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
                     for(SearchDto searchDto:songlist){
-                        if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
+                        if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||
+                                searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
                             log.info("제외된 제목 : {}",searchDto.getTitle());
                             continue;
                         } else if (!searchDto.getArtist().equals(artist)) {

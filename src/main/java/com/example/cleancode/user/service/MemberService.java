@@ -43,9 +43,6 @@ public class MemberService {
         Set<String> set_artist = new HashSet<>(artist);
         Set<String> set_genre = new HashSet<>(genre);
         Set<String> set_title = new HashSet<>(title);
-        member.setPreference_Genre(set_genre);
-        member.setPreference_Singer(set_artist);
-        member.setPreference_Title(set_title);
         try{
             memberRepository.save(member.makeMember());
             return true;

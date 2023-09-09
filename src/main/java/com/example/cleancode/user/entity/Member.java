@@ -23,24 +23,15 @@ public class Member {
     private String nickname;
     @Column(name = "profile")
     private String profile;
-    @Column(name = "preference_Genre", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private Set<String> preference_Genre;
-    @Column(name = "preference_Singer", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private Set<String> preference_Singer;
-    @Column(name = "preference_Title", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private Set<String> preference_Title;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     public MemberDto toMemberDto(){
         return MemberDto.builder()
-                .preference_Genre(preference_Genre)
                 .id(id)
                 .email(email)
                 .nickname(nickname)
                 .profile(profile)
-                .preference_Singer(preference_Singer)
-                .preference_Title(preference_Title)
                 .role(role)
                 .build();
     }
