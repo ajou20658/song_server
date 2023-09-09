@@ -76,4 +76,8 @@ public class UserController {
     public void getResult(){
         
     }
+//    @PostMapping("/file_upload")
+//    public void uploadFile(@){
+////        memberService.upload_file()
+//    }
 }
