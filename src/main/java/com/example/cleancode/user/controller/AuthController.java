@@ -31,7 +31,9 @@ public class AuthController {
         try {
 
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
-            return new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+            ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+            log.info(apiResponseJson.toString());
+            return apiResponseJson;
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();

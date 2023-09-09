@@ -1,14 +1,17 @@
 package com.example.cleancode.user.service;
 
+import com.beust.ah.A;
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.service.oauth.*;
+import com.example.cleancode.utils.ApiResponseJson;
 import com.example.cleancode.utils.jwt.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +50,7 @@ public class AndroidLoginService {
         log.info(member.toString());
         memberRepository.save(member);
         return jwtService.generate(member.toMemberDto(),member.getRole());
+//        ApiResponseJson apiResponseJson = new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value())
     }
     public JwtDto login(AndroidRequestParam androidRequestParam){
         try{

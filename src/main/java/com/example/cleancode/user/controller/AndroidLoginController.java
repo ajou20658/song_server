@@ -35,6 +35,8 @@ public class AndroidLoginController {
     public ApiResponseJson login(@RequestBody AndroidRequestParam androidRequestParam){
         JwtDto jwtDto = androidLoginService.join(androidRequestParam);
         log.info("Token Issued : {}",jwtDto);
-        return new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+        ApiResponseJson apiResponseJson =  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+        log.info(apiResponseJson.toString());
+        return apiResponseJson;
     }
 }
