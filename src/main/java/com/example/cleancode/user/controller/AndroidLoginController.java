@@ -39,11 +39,11 @@ public class AndroidLoginController {
         try{
             JwtDto jwtDto = androidLoginService.join(androidRequestParam);
             log.info("Token Issued : {}",jwtDto);
-            ApiResponseJson apiResponseJson =  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
-            log.info(apiResponseJson.toString());
+//            ApiResponseJson apiResponseJson =  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+//            log.info(apiResponseJson.toString());
             ObjectMapper mapper = new ObjectMapper();
 
-            return new ResponseEntity<>(mapper.writeValueAsString(apiResponseJson),HttpStatus.OK);
+            return new ResponseEntity<>(mapper.writeValueAsString(jwtDto),HttpStatus.OK);
         }catch (Exception ex){
             log.info("err");
             return null;

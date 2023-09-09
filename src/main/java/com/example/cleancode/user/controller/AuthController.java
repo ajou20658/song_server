@@ -31,11 +31,11 @@ public class AuthController {
 
         try {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
-            ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
-            log.info(apiResponseJson.toString());
+//            ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
+//            log.info(apiResponseJson.toString());
             ObjectMapper mapper = new ObjectMapper();
 
-            return new ResponseEntity<>(mapper.writeValueAsString(apiResponseJson),HttpStatus.OK);
+            return new ResponseEntity<>(mapper.writeValueAsString(jwtDto),HttpStatus.OK);
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();
