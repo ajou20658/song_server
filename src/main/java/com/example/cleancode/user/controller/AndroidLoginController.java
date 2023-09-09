@@ -18,9 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.PreparedStatement;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 //http://3.34.194.47:8080/v1/login
 @Slf4j
@@ -35,15 +33,15 @@ public class AndroidLoginController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<String> login(@RequestBody AndroidRequestParam androidRequestParam){
+    public ResponseEntity<Object> login(@RequestBody AndroidRequestParam androidRequestParam){
         try{
             JwtDto jwtDto = androidLoginService.join(androidRequestParam);
             log.info("Token Issued : {}",jwtDto);
 //            ApiResponseJson apiResponseJson =  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
 //            log.info(apiResponseJson.toString());
-            ObjectMapper mapper = new ObjectMapper();
-
-            return new ResponseEntity<>(mapper.writeValueAsString(jwtDto),HttpStatus.OK);
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",jwtDto);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception ex){
             log.info("err");
             return null;

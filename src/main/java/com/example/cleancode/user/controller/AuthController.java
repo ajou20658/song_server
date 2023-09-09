@@ -27,15 +27,15 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<String> login(@RequestBody KakaoLoginParam kakaoLoginParam){
+    public ResponseEntity<Object> login(@RequestBody KakaoLoginParam kakaoLoginParam){
 
         try {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
 //            ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
 //            log.info(apiResponseJson.toString());
-            ObjectMapper mapper = new ObjectMapper();
-
-            return new ResponseEntity<>(mapper.writeValueAsString(jwtDto),HttpStatus.OK);
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",jwtDto);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();
