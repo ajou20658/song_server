@@ -22,7 +22,7 @@ public class KakaoTokenProvider {
     private String apiUrl;
     @Value("${oauth.kakao.client-id}")
     private String clientId;
-    @Value("${oauth.kakao.redirect-url}")
+    @Value("${oauth.kakao.url.redirect-url}")
     private String redirectUrl;
     @Autowired
     private final WebClient webClient;
