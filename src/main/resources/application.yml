@@ -12,6 +12,7 @@ oauth:
     url:
       auth: https://kauth.kakao.com
       api: https://kapi.kakao.com
+      redirect-url: http://songssam.site:8080
 
 spring:
   autoconfigure:
