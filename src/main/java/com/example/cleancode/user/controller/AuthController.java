@@ -31,8 +31,7 @@ public class AuthController {
 
         try {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
-//            ApiResponseJson apiResponseJson=  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
-//            log.info(apiResponseJson.toString());
+            log.info("Token Issued");
             Map<String,Object> response = new HashMap<>();
             response.put("response",jwtDto);
             return new ResponseEntity<>(response,HttpStatus.OK);

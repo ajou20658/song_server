@@ -36,9 +36,7 @@ public class AndroidLoginController {
     public ResponseEntity<Object> login(@RequestBody AndroidRequestParam androidRequestParam){
         try{
             JwtDto jwtDto = androidLoginService.join(androidRequestParam);
-            log.info("Token Issued : {}",jwtDto);
-//            ApiResponseJson apiResponseJson =  new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value(),jwtDto);
-//            log.info(apiResponseJson.toString());
+            log.info("Token Issued");
             Map<String,Object> response = new HashMap<>();
             response.put("response",jwtDto);
             return new ResponseEntity<>(response,HttpStatus.OK);
