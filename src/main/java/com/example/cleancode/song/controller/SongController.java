@@ -42,7 +42,9 @@ public class SongController {
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Chart> giveJson(){
-        return chartRepository.findAll();
+
+        List<Chart> list = chartRepository.findAll();
+        return list;
     }
 
     @GetMapping("/search")

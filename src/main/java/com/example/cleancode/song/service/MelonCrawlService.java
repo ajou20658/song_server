@@ -78,10 +78,13 @@ public class MelonCrawlService {
             String getGenreParam = chart.getSongId();
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
             String genre = genreDoc.select("div.meta dd").eq(2).text();
+            List<String> genreArray = new ArrayList<>();
             if(genre.contains(",")){
-                List<String> genreArray = List.of(genre.split(", "));
-                chart.setGenre(genreArray);
+                genreArray = List.of(genre.split(", "));
+            }else{
+                genreArray = List.of(genre);
             }
+            chart.setGenre(genreArray);
             chartRepository.save(chart.toChartEntity());
             res+=1;
             log.info("crawl count: "+res);
