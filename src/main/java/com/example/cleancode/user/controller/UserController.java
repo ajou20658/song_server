@@ -64,9 +64,9 @@ public class UserController {
         return memberService.updateUser(memberDto, Long.valueOf(userPrinciple.getId()));
     }
     @PostMapping("/vocal_upload")
-    public boolean saveFileV1(@RequestParam MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public boolean saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        return memberService.upload_file(file,Long.valueOf(userPrinciple.getId()));
+        return memberService.upload_file(file,userPrinciple.getId());
     }
     @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
     public void getFile(){

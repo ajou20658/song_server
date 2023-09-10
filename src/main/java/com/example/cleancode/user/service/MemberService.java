@@ -19,6 +19,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -62,11 +63,12 @@ public class MemberService {
         }
     }
 
-    public boolean upload_file(MultipartFile file,Long id){
+    public boolean upload_file(MultipartFile file,String id){
         log.info("Multipartfile={}", file);
         try{
             if(!file.isEmpty()){
-                String fileName = String.valueOf(id)+"_";
+                String fileName = id+"_"+LocalDate.now();
+
                 //----------------------디렉토리 확인 후 생성
                 Path uploadPath = Paths.get(fileDir);
                 if(!Files.exists(uploadPath)){
