@@ -28,7 +28,8 @@ public class KakaoTokenProvider {
     private final WebClient webClient;
     public KakaoTokenResponse requestAccessToken(KakaoLoginParam params){
         String url = authUrl + "/oauth/token";
-        MultiValueMap<String, String> body = params.makeBody();
+        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
+        body.add("code",params.toString());
         body.add("grant_type", GRANT_TYPE);
         body.add("client_id", clientId);
         body.add("redirect_uri",redirectUrl);
