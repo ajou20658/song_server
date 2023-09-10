@@ -33,6 +33,7 @@ public class KakaoTokenProvider {
         body.add("grant_type", GRANT_TYPE);
         body.add("client_id", clientId);
         body.add("redirect_uri",redirectUrl);
+        log.info(body.toString());
         try{
             log.info(params.getAuthorizationCode());
             KakaoTokenResponse kakaoToken = webClient.post()
