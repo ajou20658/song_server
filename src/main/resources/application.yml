@@ -17,25 +17,7 @@ oauth:
 spring:
   autoconfigure:
     exclude : org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          kakao:
-#            client-id: f3474b073f9c02883e0b9ac53d7cbead   # REST API 키
-#            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
-#            client-authentication-method: POST
-#            authorization-grant-type: authorization_code
-#            scope:
-#              - account_email  # 동의 항목
-#              - profile_nickname
-#            client-name: Kakao
-#        provider:
-#          kakao:
-#            authorization-uri: https://kauth.kakao.com/oauth/authorize
-#            token-uri: https://kauth.kakao.com/oauth/token
-#            user-info-uri: https://kapi.kakao.com/v2/user/me
-#            user-name-attribute: id
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=UTF-8
