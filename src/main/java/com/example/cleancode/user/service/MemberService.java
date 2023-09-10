@@ -1,8 +1,11 @@
 package com.example.cleancode.user.service;
 
+import com.example.cleancode.user.JpaRepository.FilePathRepository;
 import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.dto.FilePathDto;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.MemberDto;
+import com.example.cleancode.user.entity.FilePath;
 import com.example.cleancode.user.entity.Member;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.utils.jwt.JwtService;
@@ -10,12 +13,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +39,8 @@ public class MemberService {
     private JwtService jwtService;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private FilePathRepository filePathRepository;
     @Value("${file.dir}")
     private String fileDir;
     public MemberDto findMember(Long id){
@@ -62,13 +74,16 @@ public class MemberService {
             return false;
         }
     }
-
+    @Transactional
     public boolean upload_file(MultipartFile file,String id){
         log.info("Multipartfile={}", file);
+        FilePathDto filePathDto = null;
         try{
             if(!file.isEmpty()){
                 String fileName = id+"_"+LocalDate.now();
-
+                filePathDto = FilePathDto.builder()
+                        .uri(fileName)
+                        .build();
                 //----------------------디렉토리 확인 후 생성
                 Path uploadPath = Paths.get(fileDir);
                 if(!Files.exists(uploadPath)){
@@ -78,6 +93,7 @@ public class MemberService {
                 log.info("파일 저장 fileName={}",fileName);
                 file.transferTo(new File(fileDir+fileName));
             }
+            filePathRepository.save(filePathDto.filePath());
             log.info("success");
             return true;
         }catch (Exception ex){
@@ -86,5 +102,19 @@ public class MemberService {
             return false;
         }
     }
-
+    public ResponseEntity<Resource> get_file(String id) throws FileNotFoundException {
+//         List<FilePath> list = filePathRepository.findByuserId(id);
+        String filePath = fileDir+"\\song";
+        File file = new File(filePath);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename="+file.getName());
+        headers.setContentLength(file.length());
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(mediaType)
+                .body(resource);
+    }
 }

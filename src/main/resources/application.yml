@@ -51,4 +51,4 @@ spring:
       enabled: true
 
 file:
-  dir: C:\Users\kwy\Documents\2023하계\cleancode
+  dir: C:\Users\kwy\Documents\2023하계\cleancode\src\main\resources\static

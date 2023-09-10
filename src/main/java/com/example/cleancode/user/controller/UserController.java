@@ -2,6 +2,7 @@ package com.example.cleancode.user.controller;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.MemberDto;
+import com.example.cleancode.user.entity.FilePath;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.entity.UserPrinciple;
 import com.example.cleancode.user.service.MemberService;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,13 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -74,8 +75,8 @@ public class UserController {
         return new ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE);
     }
     @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
-    public void getFile(){
-        
+    public ResponseEntity<Resource> getFile(@AuthenticationPrincipal UserPrinciple userPrinciple) throws FileNotFoundException {
+        return memberService.get_file(userPrinciple.getId());
     }
     @GetMapping("/get_result") //완료 결과 가져오기 -스트리밍형식으로?
     public void getResult(){
