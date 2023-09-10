@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -64,9 +65,13 @@ public class UserController {
         return memberService.updateUser(memberDto, Long.valueOf(userPrinciple.getId()));
     }
     @PostMapping("/vocal_upload")
-    public boolean saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        return memberService.upload_file(file,userPrinciple.getId());
+        if(memberService.upload_file(file,userPrinciple.getId())){
+            //true일떄
+            return new ResponseEntity(HttpStatus.OK);
+        }
+        return new ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE);
     }
     @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
     public void getFile(){
