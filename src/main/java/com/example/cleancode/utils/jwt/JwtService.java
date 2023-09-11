@@ -42,16 +42,16 @@ public class JwtService{
     private Long refreshMillisecond;
 
     public final String BEARER_PREFIX = "Bearer ";
-    public JwtDto generate(MemberDto memberDto,Role roles){
-        return new JwtDto(generateToken(memberDto,roles),generateRefreshToken(memberDto.getId()));
+    public JwtDto generate(MemberDto memberDto){
+        return new JwtDto(generateToken(memberDto),generateRefreshToken(memberDto.getId()));
     }
     public JwtDto refresh(JwtDto jwtDto){
         Long id = getId(jwtDto);
         MemberDto memberDto = memberRepository.findById(id).get().toMemberDto();
-        return new JwtDto(generateToken(memberDto, memberDto.getRole()),generateRefreshToken(id));
+        return new JwtDto(generateToken(memberDto),generateRefreshToken(id));
     }
     //유효기간은 기간+현재시각
-    public String generateToken(MemberDto memberDto, Role role){
+    public String generateToken(MemberDto memberDto){
         Date now = new Date();
         Date expirationDate= new Date(now.getTime()+tokenMillisecond*1000l);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -87,11 +87,11 @@ public class JwtService{
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
             log.info("들어옴 : {}",jwtDto.getAccessToken());
-            JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+            JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
             log.info("들어옴 : {}");
             Claims claims = jwtParser.parseClaimsJws(jwtDto.getAccessToken()).getBody();
             log.info(claims.toString());
-            Jwts.parserBuilder().setSigningKey(key).build();
+
             if(claims.getExpiration().before(new Date())){
                 log.info("기한이 만료됨 ");
                 log.info("현재 시간 : {}",new Date());

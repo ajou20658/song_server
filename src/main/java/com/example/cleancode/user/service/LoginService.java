@@ -67,9 +67,9 @@ public class LoginService {
             log.info(member.toString());
             memberRepository.save(member);
 
-            return jwtService.generate(member.toMemberDto(),member.getRole());
+            return jwtService.generate(member.toMemberDto());
         }
-        return jwtService.generate(isExist.get().toMemberDto(),isExist.get().getRole());
+        return jwtService.generate(isExist.get().toMemberDto());
     }
     public boolean logout(HttpServletRequest request){
         try{
@@ -92,7 +92,7 @@ public class LoginService {
             Optional<Member> member = memberRepository.findById(id);
             MemberDto memberDto = member.get().toMemberDto();
 
-            return jwtService.generate(memberDto,memberDto.getRole());
+            return jwtService.generate(memberDto);
         }catch (Exception e){
             System.out.println("Transaction rolled back:{}"+e.getMessage());
             return null;

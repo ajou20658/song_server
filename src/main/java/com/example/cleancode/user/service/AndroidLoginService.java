@@ -51,9 +51,9 @@ public class AndroidLoginService {
             log.info(member.toString());
             memberRepository.save(member);
 
-            return jwtService.generate(member.toMemberDto(),member.getRole());
+            return jwtService.generate(member.toMemberDto());
         }
-        return jwtService.generate(isExist.get().toMemberDto(),isExist.get().getRole());
+        return jwtService.generate(isExist.get().toMemberDto());
 //        ApiResponseJson apiResponseJson = new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value())
     }
     public JwtDto login(AndroidRequestParam androidRequestParam){
@@ -62,7 +62,7 @@ public class AndroidLoginService {
             Long id = kakaoValidateResponse.getId();
             Optional<Member> isExist = memberRepository.findById(id);
             MemberDto memberDto = isExist.get().toMemberDto();
-            return jwtService.generate(memberDto,memberDto.getRole());
+            return jwtService.generate(memberDto);
         }catch (Exception exception){
             exception.getMessage();
             log.info("------------User matching err------------");

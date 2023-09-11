@@ -44,7 +44,7 @@ public class AdminController {
                 .profile("kwy1379")
                 .nickname("kwy1379")
                 .build();
-        return jwtService.generate(memberDto, Role.ROLE_USER);
+        return jwtService.generate(memberDto);
     }
     @GetMapping("/members")
     public String getMemberList(Model model){
