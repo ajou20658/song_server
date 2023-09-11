@@ -77,6 +77,17 @@ public class UserController {
     @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
     public ResponseEntity<Resource> getFile(@AuthenticationPrincipal UserPrinciple userPrinciple) throws FileNotFoundException {
         return memberService.get_file(userPrinciple.getId());
+
+
+
+
+
+
+
+
+
+
+
     }
     @GetMapping("/get_result") //완료 결과 가져오기 -스트리밍형식으로?
     public void getResult(){

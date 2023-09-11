@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,17 +42,15 @@ public class AuthController {
             return null;
         }
     }
-    /**
-     * 유저 jwt 갱신
-     * @param request
-     * @param response null이면 로그인창으로 보내기, null이 아니면 제대로 갱신된 것
-     */
+
     @PostMapping("/jwtUpdate")
     @ResponseBody
-    public JwtDto jwtUpdate(HttpServletRequest request, HttpServletResponse response){
-        Optional<JwtDto> jwtDtoE = jwtService.resolveJwt(request);
-        if(jwtDtoE.isEmpty()) return null;
-        return jwtService.refresh(jwtDtoE.get());
+    public ResponseEntity<Object> jwtUpdate(@RequestBody JwtDto jwtDto){
+
+        Map<String,Object> res = new HashMap<>();
+        res.put("response",jwtService.refresh(jwtDto));
+        return new ResponseEntity<>(res,HttpStatus.OK);
+
     }
 
     @PostMapping("/logout")
