@@ -36,7 +36,8 @@ public class AndroidLoginController {
     public ResponseEntity<Object> login(@RequestBody AndroidRequestParam androidRequestParam){
         try{
             JwtDto jwtDto = androidLoginService.join(androidRequestParam);
-            log.info("Token Issued");
+            log.info("Token Issued accessToken = {}",jwtDto.getAccessToken());
+            log.info("refreshToken = {}",jwtDto.getRefreshToken());
             Map<String,Object> response = new HashMap<>();
             response.put("response",jwtDto);
             return new ResponseEntity<>(response,HttpStatus.OK);
