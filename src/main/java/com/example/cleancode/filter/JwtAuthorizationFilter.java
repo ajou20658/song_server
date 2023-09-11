@@ -49,7 +49,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             jwtDto.setRefreshToken(refresh);
         }
         if(StringUtils.hasText(token)){
-            log.info(token);
+            log.info(jwtDto.getAccessToken());
             if(jwtService.validateToken(jwtDto)){
                 try {
                     auth = token != null ? jwtService.authenticate(jwtDto) : null;
