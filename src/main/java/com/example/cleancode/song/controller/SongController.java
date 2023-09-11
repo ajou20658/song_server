@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 public class SongController {
     @Autowired
     private MelonCrawlService melonService;
-//    @Autowired
-//    private ServletContext servletContext;
     @Autowired
     private ChartRepository chartRepository;
 

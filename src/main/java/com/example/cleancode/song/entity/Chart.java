@@ -2,6 +2,7 @@ package com.example.cleancode.song.entity;
 
 import com.example.cleancode.song.dto.ChartDTO;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @ToString
 @AllArgsConstructor
+@Entity
 @Builder
 public class Chart {
     @Id
