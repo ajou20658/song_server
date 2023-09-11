@@ -57,16 +57,20 @@ public class LoginService {
         Optional<Member> isExist = memberRepository.findByid(id);
         //회원정보 저장 필요
         //사용자 추가
-        Member member = Member.builder()
-                .id(id)
-                .email(kakaoInfoResponse.getKakaoAccount().getEmail())
-                .nickname(kakaoInfoResponse.getKakaoAccount().getProfile().getNickname())
-                .profile(kakaoInfoResponse.getKakaoAccount().getProfile().getProfile())
-                .role(Role.ROLE_USER)
-                .build();
-        log.info(member.toString());
-        memberRepository.save(member);
-        return jwtService.generate(member.toMemberDto(),member.getRole());
+        if(isExist.isEmpty()) {
+            Member member = Member.builder()
+                    .id(id)
+                    .email(kakaoInfoResponse.getKakaoAccount().getEmail())
+                    .nickname(kakaoInfoResponse.getKakaoAccount().getProfile().getNickname())
+                    .profile(kakaoInfoResponse.getKakaoAccount().getProfile().getProfile())
+                    .role(Role.ROLE_USER)
+                    .build();
+            log.info(member.toString());
+            memberRepository.save(member);
+
+            return jwtService.generate(member.toMemberDto(),member.getRole());
+        }
+        return jwtService.generate(isExist.get().toMemberDto(),isExist.get().getRole());
     }
     public boolean logout(HttpServletRequest request){
         try{

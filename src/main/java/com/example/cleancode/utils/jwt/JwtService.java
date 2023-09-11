@@ -89,6 +89,9 @@ public class JwtService{
         try{
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtDto.getAccessToken()).getBody();
             if(claims.getExpiration().before(new Date())){
+                log.info("기한이 만료됨 ");
+                log.info("현재 시간 : {}",new Date());
+                log.info("만료기간 : {}",claims.getExpiration());
                 return false;
             }
             return true;
