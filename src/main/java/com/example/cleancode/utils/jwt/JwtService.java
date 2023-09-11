@@ -40,7 +40,7 @@ public class JwtService{
     private Long tokenMillisecond;
     @Value("${jwt.token.refresh-expiration-time}")
     private Long refreshMillisecond;
-    private JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+
     public final String BEARER_PREFIX = "Bearer ";
     public JwtDto generate(MemberDto memberDto,Role roles){
         return new JwtDto(generateToken(memberDto,roles),generateRefreshToken(memberDto.getId()));
@@ -87,7 +87,7 @@ public class JwtService{
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
             log.info("들어옴 : {}",jwtDto.getAccessToken());
-
+            JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
             Jws jws = jwtParser.parseClaimsJws(jwtDto.getAccessToken());
             log.info(jws.toString());
             Claims claims = (Claims) jws.getBody();
