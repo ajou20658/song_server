@@ -44,7 +44,6 @@ public class LoginService {
     //jwt 토큰이 없거나 만료된 유저들
     @Transactional
     public JwtDto join(KakaoLoginParam kakaoLoginParam)throws Exception{
-
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenProvider.requestAccessToken(kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         //1-2 토큰 유효성 검사 + 회원번호 획득
