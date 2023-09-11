@@ -58,6 +58,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 }
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("AUTH SUCCESS : {}",auth.getName());
+            }else{
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("권한이 없습니다");
+                response.getWriter().flush();
+                response.getWriter().close();
+                return;
             }
         }else {
             log.info("No Authorization Header");
