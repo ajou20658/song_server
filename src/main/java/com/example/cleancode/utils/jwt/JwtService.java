@@ -87,6 +87,7 @@ public class JwtService{
     public boolean validateToken(JwtDto jwtDto){
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
+            log.info("들어옴 : {}",jwtDto);
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtDto.getAccessToken()).getBody();
             if(claims.getExpiration().before(new Date())){
                 log.info("기한이 만료됨 ");
@@ -96,8 +97,10 @@ public class JwtService{
             }
             return true;
         }catch (ExpiredJwtException ex){
+            log.info("오류 발생");
             return false;
         }catch(Exception ex){
+            log.info("오류 발생");
             return false;
         }
     }
