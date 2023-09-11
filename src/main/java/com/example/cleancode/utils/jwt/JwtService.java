@@ -88,10 +88,9 @@ public class JwtService{
         try{
             log.info("들어옴 : {}",jwtDto.getAccessToken());
             JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
-            Jws jws = jwtParser.parseClaimsJws(jwtDto.getAccessToken());
-            log.info(jws.toString());
-            Claims claims = (Claims) jws.getBody();
-            log.info(jws.toString());
+            log.info("들어옴 : {}");
+            Claims claims = jwtParser.parseClaimsJws(jwtDto.getAccessToken()).getBody();
+            log.info(claims.toString());
             Jwts.parserBuilder().setSigningKey(key).build();
             if(claims.getExpiration().before(new Date())){
                 log.info("기한이 만료됨 ");
