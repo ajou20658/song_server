@@ -52,6 +52,7 @@ public class KakaoTokenProvider {
 
     public KakaoInfoResponse requestUserInfo(String accessToken) {
         String url = apiUrl + "/v2/user/me";
+        log.info("액세스 토큰입니다 : {}",accessToken);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("property_keys", "[\"kakao_account.email\", \"kakao_account.profile\"]");
         KakaoInfoResponse kakaoInfoResponse =  webClient.get()
