@@ -54,19 +54,5 @@ public class AndroidLoginService {
             return jwtService.generate(member.toMemberDto());
         }
         return jwtService.generate(isExist.get().toMemberDto());
-//        ApiResponseJson apiResponseJson = new ApiResponseJson(HttpStatus.OK,HttpStatus.OK.value())
-    }
-    public JwtDto login(AndroidRequestParam androidRequestParam){
-        try{
-            KakaoValidateResponse kakaoValidateResponse = kakaoTokenProvider.tokenInfo(androidRequestParam.getAccessToken());
-            Long id = kakaoValidateResponse.getId();
-            Optional<Member> isExist = memberRepository.findById(id);
-            MemberDto memberDto = isExist.get().toMemberDto();
-            return jwtService.generate(memberDto);
-        }catch (Exception exception){
-            exception.getMessage();
-            log.info("------------User matching err------------");
-            return null;
-        }
     }
 }

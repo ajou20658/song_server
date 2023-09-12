@@ -8,6 +8,7 @@ import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.entity.UserPrinciple;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.naming.AuthenticationException;
+import java.rmi.UnexpectedException;
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,7 +92,7 @@ public class JwtService{
             JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
             log.info("들어옴 : {}");
             Claims claims = jwtParser.parseClaimsJws(jwtDto.getAccessToken()).getBody();
-            log.info(claims.toString());
+//            log.info(claims.toString());
 
             if(claims.getExpiration().before(new Date())){
                 log.info("기한이 만료됨 ");
@@ -100,10 +102,18 @@ public class JwtService{
             }
             return true;
         }catch (ExpiredJwtException ex){
-            log.info("오류 발생");
+            log.info("만료된 토큰");
+            log.info("현재 시간 : {}",new Date());
+            log.info("만료기간 : {}",ex.getClaims().getExpiration());
             return false;
-        }catch(Exception ex){
-            log.info("오류 발생");
+        }catch(UnsupportedJwtException ex){
+            log.info("발급한 jwt accessToken아님 {}",jwtDto);
+            return false;
+        }catch(SignatureException ex){
+            log.info("signature 일치하지않음");
+            return false;
+        }catch(IllegalArgumentException ex){
+            log.info("jwt accessToken is null");
             return false;
         }
     }
