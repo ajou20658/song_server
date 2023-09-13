@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -35,6 +36,7 @@ public class MelonCrawlService {
      * @return mongodb에 저장됨
      * @throws Exception
      */
+    @Scheduled(fixedRate = 21600000)
     public Long collectMelonSong() throws Exception {
         chartRepository.deleteAll();
         Long res = 0l;
