@@ -34,12 +34,15 @@ public class AuthController {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
             log.info("Token Issued");
             Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.OK.value());
             response.put("response",jwtDto);
             return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception ex){
             log.info("Exception");
             ex.printStackTrace();
-            return null;
+            Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.FORBIDDEN.value());
+            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
         }
     }
 

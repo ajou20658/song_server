@@ -39,11 +39,14 @@ public class AndroidLoginController {
             log.info("Token Issued accessToken = {}",jwtDto.getAccessToken());
             log.info("refreshToken = {}",jwtDto.getRefreshToken());
             Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.OK.value());
             response.put("response",jwtDto);
             return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception ex){
             log.info("err");
-            return null;
+            Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.FORBIDDEN.value());
+            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
         }
     }
 }

@@ -115,6 +115,9 @@ public class JwtService{
         }catch(IllegalArgumentException ex){
             log.info("jwt accessToken is null");
             return false;
+        }catch (MalformedJwtException ex){
+            log.info("형식이 맞지 않는 토큰");
+            return false;
         }
     }
     public boolean validateRefresh(JwtDto jwtDto){

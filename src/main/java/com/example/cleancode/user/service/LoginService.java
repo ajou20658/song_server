@@ -43,11 +43,15 @@ public class LoginService {
 
     //jwt 토큰이 없거나 만료된 유저들
     @Transactional
-    public JwtDto join(KakaoLoginParam kakaoLoginParam)throws Exception{
+    public JwtDto join(KakaoLoginParam kakaoLoginParam) throws Exception {
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenProvider.requestAccessToken(kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         //1-2 토큰 유효성 검사 + 회원번호 획득
-        log.info(kakaoTokenResponse.getAccessToken());
+        if(kakaoTokenResponse==null){
+            log.info("받은 액세스 토큰 : {}",kakaoLoginParam.getAuthorizationCode());
+            log.error("유효하지않은 카카오 accessToken");
+            throw new Exception();
+        }
         KakaoValidateResponse kakaoValidateResponse = kakaoTokenProvider.tokenInfo(kakaoTokenResponse.getAccessToken());
         Long id = kakaoValidateResponse.getId();
         //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기

@@ -41,13 +41,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
-        log.info("accessToken {}",token);
-        String refresh = request.getParameter("refresh");
+        log.info("jwtAccessToken : {}",token);
+//        String refresh = request.getParameter("refresh");
         JwtDto jwtDto = new JwtDto(token,"");
         Authentication auth;
-        if(StringUtils.hasText(refresh)){
-            jwtDto.setRefreshToken(refresh);
-        }
+//        if(StringUtils.hasText(refresh)){
+//            jwtDto.setRefreshToken(refresh);
+//        }
         if(StringUtils.hasText(token)){
             log.info(jwtDto.getAccessToken());
             if(jwtService.validateToken(jwtDto)){
@@ -58,14 +58,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 }
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("AUTH SUCCESS : {}",auth.getName());
+            }else{
+                log.info("jwt 오류/올바르지 않은 접근");
+                request.setAttribute("result",new TokenValidationResult(false,null,null, TokenStatus.NO_AUTH_HEADER,null));
             }
-//            }else{
-//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//                response.getWriter().write("권한이 없습니다");
-//                response.getWriter().flush();
-//                response.getWriter().close();
-//                return;
-//            }
         }else {
             log.info("No Authorization Header");
             request.setAttribute("result",new TokenValidationResult(false,null,null, TokenStatus.NO_AUTH_HEADER,null));
