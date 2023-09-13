@@ -29,7 +29,6 @@ public class AuthController {
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<Object> login(@RequestBody KakaoLoginParam kakaoLoginParam){
-
         try {
             JwtDto jwtDto = loginService.join(kakaoLoginParam);
             log.info("Token Issued");

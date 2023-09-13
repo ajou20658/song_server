@@ -43,10 +43,19 @@ public class UserController {
      * @return
      */
     @GetMapping("/info")
-    public ResponseEntity<MemberDto> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
+    public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
         MemberDto member = memberService.findMember(Long.valueOf(userPrinciple.getId()));
         log.info(member.toString());
-        return ResponseEntity.ok(member);
+        if(member==null){
+            Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.FORBIDDEN.value());
+            response.put("response",member);
+            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
+        }
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",HttpStatus.OK.value());
+        response.put("response",member);
+        return ResponseEntity.ok(response);
     }
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 검색후 유저 선호 장르 업데이트
