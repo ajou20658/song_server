@@ -6,6 +6,8 @@ import com.example.cleancode.user.entity.FilePath;
 import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.entity.UserPrinciple;
 import com.example.cleancode.user.service.MemberService;
+import com.example.cleancode.utils.jwt.TokenStatus;
+import com.example.cleancode.utils.jwt.TokenValidationResult;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,14 @@ public class UserController {
      * @return
      */
     @GetMapping("/info")
-    public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
+    public ResponseEntity<Object> memberinfo(HttpServletRequest request,@AuthenticationPrincipal UserPrinciple userPrinciple){
+        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
+        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
+            Map<String,Object> response = new HashMap<>();
+            response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
+            response.put("message","재갱신이 필요합니다");
+            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
+        }
         MemberDto member = memberService.findMember(Long.valueOf(userPrinciple.getId()));
         log.info(member.toString());
         if(member==null){

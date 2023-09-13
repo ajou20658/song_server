@@ -50,7 +50,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 //        }
         if(StringUtils.hasText(token)){
             log.info(jwtDto.getAccessToken());
-            if(jwtService.validateToken(jwtDto)){
+            TokenStatus status = jwtService.validateToken(jwtDto);
+            if(status==TokenStatus.TOKEN_VALID){
                 try {
                     auth = token != null ? jwtService.authenticate(jwtDto) : null;
                 } catch (AuthenticationException e) {
@@ -58,9 +59,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 }
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("AUTH SUCCESS : {}",auth.getName());
-            }else{
+            } else if (status==TokenStatus.TOKEN_EXPIRED) {
                 log.info("jwt 오류/올바르지 않은 접근");
-                request.setAttribute("result",new TokenValidationResult(false,null,null, TokenStatus.NO_AUTH_HEADER,null));
+                request.setAttribute("result",new TokenValidationResult(false,null,null, TokenStatus.TOKEN_EXPIRED,null));
             }
         }else {
             log.info("No Authorization Header");
