@@ -12,15 +12,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class LogConfig {
-    @Bean
-    public FilterRegistrationBean logFilter(){
-        FilterRegistrationBean<Filter> filterFilterRegistrationBean =
-                new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new LogFilter());
-        filterFilterRegistrationBean.setOrder(0);
-        filterFilterRegistrationBean.addUrlPatterns("/*");
-        return filterFilterRegistrationBean;
-    }
+//    @Bean
+//    public FilterRegistrationBean logFilter(){
+//        FilterRegistrationBean<Filter> filterFilterRegistrationBean =
+//                new FilterRegistrationBean<>();
+//        filterFilterRegistrationBean.setFilter(new LogFilter());
+//        filterFilterRegistrationBean.setOrder(0);
+//        filterFilterRegistrationBean.addUrlPatterns("/*");
+//        return filterFilterRegistrationBean;
+//    }
 ////    @Bean
 ////    public FilterRegistrationBean jwtFilter(){
 ////        FilterRegistrationBean<Filter> filterFilterRegistrationBean =
