@@ -36,7 +36,7 @@ public class MelonCrawlService {
      * @return mongodb에 저장됨
      * @throws Exception
      */
-    @Scheduled(fixedRate = 21600000)
+//    @Scheduled(fixedRate = 21600000)
     //여기서는 장르, 좋아요수 제외 크롤링
     public Long collectMelonSong() throws Exception {
         chartRepository.deleteAll();
