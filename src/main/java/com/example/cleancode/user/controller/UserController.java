@@ -35,7 +35,7 @@ public class UserController {
      * @param userPrinciple
      * @return
      */
-    @GetMapping("/info")
+    @PostMapping("/info")
     public ResponseEntity<Object> memberinfo(HttpServletRequest request,@AuthenticationPrincipal UserPrinciple userPrinciple){
 //        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
 //        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
