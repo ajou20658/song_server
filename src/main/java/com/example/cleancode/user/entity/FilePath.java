@@ -13,13 +13,11 @@ import lombok.Getter;
 @Builder
 public class FilePath {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String userId;
     private String uri;
     public FilePathDto toFilePathDto(){
         return FilePathDto.builder()
-                .userId(userId)
                 .uri(uri)
                 .build();
     }

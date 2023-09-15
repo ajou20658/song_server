@@ -11,11 +11,9 @@ import lombok.Setter;
 public class FilePathDto {
     private Long id;
     private String uri;
-    private String userId;
     public FilePath filePath(){
         return FilePath.builder()
                 .uri(uri)
-                .userId(userId)
                 .build();
     }
 }
