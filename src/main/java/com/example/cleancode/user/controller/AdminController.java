@@ -24,8 +24,6 @@ import java.util.List;
 public class AdminController {
     @Autowired
     private MemberRepository memberRepository;
-//    @Autowired
-//    private TokenRepository tokenRepository;
     @Autowired
     private ChartRepository chartRepository;
     @Autowired

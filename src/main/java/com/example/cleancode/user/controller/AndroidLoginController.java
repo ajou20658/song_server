@@ -2,22 +2,14 @@ package com.example.cleancode.user.controller;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.JwtDto;
-import com.example.cleancode.user.dto.MemberDto;
-import com.example.cleancode.user.entity.Member;
-import com.example.cleancode.user.entity.UserPrinciple;
 import com.example.cleancode.user.service.AndroidLoginService;
 import com.example.cleancode.user.service.oauth.AndroidRequestParam;
-import com.example.cleancode.utils.ApiResponseJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.PreparedStatement;
 import java.util.*;
 
 //http://3.34.194.47:8080/v1/login

@@ -1,8 +1,6 @@
 package com.example.cleancode.config;
 
 import com.example.cleancode.filter.JwtAuthorizationFilter;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -1,10 +1,8 @@
 package com.example.cleancode.song.controller;
 
 import com.example.cleancode.song.dto.ChartDTO;
-import com.example.cleancode.song.dto.SearchDto;
 import com.example.cleancode.song.entity.Chart;
 import com.example.cleancode.song.repository.ChartRepository;
-//import com.example.cleancode.image.service.MelonService;
 import com.example.cleancode.song.service.MelonCrawlService;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,6 @@ package com.example.cleancode.user.dto;
 
 import com.example.cleancode.user.entity.FilePath;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

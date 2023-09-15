@@ -2,17 +2,13 @@ package com.example.cleancode.user.controller;
 
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.MemberDto;
-import com.example.cleancode.user.entity.FilePath;
-import com.example.cleancode.user.entity.Role;
 import com.example.cleancode.user.entity.UserPrinciple;
 import com.example.cleancode.user.service.MemberService;
 import com.example.cleancode.utils.jwt.TokenStatus;
 import com.example.cleancode.utils.jwt.TokenValidationResult;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Slf4j

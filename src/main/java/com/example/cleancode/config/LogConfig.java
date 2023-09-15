@@ -1,9 +1,5 @@
 package com.example.cleancode.config;
 
-//import com.example.cleancode.filter.JwtTokenFilter;
-//import com.example.cleancode.filter.JwtTokenFilter;
-//import com.example.cleancode.filter.JwtAuthorizationFilter;
-//import com.example.cleancode.filter.LogFilter;
 import com.example.cleancode.filter.LogFilter;
 import com.example.cleancode.utils.jwt.JwtService;
 import jakarta.servlet.Filter;
@@ -16,9 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class LogConfig {
-//    @Autowired
-//    private JwtService jwtService;
-//
     @Bean
     public FilterRegistrationBean logFilter(){
         FilterRegistrationBean<Filter> filterFilterRegistrationBean =
