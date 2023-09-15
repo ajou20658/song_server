@@ -22,4 +22,14 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedHeaders("Authorization")
                 .allowedMethods("GET","POST");
     }
+    @Bean
+    public CorsFilter corsFilter(){
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+        source.registerCorsConfiguration("/**",config);
+        return new CorsFilter(source);
+    }
 }
