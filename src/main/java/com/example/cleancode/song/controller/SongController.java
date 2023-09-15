@@ -1,5 +1,6 @@
 package com.example.cleancode.song.controller;
 
+import com.example.cleancode.song.dto.ChartDTO;
 import com.example.cleancode.song.dto.SearchDto;
 import com.example.cleancode.song.entity.Chart;
 import com.example.cleancode.song.repository.ChartRepository;
@@ -46,7 +47,7 @@ public class SongController {
 
     @GetMapping("/search")
     @ResponseBody
-    public List<SearchDto> getList2(@RequestParam @Nullable String target, @RequestParam String mode, Model model){
+    public List<ChartDTO> getList2(@RequestParam @Nullable String target, @RequestParam String mode, Model model){
         try{
             String decodedArtist = URLDecoder.decode(target, "UTF-8");
             log.info("아티스트명에서");
@@ -83,10 +84,10 @@ public class SongController {
                 }
                 for(String artist : lines){
                     likeIDSumCntMap = new HashMap<>();
-                    List<SearchDto> songlist = melonService.search_artist(artist,"1");
+                    List<ChartDTO> songlist = melonService.search_artist(artist,"1");
 
                     List<String> likeString=songlist.stream()
-                            .map(SearchDto::getLikeId)
+                            .map(ChartDTO::getLikeId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -100,22 +101,22 @@ public class SongController {
                         int sumCnt = contsLikeObject.getInt("SUMMCNT");
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
-                    for(SearchDto searchDto:songlist){
-                        if(searchDto.getTitle().contains("Inst")||searchDto.getTitle().contains("inst")||
-                                searchDto.getTitle().contains("Feat")||searchDto.getTitle().contains("feat")||searchDto.getTitle().contains("MR")){
-                            log.info("제외된 제목 : {}",searchDto.getTitle());
+                    for(ChartDTO chartDTO:songlist){
+                        if(chartDTO.getTitle().contains("Inst")||chartDTO.getTitle().contains("inst")||
+                                chartDTO.getTitle().contains("Feat")||chartDTO.getTitle().contains("feat")||chartDTO.getTitle().contains("MR")){
+                            log.info("제외된 제목 : {}",chartDTO.getTitle());
                             continue;
-                        } else if (!searchDto.getArtist().equals(artist)) {
-                            log.info("제외된 가수 : {}",searchDto.getArtist());
+                        } else if (!chartDTO.getArtist().equals(artist)) {
+                            log.info("제외된 가수 : {}",chartDTO.getArtist());
                             continue;
                         }
-                        searchDto.setTitle(searchDto.getTitle().replace(","," "));
-                        String likeId = searchDto.getLikeId();
+                        chartDTO.setTitle(chartDTO.getTitle().replace(","," "));
+                        String likeId = chartDTO.getLikeId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             List<String> genreList = new ArrayList<>();
-                            String getGenreParam = searchDto.getSongId();
+                            String getGenreParam = chartDTO.getSongId();
 
                             try {
                                 Document genreDoc = Jsoup.connect(genreUrl + getGenreParam).get();
@@ -125,7 +126,7 @@ public class SongController {
                                 //제목,가수,장르,좋아요
 
                                 Thread.sleep(2500);
-                                String csvRow = searchDto.getTitle()+","+searchDto.getArtist()+","+sumCnt+","+genre;
+                                String csvRow = chartDTO.getTitle()+","+chartDTO.getArtist()+","+sumCnt+","+genre;
                                 log.info(csvRow);
                                 writer.write(csvRow);
                                 writer.newLine();

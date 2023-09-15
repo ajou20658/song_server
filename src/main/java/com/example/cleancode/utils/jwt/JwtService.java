@@ -85,29 +85,29 @@ public class JwtService{
         return token;
     }
     //토큰 검증 - 필터에서 사용해야됨 -----------------------------------------------------
-    public TokenStatus validateToken(JwtDto jwtDto){
+    public TokenStatus validateToken(JwtDto jwtDto) throws ExpiredJwtException, UnsupportedJwtException{
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
         try{
             JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
             Claims claims = jwtParser.parseClaimsJws(jwtDto.getAccessToken()).getBody();
-            return TokenStatus.TOKEN_VALID;
-        }catch (ExpiredJwtException ex){
-            log.info("현재 시간 : {}",new Date());
-            log.info("만료기간 : {}",ex.getClaims().getExpiration());
-            return TokenStatus.TOKEN_EXPIRED;
         }catch(UnsupportedJwtException ex){
             log.info("발급한 jwt accessToken아님 {}",jwtDto);
-            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+//            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+            throw new RuntimeException();
         }catch(SignatureException ex){
             log.info("signature 일치하지않음");
-            return TokenStatus.TOKEN_WRONG_SIGNATURE;
+//            return TokenStatus.TOKEN_WRONG_SIGNATURE;
+            throw new RuntimeException();
         }catch(IllegalArgumentException ex){
             log.info("jwt accessToken is null");
-            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+//            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+            throw new RuntimeException();
         }catch (MalformedJwtException ex){
             log.info("형식이 맞지 않는 토큰");
-            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+//            return TokenStatus.TOKEN_VALIDATION_TRY_FAILED;
+            throw new RuntimeException();
         }
+        return TokenStatus.TOKEN_VALID;
     }
     public boolean validateRefresh(JwtDto jwtDto){
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());

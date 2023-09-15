@@ -3,7 +3,7 @@ jwt:
   secret-key: ad861fbe42d6d4517997caaac85748c7b33ac43b0eb3d6fe19126eba998c1bb5c29f6110dd5e5d45c287462bc2cbd90865485e93e313717260b3a054c9d355a7
   token:
 #    expiration-time: 3600 #1시간
-    expiration-time: 2592000
+    expiration-time: 604800
     refresh-expiration-time: 2592000
 
 oauth:
@@ -12,9 +12,21 @@ oauth:
     url:
       auth: https://kauth.kakao.com
       api: https://kapi.kakao.com
-      redirect-url: http://localhost:3000/login
+#      redirect-url: http://localhost:3000/login
 #      redirect-url: http://songssam.site:3000/login
-
+      redirect-url: http://localhost:8080
+cloud:
+  aws:
+    s3:
+      bucket: songssam
+    credentials:
+      access-key: AKIATIVNZLQ23AQR4MPK
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
 spring:
   autoconfigure:
     exclude : org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -27,7 +39,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -42,8 +54,8 @@ spring:
     port: 6379
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 20MB
+      max-file-size: 40MB
+      max-request-size: 40MB
   http:
     encoding:
       charset: UTF-8
@@ -51,4 +63,4 @@ spring:
       enabled: true
 
 file:
-  dir: C:\Users\kwy\Documents\2023하계\cleancode\src\main\resources\static
+  dir: C:\Users\kwy\Documents\2023하계\cleancode\src\main\resources\

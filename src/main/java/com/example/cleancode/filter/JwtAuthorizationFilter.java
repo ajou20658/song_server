@@ -55,6 +55,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 try {
                     auth = token != null ? jwtService.authenticate(jwtDto) : null;
                 } catch (AuthenticationException e) {
+                    log.info("auth 발급 실패");
                     throw new RuntimeException(e);
                 }
                 SecurityContextHolder.getContext().setAuthentication(auth);

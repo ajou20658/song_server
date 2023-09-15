@@ -14,6 +14,7 @@ public class ChartDTO {
     private String imgUrl;
     private String artist;
     private String albumId;
+    private String likeId;
     private List<String> genre;
 
     public Chart toChartEntity(){

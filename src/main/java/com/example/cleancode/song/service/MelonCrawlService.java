@@ -36,7 +36,8 @@ public class MelonCrawlService {
      * @return mongodb에 저장됨
      * @throws Exception
      */
-    @Scheduled(fixedRate = 21600000)
+//    @Scheduled(fixedRate = 21600000)
+    //여기서는 장르, 좋아요수 제외 크롤링
     public Long collectMelonSong() throws Exception {
         chartRepository.deleteAll();
         Long res = 0l;
@@ -47,17 +48,13 @@ public class MelonCrawlService {
 
         // <div class="service_list_song"> 이 태그 내에 있는 HTML 소스만 element에 저장된다.
         Elements element = doc.select("div.service_list_song");
-        log.info(element.toString());
         for (Element songInfo : element.select("#lst50")) {
-            log.info(songInfo.toString());
             // 크롤링을 통해 데이터 저장하기
             String songId = songInfo.attr("data-song-no");
             String albumId = songInfo.select("div.ellipsis.rank03 a").attr("href").substring(37,45);
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-            log.info("song : {}", title);
-            log.info("singer : {}", artist);
 
             if ((title.length() > 0) && (artist.length() > 0)) {
 
@@ -72,7 +69,27 @@ public class MelonCrawlService {
                 pList.add(chartDTO);
             }
         }
-        log.info(pList.toString());
+        for (Element songInfo : element.select("#lst100")) {
+            // 크롤링을 통해 데이터 저장하기
+            String songId = songInfo.attr("data-song-no");
+            String albumId = songInfo.select("div.ellipsis.rank03 a").attr("href").substring(37,45);
+            String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
+            String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+            String imgUrl = songInfo.select(".image_typeAll img").attr("src");
+
+            if ((title.length() > 0) && (artist.length() > 0)) {
+
+                ChartDTO chartDTO = ChartDTO.builder()
+                        .albumId(albumId)
+                        .artist(artist)
+                        .title(title)
+                        .songId(songId)
+                        .imgUrl(imgUrl)
+                        .build();
+                //한 번에 여러 개의 데이터를 MongoDB에 저장할 List 형태의 데이터 저장하기
+                pList.add(chartDTO);
+            }
+        }
         //MongoDB에 데이터저장하기
         //res = iMelonMapper.insertSong(pList, cloNm);
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
@@ -89,14 +106,11 @@ public class MelonCrawlService {
             chart.setGenre(genreArray);
             chartRepository.save(chart.toChartEntity());
             res+=1;
-            log.info("crawl count: "+res);
         }
-        log.info(this.getClass().getName() + ".collectionMelonSong End");
-
         return res;
     }
     /**
-     * 100~800번
+     * 100~800번 장르별 top100가수 이름 크롤링
      * @param
      * @return
      */
@@ -142,9 +156,9 @@ public class MelonCrawlService {
      * @return json 형태로 반환
      * @throws Exception
      */
-    public List<SearchDto> search_artist(String artist, String mode) throws Exception{
+    public List<ChartDTO> search_artist(String artist, String mode) throws Exception{
         Long res =0l;
-        List<SearchDto> list = new LinkedList<>();
+        List<ChartDTO> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
 //        String all = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=all&searchGnbYn=Y&kkoSpl=N&kkoDpType=#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=all&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=51";
         String m ="";
@@ -197,11 +211,10 @@ public class MelonCrawlService {
         //                log.info(onClickValue4);
                         String[] parse = parser(href);
 
-                        list.add(SearchDto.builder()
+                        list.add(ChartDTO.builder()
                                 .title(title)
                                 .artist(singer)
                                 .albumId(parse[5])
-                                .albumTitle(album)
                                 .songId(parse[4])
                                 .likeId(like)
                                 .build());

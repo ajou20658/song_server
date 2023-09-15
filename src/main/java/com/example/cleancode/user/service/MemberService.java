@@ -1,5 +1,7 @@
 package com.example.cleancode.user.service;
 
+import com.example.cleancode.song.entity.Chart;
+import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.user.JpaRepository.FilePathRepository;
 import com.example.cleancode.user.JpaRepository.MemberRepository;
 import com.example.cleancode.user.dto.FilePathDto;
@@ -41,6 +43,8 @@ public class MemberService {
     private MemberRepository memberRepository;
     @Autowired
     private FilePathRepository filePathRepository;
+    @Autowired
+    private ChartRepository chartRepository;
     @Value("${file.dir}")
     private String fileDir;
     public MemberDto findMember(Long id){
@@ -80,7 +84,11 @@ public class MemberService {
         FilePathDto filePathDto = null;
         try{
             if(!file.isEmpty()){
-                String fileName = id+"_"+LocalDate.now();
+                String fileName = file.getOriginalFilename();
+                String[] split = fileName.split("_");//id,제목,가수,분류
+                Optional<Chart> chart = chartRepository.findByTitle(split[1]);
+                log.info(chart.get().songId);
+//                String fileName = id+"_"+LocalDate.now();
                 filePathDto = FilePathDto.builder()
                         .uri(fileName)
                         .build();

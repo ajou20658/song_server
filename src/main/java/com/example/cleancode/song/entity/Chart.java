@@ -4,15 +4,15 @@ import com.example.cleancode.song.dto.ChartDTO;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
+@Entity
+@Getter
 @ToString
 @AllArgsConstructor
-@Entity
+@NoArgsConstructor
 @Builder
 public class Chart {
     @Id
@@ -21,6 +21,7 @@ public class Chart {
     public String imgUrl;
     public String artist;
     public String albumId;
+    public String likeId;
 
     @ElementCollection
     public List<String> genre;

@@ -64,7 +64,7 @@ public class UserController {
         Map<String,Object> response = new HashMap<>();
         response.put("HttpStatus",HttpStatus.OK.value());
         response.put("response",member);
-        return ResponseEntity.ok(response);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 검색후 유저 선호 장르 업데이트
@@ -84,28 +84,25 @@ public class UserController {
         return memberService.updateUser(memberDto, Long.valueOf(userPrinciple.getId()));
     }
     @PostMapping("/vocal_upload")
-    public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        if(memberService.upload_file(file,userPrinciple.getId())){
-            //true일떄
-            return new ResponseEntity(HttpStatus.OK);
-        }
+        log.info("file: {}",file.getOriginalFilename());
+//        if(memberService.upload_file(file,userPrinciple.getId())){
+//            //true일떄
+//            Map<String,Object> response = new HashMap<>();
+//            response.put("HttpStatus",HttpStatus.OK.value());
+//            return new ResponseEntity<>(response,HttpStatus.OK);
+//        }
         return new ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE);
     }
     @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
     public ResponseEntity<Resource> getFile(@AuthenticationPrincipal UserPrinciple userPrinciple) throws FileNotFoundException {
         return memberService.get_file(userPrinciple.getId());
 
-
-
-
-
-
-
-
-
-
-
+    }
+    @PostMapping("/aws_upload")
+    public ResponseEntity<Object> saveFile(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        return new ResponseEntity<>(HttpStatus.OK);
     }
     @GetMapping("/get_result") //완료 결과 가져오기 -스트리밍형식으로?
     public void getResult(){
