@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface UserSongRepository extends JpaRepository<UserSong,Long> {
-    List<UserSong> findByUseridByInsDateDesc(Long userid);
+    List<UserSong> findByUseridOrderByInsDateDesc(Long userid);
 }
