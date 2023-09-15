@@ -14,14 +14,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
-    @Override
-    public void addCorsMappings(CorsRegistry registry){
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedHeaders("Authorization")
-                .allowedMethods("GET","POST");
-    }
+public class CorsConfig{
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry){
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:3000")
+//                .allowedHeaders("Authorization")
+//                .allowedMethods("GET","POST");
+//    }
     @Bean
     public CorsFilter corsFilter(){
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
