@@ -23,6 +23,7 @@ import java.util.*;
 @Slf4j
 @Controller
 @RequestMapping("/member")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     @Autowired
     private MemberRepository memberRepository;
@@ -35,7 +36,7 @@ public class UserController {
      * @param userPrinciple
      * @return
      */
-    @PostMapping("/info")
+    @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(HttpServletRequest request,@AuthenticationPrincipal UserPrinciple userPrinciple){
 //        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
 //        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
