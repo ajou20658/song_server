@@ -45,7 +45,7 @@ public class UserController {
 //            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
 //        }
         MemberDto member = memberService.findMember(Long.valueOf(userPrinciple.getId()));
-        log.info(member.toString());
+        log.info("/member/info 유저 이름 : {}",member.getNickname());
         if(member==null){
             Map<String,Object> response = new HashMap<>();
             response.put("HttpStatus",HttpStatus.FORBIDDEN.value());
