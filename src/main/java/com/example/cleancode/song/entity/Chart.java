@@ -25,6 +25,7 @@ public class Chart {
     public String artist;
     public String albumId;
     public String likeId;
+    public boolean available = false;
 
     @Column(name = "genre", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
@@ -38,6 +39,7 @@ public class Chart {
                 .artist(artist)
                 .albumId(albumId)
                 .genre(genre)
+                .available(available)
                 .build();
     }
 }

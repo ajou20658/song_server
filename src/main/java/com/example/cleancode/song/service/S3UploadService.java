@@ -2,8 +2,13 @@ package com.example.cleancode.song.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import com.example.cleancode.user.entity.UserPrinciple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,15 +22,15 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String saveFile(String folder, MultipartFile multipartFile) throws IOException{
+    public String userFile(String folder, MultipartFile multipartFile,String id) throws IOException{
         String originalFilename = multipartFile.getOriginalFilename();
-//        String extension = multipartFile.getName().substring()
-        String filename = folder+"/"+originalFilename;
+
+        String filename = folder+"/"+id+"_"+originalFilename;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
 
-        amazonS3.putObject(bucket,originalFilename,multipartFile.getInputStream(),metadata);
+        amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
         return amazonS3.getUrl(bucket,originalFilename).toString();
     }
 //    public void deleteFile(String fileName) throws IOException{
@@ -33,4 +38,9 @@ public class S3UploadService {
 //            amazonS3.deleteObject(bucket,);
 //        }
 //    }
+    public Resource stream(String url){
+        S3Object s3Object = amazonS3.getObject(bucket,url);
+        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
+        return resource;
+    }
 }

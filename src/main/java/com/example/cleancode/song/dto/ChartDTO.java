@@ -16,6 +16,7 @@ public class ChartDTO {
     private String albumId;
     private String likeId;
     private List<String> genre;
+    private boolean available;
 
     public Chart toChartEntity(){
         return Chart.builder()
@@ -25,6 +26,7 @@ public class ChartDTO {
                 .artist(artist)
                 .albumId(albumId)
                 .genre(genre)
+                .available(available)
                 .build();
     }
 }

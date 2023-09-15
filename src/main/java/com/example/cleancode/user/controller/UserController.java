@@ -1,8 +1,11 @@
 package com.example.cleancode.user.controller;
 
+import com.example.cleancode.song.service.S3UploadService;
 import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.MemberDto;
 import com.example.cleancode.user.entity.UserPrinciple;
+import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.user.service.MemberService;
 import com.example.cleancode.utils.jwt.TokenStatus;
 import com.example.cleancode.utils.jwt.TokenValidationResult;
@@ -10,51 +13,47 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
 @Controller
 @RequestMapping("/member")
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
     private MemberService memberService;
-
-
+    @Autowired
+    private S3UploadService s3UploadService;
+    @Autowired
+    private UserSongRepository userSongRepository;
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 반환
      * @param userPrinciple
      * @return
      */
     @GetMapping("/info")
-    public ResponseEntity<Object> memberinfo(HttpServletRequest request,@AuthenticationPrincipal UserPrinciple userPrinciple){
-//        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
-//        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
-//            Map<String,Object> response = new HashMap<>();
-//            response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
-//            response.put("message","재갱신이 필요합니다");
-//            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
-//        }
+    public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
         MemberDto member = memberService.findMember(Long.valueOf(userPrinciple.getId()));
         log.info("/member/info 유저 이름 : {}",member.getNickname());
         if(member==null){
             Map<String,Object> response = new HashMap<>();
-            response.put("HttpStatus",HttpStatus.FORBIDDEN.value());
             response.put("response",member);
             return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
         }
         Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",HttpStatus.OK.value());
         response.put("response",member);
         ResponseEntity result = new ResponseEntity<>(response,HttpStatus.OK);
         log.info(result.getHeaders().toString());
@@ -78,21 +77,36 @@ public class UserController {
         return memberService.updateUser(memberDto, Long.valueOf(userPrinciple.getId()));
     }
     @PostMapping("/vocal_upload")
-    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) {
+    public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        log.info("file: {}",file.getOriginalFilename());
-//        if(memberService.upload_file(file,userPrinciple.getId())){
-//            //true일떄
-//            Map<String,Object> response = new HashMap<>();
-//            response.put("HttpStatus",HttpStatus.OK.value());
-//            return new ResponseEntity<>(response,HttpStatus.OK);
-//        }
-        return new ResponseEntity(HttpStatus.SERVICE_UNAVAILABLE);
+        String url = s3UploadService.userFile("user",file,userPrinciple.getId());
+        userSongRepository.save(UserSong.builder()
+                        .url(url)
+                        .userid(Long.valueOf(userPrinciple.getId()))
+                .build());
+        return ResponseEntity.ok().build();
     }
-    @GetMapping("/get_file") //업로드한 파일 보기 -스트리밍형식으로?
-    public ResponseEntity<Resource> getFile(@AuthenticationPrincipal UserPrinciple userPrinciple) throws FileNotFoundException {
-        return memberService.get_file(userPrinciple.getId());
-
+    @GetMapping("/vocal_stream")
+    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
+        try{
+            Resource resource = s3UploadService.stream(url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment","audio.wav");
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/vocal_list")
+    public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
+        List<UserSong> userSongList = userSongRepository.findByUseridByInsDateDesc(Long.valueOf(userPrinciple.getId()));
+        Map<String,Object> response = new HashMap<>();
+        response.put("response",userSongList);
+        ResponseEntity result = new ResponseEntity<>(response,HttpStatus.OK);
+        return result;
     }
     @PostMapping("/aws_upload")
     public ResponseEntity<Object> saveFile(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple){

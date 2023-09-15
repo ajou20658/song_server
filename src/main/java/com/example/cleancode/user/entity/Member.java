@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 public class Member {
     @Id
+    @Column(name = "USER_ID")
     private Long id;
 
     private String email;
