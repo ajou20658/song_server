@@ -7,5 +7,4 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FilePathRepository extends JpaRepository<FilePath,Long> {
-    List<FilePath> findByuserId(String userId);
 }
