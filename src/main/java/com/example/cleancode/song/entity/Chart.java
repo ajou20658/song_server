@@ -1,6 +1,7 @@
 package com.example.cleancode.song.entity;
 
 import com.example.cleancode.song.dto.ChartDTO;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -17,8 +18,10 @@ import java.util.List;
 public class Chart {
     @Id
     public String songId;
+    @Column(name = "nickname", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     public String title;
     public String imgUrl;
+    @Column(name = "nickname", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     public String artist;
     public String albumId;
     public String likeId;
