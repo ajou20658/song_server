@@ -102,7 +102,7 @@ public class UserController {
     }
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        List<UserSong> userSongList = userSongRepository.findByUseridByInsDateDesc(Long.valueOf(userPrinciple.getId()));
+        List<UserSong> userSongList = userSongRepository.findByUseridOrderByInsDateDesc(Long.valueOf(userPrinciple.getId()));
         Map<String,Object> response = new HashMap<>();
         response.put("response",userSongList);
         ResponseEntity result = new ResponseEntity<>(response,HttpStatus.OK);
