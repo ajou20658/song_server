@@ -37,13 +37,13 @@ public class UserController {
      */
     @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(HttpServletRequest request,@AuthenticationPrincipal UserPrinciple userPrinciple){
-        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
-        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
-            Map<String,Object> response = new HashMap<>();
-            response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
-            response.put("message","재갱신이 필요합니다");
-            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
-        }
+//        TokenValidationResult validationResult = (TokenValidationResult) request.getAttribute("result");
+//        if(validationResult.getTokenStatus() == TokenStatus.TOKEN_EXPIRED){
+//            Map<String,Object> response = new HashMap<>();
+//            response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
+//            response.put("message","재갱신이 필요합니다");
+//            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
+//        }
         MemberDto member = memberService.findMember(Long.valueOf(userPrinciple.getId()));
         log.info(member.toString());
         if(member==null){
