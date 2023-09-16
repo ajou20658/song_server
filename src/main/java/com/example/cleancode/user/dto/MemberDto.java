@@ -16,7 +16,7 @@ public class MemberDto {
     private Long id;
     private String email;
     private String nickname;
-    private String profile;
+    private String profileUrl;
     private Role role;
     public Member makeMember(){
         return Member.builder()
@@ -24,7 +24,7 @@ public class MemberDto {
                 .email(email)
                 .id(id)
                 .nickname(nickname)
-                .profile(profile)
+                .profileUrl(profileUrl)
                 .build();
     }
 }

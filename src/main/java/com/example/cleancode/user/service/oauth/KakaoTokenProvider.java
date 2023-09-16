@@ -63,6 +63,7 @@ public class KakaoTokenProvider {
         System.out.println("kakaoInfoResponseDto.toString() = " + kakaoInfoResponse.toString());
         System.out.println("kakaoInfoResponseDto.getEmail() = " + kakaoInfoResponse.getKakaoAccount().email);
         System.out.println("kakaoInfoResponseDto.getKakaoProfile() = " + kakaoInfoResponse.getKakaoAccount().profile.nickname);
+        System.out.println("kakaoInfoResponseDto.getImage() = " + kakaoInfoResponse.getKakaoAccount().profile.thumbnail_image_url);
         return kakaoInfoResponse;
     }
     //유효성 검사

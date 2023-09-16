@@ -21,7 +21,7 @@ public class KakaoInfoResponse {
     @Getter
     public static class profile{
         String nickname;
-        String profile;
+        String thumbnail_image_url;
     }
 
 }

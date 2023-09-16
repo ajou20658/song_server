@@ -18,8 +18,8 @@ public class Member {
     private String email;
     @Column(name = "nickname", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String nickname;
-    @Column(name = "profile")
-    private String profile;
+    @Column(name = "profileUrl")
+    private String profileUrl;
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -28,7 +28,7 @@ public class Member {
                 .id(id)
                 .email(email)
                 .nickname(nickname)
-                .profile(profile)
+                .profileUrl(profileUrl)
                 .role(role)
                 .build();
     }
