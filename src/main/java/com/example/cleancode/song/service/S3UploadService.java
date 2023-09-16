@@ -3,8 +3,11 @@ package com.example.cleancode.song.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.entity.UserPrinciple;
+import com.example.cleancode.user.entity.UserSong;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -19,10 +22,12 @@ import java.io.IOException;
 public class S3UploadService {
     private final AmazonS3 amazonS3;
 
+    @Autowired
+    private UserSongRepository userSongRepository;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String userFile(String folder, MultipartFile multipartFile,String id) throws IOException{
+    public boolean userFile(String folder, MultipartFile multipartFile,String id) throws IOException{
         String originalFilename = multipartFile.getOriginalFilename();
 
         String filename = folder+"/"+id+"_"+originalFilename;
@@ -31,7 +36,12 @@ public class S3UploadService {
         metadata.setContentType(multipartFile.getContentType());
 
         amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
-        return amazonS3.getUrl(bucket,originalFilename).toString();
+        amazonS3.getUrl(bucket,originalFilename).toString();
+        userSongRepository.save(UserSong.builder()
+                .url(filename)
+                .userid(Long.valueOf(id))
+                .build());
+        return true;
     }
 //    public void deleteFile(String fileName) throws IOException{
 //        try{

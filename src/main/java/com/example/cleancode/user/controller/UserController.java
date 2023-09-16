@@ -79,27 +79,13 @@ public class UserController {
     @PostMapping("/vocal_upload")
     public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        String url = s3UploadService.userFile("user",file,userPrinciple.getId());
-        userSongRepository.save(UserSong.builder()
-                        .url(url)
-                        .userid(Long.valueOf(userPrinciple.getId()))
-                .build());
-        return ResponseEntity.ok().build();
-    }
-    @GetMapping("/vocal_stream")
-    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
-        try{
-            Resource resource = s3UploadService.stream(url);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment","audio.wav");
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }catch (Exception e) {
-            return ResponseEntity.notFound().build();
+        if(s3UploadService.userFile("user",file,userPrinciple.getId())){
+            return ResponseEntity.ok().build();
         }
+        return ResponseEntity.badRequest().build();
+
     }
+
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         List<UserSong> userSongList = userSongRepository.findByUseridOrderByInsDateDesc(Long.valueOf(userPrinciple.getId()));

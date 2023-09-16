@@ -4,6 +4,7 @@ import com.example.cleancode.song.dto.ChartDTO;
 import com.example.cleancode.song.entity.Chart;
 import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
+import com.example.cleancode.song.service.S3UploadService;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -11,6 +12,10 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +39,8 @@ public class SongController {
     private MelonCrawlService melonService;
     @Autowired
     private ChartRepository chartRepository;
-
+    @Autowired
+    private S3UploadService s3UploadService;
 
     @GetMapping("/chartjson")
     @ResponseBody
@@ -142,5 +148,20 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
-
+    @GetMapping("/vocal_stream")
+    @ResponseBody
+    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
+        try{
+            log.info("String : {}",url);
+            Resource resource = s3UploadService.stream(url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("audio/wav"));
+            headers.setContentDispositionFormData("inline","audio.wav");
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
