@@ -61,7 +61,7 @@ public class JwtService{
         Claims claims = Jwts.claims().setSubject(memberDto.getId().toString());
         claims.put("roles",memberDto.getRole());
         claims.put("email",memberDto.getEmail());
-        claims.put("profile",memberDto.getProfile());
+        claims.put("profile",memberDto.getProfileUrl());
         claims.put("nickname",memberDto.getNickname());
 
         String token = Jwts.builder()

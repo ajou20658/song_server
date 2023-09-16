@@ -39,7 +39,7 @@ public class AdminController {
                 .role(Role.ROLE_USER)
                 .id(2919293l)
                 .email("kwy1379@naver.com")
-                .profile("kwy1379")
+                .profileUrl("kwy1379")
                 .nickname("kwy1379")
                 .build();
         return jwtService.generate(memberDto);

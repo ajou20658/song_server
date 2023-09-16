@@ -44,7 +44,7 @@ class JwtServiceTest {
     @Test
     void generateToken() {
         MemberDto memberDto = MemberDto.builder()
-                .profile("이것은 프로필")
+                .profileUrl("이것은 프로필")
                 .email("이것은 이메일")
                 .nickname("이것은 닉네임")
                 .id(12345l)
@@ -57,7 +57,7 @@ class JwtServiceTest {
         Claims claims = Jwts.claims().setSubject(memberDto.getId().toString());
         claims.put("roles",memberDto.getRole());
         claims.put("email",memberDto.getEmail());
-        claims.put("profile",memberDto.getProfile());
+        claims.put("profile",memberDto.getProfileUrl());
         claims.put("nickname",memberDto.getNickname());
         String token=null;
         try {
