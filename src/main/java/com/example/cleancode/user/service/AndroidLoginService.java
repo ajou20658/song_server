@@ -41,7 +41,7 @@ public class AndroidLoginService {
                     .id(id)
                     .email(kakaoInfoResponse.getKakaoAccount().getEmail())
                     .nickname(kakaoInfoResponse.getKakaoAccount().getProfile().getNickname())
-                    .profile(kakaoInfoResponse.getKakaoAccount().getProfile().getThumbnail_image_url())
+                    .profileUrl(kakaoInfoResponse.getKakaoAccount().getProfile().getThumbnail_image_url())
                     .role(Role.ROLE_USER)
                     .build();
             log.info(member.toString());
