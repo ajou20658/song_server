@@ -1,4 +1,4 @@
-package com.example.cleancode.user.entity;
+package com.example.cleancode.utils;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,8 +8,8 @@ import java.util.Collection;
 
 @Getter
 public class UserPrinciple extends User {
-    private String Id;
-    public UserPrinciple(String Id,String username, Collection<? extends GrantedAuthority> authorities) {
+    private Long Id;
+    public UserPrinciple(Long Id,String username, Collection<? extends GrantedAuthority> authorities) {
         super(username, "", authorities);
         this.Id=Id;
 

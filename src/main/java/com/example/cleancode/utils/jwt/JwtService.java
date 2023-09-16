@@ -1,31 +1,25 @@
 package com.example.cleancode.utils.jwt;
 
-import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.JwtDto;
-import com.example.cleancode.user.dto.MemberDto;
-import com.example.cleancode.user.entity.Member;
-import com.example.cleancode.user.entity.Role;
-import com.example.cleancode.user.entity.UserPrinciple;
+import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.entity.User;
+import com.example.cleancode.utils.UserPrinciple;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.naming.AuthenticationException;
-import java.rmi.UnexpectedException;
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,8 +28,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class JwtService{
-    @Autowired
-    private MemberRepository memberRepository;
+
+    private final UserRepository memberRepository;
     @Value("${jwt.secret-key}")
     private String secretKey;
     @Value("${jwt.token.expiration-time}")
@@ -44,16 +38,16 @@ public class JwtService{
     private Long refreshMillisecond;
 
     public final String BEARER_PREFIX = "Bearer ";
-    public JwtDto generate(MemberDto memberDto){
+    public JwtDto generate(UserDto memberDto){
         return new JwtDto(generateToken(memberDto),generateRefreshToken(memberDto.getId()));
     }
     public JwtDto refresh(JwtDto jwtDto){
         Long id = getId(jwtDto);
-        MemberDto memberDto = memberRepository.findById(id).get().toMemberDto();
+        UserDto memberDto = memberRepository.findById(id).get().toMemberDto();
         return new JwtDto(generateToken(memberDto),generateRefreshToken(id));
     }
     //유효기간은 기간+현재시각
-    public String generateToken(MemberDto memberDto){
+    public String generateToken(UserDto memberDto){
         Date now = new Date();
         Date expirationDate= new Date(now.getTime()+tokenMillisecond*1000l);
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -189,19 +183,19 @@ public class JwtService{
     public Authentication authenticate(JwtDto jwtDto) throws AuthenticationException{
         Long id = getId(jwtDto);
         log.info("Member id = {}",id);
-        Optional<Member> tmp = memberRepository.findByid(id);
+        Optional<User> tmp = memberRepository.findById(id);
         if(tmp.isEmpty()){
             log.info("It empty");
             return null;
         }
-        MemberDto memberDto = tmp.get().toMemberDto();
+        UserDto memberDto = tmp.get().toMemberDto();
 
         Claims claims = getClaim(jwtDto);
         List<? extends GrantedAuthority> authorities = Arrays.stream(
                 claims.get("roles").toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        UserPrinciple principle = new UserPrinciple(String.valueOf(id), memberDto.getNickname(),authorities);
+        UserPrinciple principle = new UserPrinciple(id, memberDto.getNickname(),authorities);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =  new UsernamePasswordAuthenticationToken(principle,jwtDto.getAccessToken(),authorities);
 //        return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         return usernamePasswordAuthenticationToken;

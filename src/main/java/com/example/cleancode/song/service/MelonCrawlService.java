@@ -1,9 +1,9 @@
 package com.example.cleancode.song.service;
 
 import com.example.cleancode.song.dto.ChartDTO;
-import com.example.cleancode.song.dto.SearchDto;
-import com.example.cleancode.song.entity.Chart;
+import com.example.cleancode.song.entity.Chart100;
 import com.example.cleancode.song.repository.ChartRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.json.JSONObject;
@@ -13,7 +13,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -26,9 +25,9 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MelonCrawlService {
-    @Autowired
-    private ChartRepository chartRepository;
+    private final ChartRepository chartRepository;
 
     /**
      * do-crawl에서 사용
@@ -59,10 +58,10 @@ public class MelonCrawlService {
             if ((title.length() > 0) && (artist.length() > 0)) {
 
                 ChartDTO chartDTO = ChartDTO.builder()
-                        .albumId(albumId)
+                        .albumId(Long.valueOf(albumId))
                         .artist(artist)
                         .title(title)
-                        .songId(songId)
+                        .id(Long.valueOf(songId))
                         .imgUrl(imgUrl)
                         .build();
                 //한 번에 여러 개의 데이터를 MongoDB에 저장할 List 형태의 데이터 저장하기
@@ -76,14 +75,14 @@ public class MelonCrawlService {
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-
+            String likeId = songInfo.select("div>div>a.fc_gray").attr("href").toString();
             if ((title.length() > 0) && (artist.length() > 0)) {
 
                 ChartDTO chartDTO = ChartDTO.builder()
-                        .albumId(albumId)
+                        .albumId(Long.valueOf(albumId))
                         .artist(artist)
                         .title(title)
-                        .songId(songId)
+                        .id(Long.valueOf(songId))
                         .imgUrl(imgUrl)
                         .build();
                 //한 번에 여러 개의 데이터를 MongoDB에 저장할 List 형태의 데이터 저장하기
@@ -94,7 +93,7 @@ public class MelonCrawlService {
         //res = iMelonMapper.insertSong(pList, cloNm);
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
         for(ChartDTO chart: pList){
-            String getGenreParam = chart.getSongId();
+            String getGenreParam = String.valueOf(chart.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
             String genre = genreDoc.select("div.meta dd").eq(2).text();
             List<String> genreArray = new ArrayList<>();
@@ -214,9 +213,9 @@ public class MelonCrawlService {
                         list.add(ChartDTO.builder()
                                 .title(title)
                                 .artist(singer)
-                                .albumId(parse[5])
-                                .songId(parse[4])
-                                .likeId(like)
+                                .albumId(Long.valueOf(parse[5]))
+                                .id(Long.valueOf(parse[4]))
+                                .likeId(Long.valueOf(like))
                                 .build());
                     }
                 }catch (Exception ex){
@@ -228,7 +227,7 @@ public class MelonCrawlService {
         }
         return list;
     }
-    public List<Chart> getAllChart() throws Exception{
+    public List<Chart100> getAllChart() throws Exception{
         return chartRepository.findAll();
     }
 
@@ -236,9 +235,10 @@ public class MelonCrawlService {
         return chartRepository.count();
     }
 
-    public JSONObject getLikeNum(List<String> likeList)throws Exception{
+    public JSONObject getLikeNum(List<Long> likeList)throws Exception{
         String url = "https://www.melon.com/commonlike/getSongLike.json?contsIds=";
         String param = likeList.stream()
+                .map(a -> a.toString())
                 .collect(Collectors.joining(","));
         String request = url+param;
         URL obj = new URL(request);

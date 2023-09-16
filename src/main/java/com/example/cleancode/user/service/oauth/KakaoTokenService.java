@@ -6,15 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class KakaoTokenProvider {
+public class KakaoTokenService {
     public static final String GRANT_TYPE = "authorization_code";
     @Value("${oauth.kakao.url.auth}")
     private String authUrl;

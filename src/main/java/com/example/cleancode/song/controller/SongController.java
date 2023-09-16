@@ -1,11 +1,12 @@
 package com.example.cleancode.song.controller;
 
 import com.example.cleancode.song.dto.ChartDTO;
-import com.example.cleancode.song.entity.Chart;
+import com.example.cleancode.song.entity.Chart100;
 import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.song.service.S3UploadService;
 import jakarta.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,18 +35,16 @@ import java.util.stream.Collectors;
 @Controller
 @Slf4j
 @RequestMapping("/song")
+@RequiredArgsConstructor
 public class SongController {
-    @Autowired
-    private MelonCrawlService melonService;
-    @Autowired
-    private ChartRepository chartRepository;
-    @Autowired
-    private S3UploadService s3UploadService;
+    private final MelonCrawlService melonService;
+    private final ChartRepository chartRepository;
+    private final S3UploadService s3UploadService;
 
     @GetMapping("/chartjson")
     @ResponseBody
-    public List<Chart> giveJson(){
-        List<Chart> list = chartRepository.findAll();
+    public List<Chart100> giveJson(){
+        List<Chart100> list = chartRepository.findAll();
         return list;
     }
 
@@ -90,7 +89,7 @@ public class SongController {
                     likeIDSumCntMap = new HashMap<>();
                     List<ChartDTO> songlist = melonService.search_artist(artist,"1");
 
-                    List<String> likeString=songlist.stream()
+                    List<Long> likeString=songlist.stream()
                             .map(ChartDTO::getLikeId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
@@ -115,12 +114,12 @@ public class SongController {
                             continue;
                         }
                         chartDTO.setTitle(chartDTO.getTitle().replace(","," "));
-                        String likeId = chartDTO.getLikeId();
+                        Long likeId = chartDTO.getLikeId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             List<String> genreList = new ArrayList<>();
-                            String getGenreParam = chartDTO.getSongId();
+                            Long getGenreParam = chartDTO.getId();
 
                             try {
                                 Document genreDoc = Jsoup.connect(genreUrl + getGenreParam).get();
@@ -148,20 +147,5 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
-    @GetMapping("/vocal_stream")
-    @ResponseBody
-    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
-        try{
-            log.info("String : {}",url);
-            Resource resource = s3UploadService.stream(url);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType("audio/wav"));
-            headers.setContentDispositionFormData("inline","audio.wav");
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+
 }

@@ -5,6 +5,7 @@ import com.example.cleancode.user.service.LoginService;
 import com.example.cleancode.user.service.oauth.KakaoLoginParam;
 import com.example.cleancode.utils.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,11 +17,10 @@ import java.util.*;
 @RestController
 @Slf4j
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    private LoginService loginService;
-    @Autowired
-    private JwtService jwtService;
+    private final LoginService loginService;
+    private final JwtService jwtService;
 
     @PostMapping("/login")
     @ResponseBody

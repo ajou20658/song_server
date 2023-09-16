@@ -1,17 +1,17 @@
 package com.example.cleancode.user.controller;
 
-import com.example.cleancode.song.entity.Chart;
+import com.example.cleancode.song.entity.Chart100;
 import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
-import com.example.cleancode.user.JpaRepository.MemberRepository;
+import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.JwtDto;
-import com.example.cleancode.user.dto.MemberDto;
-import com.example.cleancode.user.entity.Member;
-import com.example.cleancode.user.entity.Role;
+import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.entity.User;
+import com.example.cleancode.utils.Role;
 import com.example.cleancode.user.service.LoginService;
 import com.example.cleancode.utils.jwt.JwtService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,21 +21,17 @@ import java.util.List;
 @Controller
 @Slf4j
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminController {
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private ChartRepository chartRepository;
-    @Autowired
-    private MelonCrawlService melonService;
-    @Autowired
-    private LoginService loginService;
-    @Autowired
-    private JwtService jwtService;
+    private final UserRepository memberRepository;
+    private final ChartRepository chartRepository;
+    private final MelonCrawlService melonService;
+    private final LoginService loginService;
+    private final JwtService jwtService;
     @GetMapping("/generate")
     @ResponseBody
     public JwtDto getJwt(){
-        MemberDto memberDto = MemberDto.builder()
+        UserDto memberDto = UserDto.builder()
                 .role(Role.ROLE_USER)
                 .id(2919293l)
                 .email("kwy1379@naver.com")
@@ -46,7 +42,7 @@ public class AdminController {
     }
     @GetMapping("/members")
     public String getMemberList(Model model){
-        List<Member> members = memberRepository.findAll();
+        List<User> members = memberRepository.findAll();
 
         model.addAttribute("members",members);
         return "member-list";
@@ -77,7 +73,7 @@ public class AdminController {
     }
     @GetMapping("/showall")
     public String getList(Model model){
-        List<Chart> charts = chartRepository.findAll();
+        List<Chart100> charts = chartRepository.findAll();
         model.addAttribute("charts",charts);
         return "chart-list";
     }

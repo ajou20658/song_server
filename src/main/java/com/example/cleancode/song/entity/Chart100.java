@@ -1,10 +1,7 @@
 package com.example.cleancode.song.entity;
 
 import com.example.cleancode.song.dto.ChartDTO;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
@@ -15,17 +12,21 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Chart {
+public class Chart100 {
     @Id
-    public String songId;
+    private Long id;
     @Column(name = "title", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    public String title;
-    public String imgUrl;
+    private String title;
+    private String imgUrl;
     @Column(name = "artist", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    public String artist;
-    public String albumId;
-    public String likeId;
-    public boolean available = false;
+    private String artist;
+    private Long albumId;
+    private Long likeId;
+    @ElementCollection
+    private List<Float> spectr;
+    @Column(name = "awsUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String awsUrl;
+    private boolean available;
 
     @Column(name = "genre", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
@@ -33,13 +34,15 @@ public class Chart {
 
     public ChartDTO toChartDto(){
         return ChartDTO.builder()
-                .songId(songId)
+                .id(id)
                 .title(title)
                 .imgUrl(imgUrl)
                 .artist(artist)
                 .albumId(albumId)
                 .genre(genre)
+                .spectr(spectr)
                 .available(available)
+                .awsUrl(awsUrl)
                 .build();
     }
 }
