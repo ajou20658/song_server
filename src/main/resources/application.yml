@@ -34,7 +34,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=UTF-8
-    username: root #root - local admin- aws
+    username: admin #root - local admin- aws
     password: password
   jpa:
     open-in-view: true
