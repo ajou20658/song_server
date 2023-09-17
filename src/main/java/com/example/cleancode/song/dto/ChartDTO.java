@@ -13,7 +13,6 @@ public class ChartDTO {
     private String title;
     private String imgUrl;
     private String artist;
-    private Long albumId;
     private Long likeId;
     private List<String> genre;
     private List<Float> spectr;
@@ -25,7 +24,6 @@ public class ChartDTO {
                 .title(title)
                 .imgUrl(imgUrl)
                 .artist(artist)
-                .albumId(albumId)
                 .genre(genre)
                 .spectr(spectr)
                 .available(available)
