@@ -83,6 +83,11 @@ public class MelonCrawlService {
                 pList.add(chartDTO);
             }
         }
+        try{
+            Thread.sleep(3000);
+        }catch (Exception ex){
+
+        }
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
             String songId = songInfo.attr("data-song-no");
