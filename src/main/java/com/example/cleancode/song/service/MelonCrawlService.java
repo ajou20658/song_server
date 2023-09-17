@@ -44,7 +44,7 @@ public class MelonCrawlService {
     public Long collectMelonSong() throws Exception {
 //        chartRepository.deleteAll();
         Long res = 0l;
-        Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
+        Pattern pattern = Pattern.compile("/\\'(\\d+)\\'/");
         List<ChartDTO> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
 

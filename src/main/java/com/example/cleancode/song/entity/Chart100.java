@@ -23,11 +23,11 @@ public class Chart100 {
     private Long likeId;
     @ElementCollection
     private List<Float> spectr;
-    @Column(name = "awsUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "awsUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String awsUrl;
     private boolean available;
 
-    @Column(name = "genre", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "genre", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
     public List<String> genre;
 
