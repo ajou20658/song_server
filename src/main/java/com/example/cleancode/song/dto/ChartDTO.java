@@ -24,6 +24,7 @@ public class ChartDTO {
                 .title(title)
                 .imgUrl(imgUrl)
                 .artist(artist)
+                .likeId(likeId)
                 .genre(genre)
                 .spectr(spectr)
                 .available(available)

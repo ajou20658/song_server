@@ -39,6 +39,7 @@ public class Chart100 {
                 .imgUrl(imgUrl)
                 .artist(artist)
                 .genre(genre)
+                .likeId(likeId)
                 .spectr(spectr)
                 .available(available)
                 .awsUrl(awsUrl)
