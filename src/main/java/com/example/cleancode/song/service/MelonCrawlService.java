@@ -49,7 +49,7 @@ public class MelonCrawlService {
         String url = "https://www.melon.com/chart/index.htm";
 
         Document doc = Jsoup.connect(url).get();
-
+        String like = null;
         // <div class="service_list_song"> 이 태그 내에 있는 HTML 소스만 element에 저장된다.
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
@@ -63,10 +63,12 @@ public class MelonCrawlService {
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
             String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href").toString();
             Matcher matcher = pattern.matcher(likeId);
-            String like = null;
+
             if(matcher.find()){
                 like = matcher.group();
                 log.info(like);
+            }else {
+                like = "0";
             }
             if ((title.length() > 0) && (artist.length() > 0)) {
 
@@ -93,10 +95,11 @@ public class MelonCrawlService {
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
             String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href").toString();
             Matcher matcher = pattern.matcher(likeId);
-            String like = null;
             if(matcher.find()){
                 like = matcher.group();
                 log.info(like);
+            }else {
+                like = "0";
             }
             if ((title.length() > 0) && (artist.length() > 0)) {
 
@@ -232,6 +235,8 @@ public class MelonCrawlService {
                         if(matcher.find()){
                             like = matcher.group();
                             log.info(like);
+                        }else {
+                            like = "0";
                         }
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
