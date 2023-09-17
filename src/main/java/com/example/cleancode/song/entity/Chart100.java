@@ -20,6 +20,7 @@ public class Chart100 {
     private String imgUrl;
     @Column(name = "artist", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String artist;
+    @Column(name = "likeId", nullable = false)
     private Long likeId;
     @ElementCollection
     private List<Float> spectr;
