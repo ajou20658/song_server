@@ -80,7 +80,7 @@ public class UserService {
         return true;
     }
     public List<UserSong> userFileList(Long id){
-        return userSongRepository.findByUserId(id);
+        return userSongRepository.findByMemberId(id);
     }
 
     @Transactional(rollbackFor = IllegalArgumentException.class)

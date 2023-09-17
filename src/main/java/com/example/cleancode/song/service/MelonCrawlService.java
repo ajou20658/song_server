@@ -38,7 +38,7 @@ public class MelonCrawlService {
 //    @Scheduled(fixedRate = 21600000)
     //여기서는 장르, 좋아요수 제외 크롤링
     public Long collectMelonSong() throws Exception {
-        chartRepository.deleteAll();
+//        chartRepository.deleteAll();
         Long res = 0l;
         List<ChartDTO> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
@@ -50,6 +50,9 @@ public class MelonCrawlService {
         for (Element songInfo : element.select("#lst50")) {
             // 크롤링을 통해 데이터 저장하기
             String songId = songInfo.attr("data-song-no");
+            if(chartRepository.findById(Long.valueOf(songId)).isPresent()){
+                continue;
+            }
             String albumId = songInfo.select("div.ellipsis.rank03 a").attr("href").substring(37,45);
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
@@ -71,6 +74,9 @@ public class MelonCrawlService {
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
             String songId = songInfo.attr("data-song-no");
+            if(chartRepository.findById(Long.valueOf(songId)).isPresent()){
+                continue;
+            }
             String albumId = songInfo.select("div.ellipsis.rank03 a").attr("href").substring(37,45);
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
@@ -91,6 +97,7 @@ public class MelonCrawlService {
         }
         //MongoDB에 데이터저장하기
         //res = iMelonMapper.insertSong(pList, cloNm);
+
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
         for(ChartDTO chart: pList){
             String getGenreParam = String.valueOf(chart.getId());

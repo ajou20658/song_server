@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface UserSongRepository extends JpaRepository<UserSong,Long> {
-    List<UserSong> findByUserId(Long userId);
+    List<UserSong> findByMemberId(Long memberId);
 }
