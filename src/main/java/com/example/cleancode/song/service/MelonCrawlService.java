@@ -44,7 +44,7 @@ public class MelonCrawlService {
     public Long collectMelonSong() throws Exception {
 //        chartRepository.deleteAll();
         Long res = 0l;
-        Pattern pattern = Pattern.compile("/\\'(\\d+)\\'/");
+        Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
         List<ChartDTO> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
 
@@ -66,9 +66,10 @@ public class MelonCrawlService {
 
             if(matcher.find()){
                 like = matcher.group();
-                log.info(like);
+//                log.info(like);
             }else {
                 like = "0";
+//                log.info(like);
             }
             if ((title.length() > 0) && (artist.length() > 0)) {
 
@@ -102,9 +103,10 @@ public class MelonCrawlService {
             Matcher matcher = pattern.matcher(likeId);
             if(matcher.find()){
                 like = matcher.group();
-                log.info(like);
+//                log.info(like);
             }else {
                 like = "0";
+//                log.info(like);
             }
             if ((title.length() > 0) && (artist.length() > 0)) {
 
