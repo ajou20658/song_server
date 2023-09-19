@@ -54,7 +54,7 @@ public class UserService {
         }
     }
     @Transactional
-    public boolean userFile(String folder, MultipartFile multipartFile,Long id){
+    public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
         String originalFilename = multipartFile.getOriginalFilename();
         User member = memberRepository.findById(id).get();
         if(member==null){
@@ -83,7 +83,7 @@ public class UserService {
         return userSongRepository.findByMemberId(id);
     }
 
-    @Transactional(rollbackFor = IllegalArgumentException.class)
+    @Transactional
     public boolean changeSelectList(List<Long> song,Long id){
         UserDto memberDto = memberRepository.findById(id).get().toMemberDto();
         if(memberDto==null) return false;

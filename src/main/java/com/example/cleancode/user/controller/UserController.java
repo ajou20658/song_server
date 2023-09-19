@@ -3,6 +3,7 @@ package com.example.cleancode.user.controller;
 import com.example.cleancode.song.service.S3UploadService;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.entity.User;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.user.service.UserService;
@@ -32,8 +33,6 @@ public class UserController {
     private final S3UploadService s3UploadService;
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 반환
-     * @param userPrinciple
-     * @return
      */
     @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
@@ -50,18 +49,7 @@ public class UserController {
         log.info(result.getHeaders().toString());
         return result;
     }
-//    /**
-//     * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 검색후 유저 선호 장르 업데이트
-//     * 이후 상태코드도 같이 보내주게 변경 필요
-//     * @param artist
-//     * @param genre
-//     * @param title
-//     * @param userPrinciple
-//     */
-//    @PostMapping("/update_prefer")
-//    public boolean preferUpdate(@RequestBody List<String> artist, @RequestBody List<String> genre, @RequestBody List<String> title, @AuthenticationPrincipal UserPrinciple userPrinciple){
-//
-//    }
+
     @PostMapping("/user_list_update")
     public ResponseEntity userUpdate(List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
         if(userService.changeSelectList(songList, userPrinciple.getId())){
@@ -72,7 +60,7 @@ public class UserController {
     @PostMapping("/vocal_upload")
     public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        if(userService.userFile("user",file,userPrinciple.getId())){
+        if(userService.userFileUpload("user",file,userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
