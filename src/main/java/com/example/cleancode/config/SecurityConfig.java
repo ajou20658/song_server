@@ -1,6 +1,7 @@
 package com.example.cleancode.config;
 
 import com.example.cleancode.filter.JwtAuthorizationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,14 +10,20 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     @Value("${jwt.secret-key}")
     private String secretKey;
-    @Autowired
-    private JwtAuthorizationFilter jwtAuthorizationFilter;
+
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -32,19 +39,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    private AuthenticationSuccessHandler successHandler() {
-//        return(((request, response, authentication) -> {
-//            DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
-//            String id = defaultOAuth2User.getAttributes().get("id").toString();
-//            String body= """
-//                    {"id":"%s"}
-//                    """.formatted(id);
-//            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-//
-//            PrintWriter writer = response.getWriter();
-//            writer.println(body);
-//            writer.flush();
-//        }));
-//    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("*"));
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
