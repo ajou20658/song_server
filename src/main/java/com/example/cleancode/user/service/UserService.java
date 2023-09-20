@@ -32,8 +32,6 @@ public class UserService {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${file.dir}")
-    private String fileDir;
     public UserDto findMember(Long id){
         log.info(id.toString());
         Optional<User> mem = memberRepository.findById(id);

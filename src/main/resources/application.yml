@@ -18,7 +18,7 @@ oauth:
 cloud:
   aws:
     s3:
-      bucket: songssam
+      bucket: songssam.site
     credentials:
       access-key: AKIATIVNZLQ23AQR4MPK
       secret-key: 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
@@ -39,7 +39,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
@@ -55,6 +55,3 @@ spring:
       charset: UTF-8
       force: true
       enabled: true
-
-file:
-  dir: C:\Users\kwy\Documents\2023하계\cleancode\src\main\resources\
