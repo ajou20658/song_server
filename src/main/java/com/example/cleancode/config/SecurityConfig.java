@@ -23,7 +23,6 @@ import java.util.List;
 public class SecurityConfig {
     @Value("${jwt.secret-key}")
     private String secretKey;
-    private final CorsConfig config;
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
