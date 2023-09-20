@@ -36,29 +36,34 @@ public class UserController {
      */
     @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        UserDto member = userService.findMember(Long.valueOf(userPrinciple.getId()));
+        UserDto member = userService.findMember(userPrinciple.getId());
         log.info("/member/info 유저 이름 : {}",member.getNickname());
-        if(member==null){
-            Map<String,Object> response = new HashMap<>();
-            response.put("response",member);
-            return new ResponseEntity<>(response,HttpStatus.FORBIDDEN);
-        }
         Map<String,Object> response = new HashMap<>();
         response.put("response",member);
-        ResponseEntity result = new ResponseEntity<>(response,HttpStatus.OK);
+        ResponseEntity<Object> result = new ResponseEntity<>(response,HttpStatus.OK);
         log.info(result.getHeaders().toString());
         return result;
     }
 
-    @PostMapping("/user_list_update")
-    public ResponseEntity userUpdate(List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
+    @PostMapping("/user_list")
+    public ResponseEntity<Object> userUpdate(List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
         if(userService.changeSelectList(songList, userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/vocal_upload")
-    public ResponseEntity saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    @GetMapping("/user_list")
+    public ResponseEntity<Object> user(@AuthenticationPrincipal UserPrinciple userPrinciple){
+        Optional<User> userOptional = userRepository.findById(userPrinciple.getId());
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        Map<String,Object> response = new HashMap<>();
+        response.put("response",userOptional.get().getSelected());
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+    @PostMapping("/upload")
+    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
         if(userService.userFileUpload("user",file,userPrinciple.getId())){
             return ResponseEntity.ok().build();
@@ -72,10 +77,9 @@ public class UserController {
         List<UserSong> list = userRepository.findUserSongById(userPrinciple.getId());
         Map<String,Object> response = new HashMap<>();
         response.put("response",list);
-        ResponseEntity result = new ResponseEntity<>(response,HttpStatus.OK);
-        return result;
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
-    @GetMapping("/vocal_download")
+    @GetMapping("/download")
     @ResponseBody
     public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
         try{
