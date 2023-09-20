@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping("/user_list")
-    public ResponseEntity<Object> userUpdate(List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
+    public ResponseEntity<Object> userUpdate(@RequestBody List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
         if(userService.changeSelectList(songList, userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
