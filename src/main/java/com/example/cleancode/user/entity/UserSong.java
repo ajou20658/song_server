@@ -24,7 +24,7 @@ public class UserSong {
     private List<Float> spectr;
     @CreationTimestamp
     private LocalDateTime createdAt;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private User member;
     public UserSongDto UserSong(){

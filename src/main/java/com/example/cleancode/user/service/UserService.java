@@ -6,6 +6,7 @@ import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.Role;
@@ -77,10 +78,6 @@ public class UserService {
         }
         return true;
     }
-    public List<UserSong> userFileList(Long id){
-        return userSongRepository.findByMemberId(id);
-    }
-
     @Transactional
     public boolean changeSelectList(List<Long> song,Long id){
         UserDto memberDto = memberRepository.findById(id).get().toMemberDto();
@@ -89,4 +86,17 @@ public class UserService {
         memberRepository.save(memberDto.makeMember());
         return true;
     }
+    public List<UserSong> readUserSongList(Long id){
+        List<UserSong> list = userSongRepository.findByMemberId(id);
+        List<UserSong> result = new ArrayList<>();
+        UserSongDto userSongDto = new UserSongDto();
+        for(UserSong song1: list){
+            userSongDto.setAwsUrl(song1.getAwsUrl());
+            userSongDto.setSpectr(song1.getSpectr());
+            userSongDto.setCreatedAt(song1.getCreatedAt());
+            result.add(userSongDto.toUserSong());
+        }
+        return  result;
+    }
+
 }

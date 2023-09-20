@@ -2,7 +2,9 @@ package com.example.cleancode.user.controller;
 
 import com.example.cleancode.song.service.S3UploadService;
 import com.example.cleancode.user.JpaRepository.UserRepository;
+import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.entity.UserSong;
@@ -29,6 +31,7 @@ import java.util.*;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final UserSongRepository userSongRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
     /**
@@ -65,6 +68,7 @@ public class UserController {
     @PostMapping("/upload")
     public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
+        log.info("file : {}",file);
         if(userService.userFileUpload("user",file,userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
@@ -74,9 +78,8 @@ public class UserController {
 
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        List<UserSong> list = userRepository.findUserSongById(userPrinciple.getId());
         Map<String,Object> response = new HashMap<>();
-        response.put("response",list);
+        response.put("response",userService.readUserSongList(userPrinciple.getId()));
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
     @GetMapping("/download")

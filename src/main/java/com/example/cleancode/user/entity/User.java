@@ -23,6 +23,7 @@ public class User {
     private String profileUrl;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @ElementCollection
     private List<Long> selected;
 
     public UserDto toMemberDto(){

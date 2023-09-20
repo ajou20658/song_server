@@ -17,7 +17,7 @@ public class UserSongDto {
     private LocalDateTime createdAt;
 
 
-    public UserSong UserSongDto(){
+    public UserSong toUserSong(){
         return UserSong.builder()
                 .id(id)
                 .awsUrl(awsUrl)
