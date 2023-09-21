@@ -2,12 +2,9 @@ package com.example.cleancode.user.controller;
 
 import com.example.cleancode.song.service.S3UploadService;
 import com.example.cleancode.user.JpaRepository.UserRepository;
-import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
-import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.utils.UserPrinciple;
-import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
