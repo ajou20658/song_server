@@ -12,4 +12,5 @@ public interface ChartRepository extends JpaRepository<Chart100,Long> {
     Optional<Chart100> findById(Long id);
     Page<Chart100> findByArtistOrderByIdDesc(String artist, Pageable pageable);
     Page<Chart100> findByArtistContaining(String artist,Pageable pageable);
+    Optional<Chart100> findByArtistAndTitle(String artist,String title);
 }

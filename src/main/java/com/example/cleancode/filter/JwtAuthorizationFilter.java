@@ -38,18 +38,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
         log.info("jwtAccessToken : {}",token);
-//        String refresh = request.getParameter("refresh");
         JwtDto jwtDto = new JwtDto(token,"");
         Authentication auth;
-//        if(StringUtils.hasText(refresh)){
-//            jwtDto.setRefreshToken(refresh);
-//        }
         if(StringUtils.hasText(token)){
             log.info(jwtDto.getAccessToken());
             TokenStatus status = jwtService.validateToken(jwtDto);
             if(status==TokenStatus.TOKEN_VALID){
                 try {
-                    auth = token != null ? jwtService.authenticate(jwtDto) : null;
+                    auth = jwtService.authenticate(jwtDto);
                 } catch (AuthenticationException e) {
                     log.info("auth 발급 실패");
                     throw new RuntimeException(e);

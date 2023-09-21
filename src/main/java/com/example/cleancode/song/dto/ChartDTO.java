@@ -16,8 +16,8 @@ public class ChartDTO {
     private Long likeId;
     private List<String> genre;
     private List<Float> spectr;
-    private boolean available;
-    private String awsUrl;
+    private String vocalUrl;
+    private String instUrl;
     public Chart100 toChartEntity(){
         return Chart100.builder()
                 .id(id)
@@ -27,8 +27,8 @@ public class ChartDTO {
                 .likeId(likeId)
                 .genre(genre)
                 .spectr(spectr)
-                .available(available)
-                .awsUrl(awsUrl)
+                .vocalUrl(vocalUrl)
+                .instUrl(instUrl)
                 .build();
     }
 }

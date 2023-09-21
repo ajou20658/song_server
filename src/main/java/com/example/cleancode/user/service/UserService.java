@@ -1,8 +1,8 @@
 package com.example.cleancode.user.service;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cleancode.song.repository.ChartRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
@@ -10,7 +10,6 @@ import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.Role;
-import com.example.cleancode.utils.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,19 +24,16 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    private final JwtService jwtService;
     private final UserRepository memberRepository;
     private final UserSongRepository userSongRepository;
-    private final ChartRepository chartRepository;
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     public UserDto findMember(Long id){
         log.info(id.toString());
         Optional<User> mem = memberRepository.findById(id);
-        User member = mem.get();
         if(mem.isEmpty()) return null;
+        User member = mem.get();
         return member.toMemberDto();
     }
 
@@ -55,8 +51,8 @@ public class UserService {
     @Transactional
     public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
         String originalFilename = multipartFile.getOriginalFilename();
-        User member = memberRepository.findById(id).get();
-        if(member==null){
+        Optional<User> userOptional = memberRepository.findById(id);
+        if(userOptional.isEmpty()){
             return false;
         }
 
@@ -66,28 +62,28 @@ public class UserService {
         metadata.setContentType(multipartFile.getContentType());
         UserSong userSong = UserSong.builder()
                 .awsUrl(amazonS3.getUrl(bucket,filename).toString())
-                .member(member)
+                .user(userOptional.get())
                 .build();
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
             userSongRepository.save(userSong);
-        }catch (IOException ex){
-            throw new RuntimeException();
-        }catch (com.amazonaws.SdkClientException ex){
+        }catch (IOException | SdkClientException ex){
             throw new RuntimeException();
         }
         return true;
     }
     @Transactional
     public boolean changeSelectList(List<Long> song,Long id){
-        UserDto memberDto = memberRepository.findById(id).get().toMemberDto();
-        if(memberDto==null) return false;
-        memberDto.setSelected(song);
-        memberRepository.save(memberDto.makeMember());
+
+        Optional<User> userOptional = memberRepository.findById(id);
+        if(userOptional.isEmpty())return false;
+        UserDto userDto = userOptional.get().toMemberDto();
+        userDto.setSelected(song);
+        memberRepository.save(userDto.makeMember());
         return true;
     }
     public List<UserSong> readUserSongList(Long id){
-        List<UserSong> list = userSongRepository.findByMemberId(id);
+        List<UserSong> list = userSongRepository.findByUserId(id);
         List<UserSong> result = new ArrayList<>();
         UserSongDto userSongDto = new UserSongDto();
         for(UserSong song1: list){

@@ -12,10 +12,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,17 +31,8 @@ import java.util.stream.Collectors;
 public class MelonCrawlService {
     private final ChartRepository chartRepository;
 
-    /**
-     * do-crawl에서 사용
-     * 실행시 이전에 존재하는 데이터는 삭제
-     * @return mongodb에 저장됨
-     * @throws Exception
-     */
     @Scheduled(fixedRate = 21600000)
-    //여기서는 장르, 좋아요수 제외 크롤링
-    public Long collectMelonSong() throws Exception {
-//        chartRepository.deleteAll();
-        Long res = 0l;
+    public void collectMelonSong() throws Exception {
         Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
         List<ChartDTO> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
@@ -61,7 +50,7 @@ public class MelonCrawlService {
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href").toString();
+            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");
             Matcher matcher = pattern.matcher(likeId);
 
             if(matcher.find()){
@@ -71,7 +60,7 @@ public class MelonCrawlService {
                 like = "0";
 //                log.info(like);
             }
-            if ((title.length() > 0) && (artist.length() > 0)) {
+            if ((!title.isEmpty()) && (!artist.isEmpty())) {
 
                 ChartDTO chartDTO = ChartDTO.builder()
                         .artist(artist)
@@ -80,15 +69,12 @@ public class MelonCrawlService {
                         .id(Long.valueOf(songId))
                         .imgUrl(imgUrl)
                         .build();
-                //한 번에 여러 개의 데이터를 MongoDB에 저장할 List 형태의 데이터 저장하기
                 pList.add(chartDTO);
             }
         }
-        try{
-            Thread.sleep(3000);
-        }catch (Exception ex){
 
-        }
+        Thread.sleep(3000);
+
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
             String songId = songInfo.attr("data-song-no");
@@ -99,7 +85,7 @@ public class MelonCrawlService {
             String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
             String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
             String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href").toString();
+            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");
             Matcher matcher = pattern.matcher(likeId);
             if(matcher.find()){
                 like = matcher.group();
@@ -108,7 +94,7 @@ public class MelonCrawlService {
                 like = "0";
 //                log.info(like);
             }
-            if ((title.length() > 0) && (artist.length() > 0)) {
+            if ((!title.isEmpty()) && (!artist.isEmpty())) {
 
                 ChartDTO chartDTO = ChartDTO.builder()
                         .likeId(Long.valueOf(like))
@@ -137,16 +123,9 @@ public class MelonCrawlService {
             }
             chart.setGenre(genreArray);
             chartRepository.save(chart.toChartEntity());
-            res+=1;
         }
-        return res;
     }
-    /**
-     * 100~800번 장르별 top100가수 이름 크롤링
-     * @param
-     * @return
-     */
-    public boolean artistCrawl() throws Exception{
+    public void artistCrawl() throws Exception{
         Set<String> artistList = new HashSet<>();
         List<String> mode = new ArrayList<String>(Arrays.asList("100","200","300","400","500","600","700","800"));
         for(String i :mode){
@@ -157,9 +136,10 @@ public class MelonCrawlService {
                 Thread.sleep(10000);
                 doc = connect.get();
             }catch (InterruptedException ex){
-                ex.printStackTrace();
+                ex.printStackTrace((PrintStream) log);
             }
 
+            assert doc != null;
             Elements elements = doc.select("div.service_list_song");
             System.out.println("elements = " + elements);
             for(Element element : elements.select("#lst50")){
@@ -179,17 +159,9 @@ public class MelonCrawlService {
             log.info(artistList.toString());
         }
         writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
-        return true;
     }
-    /**
-     * search에서 사용
-     * @param artist 검색할 내용
-     * @param mode 검색 방법
-     * @return json 형태로 반환
-     * @throws Exception
-     */
     public List<ChartDTO> search_artist(String artist, String mode) throws Exception{
-        Long res =0l;
+        Long res =0L;
         List<ChartDTO> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
 //        String all = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=all&searchGnbYn=Y&kkoSpl=N&kkoDpType=#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=all&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=51";
@@ -203,7 +175,7 @@ public class MelonCrawlService {
                 Page<Chart100> result = chartRepository.findByArtistContaining(artist, PageRequest.of(0,100));
                 if(!result.isEmpty()){
                     return result.getContent().stream()
-                            .map(a -> a.toChartDto())
+                            .map(Chart100::toChartDto)
                             .collect(Collectors.toList());
                 }
                 break;
@@ -236,7 +208,7 @@ public class MelonCrawlService {
                         Element td4 = tds.get(4);
                         Element td5 = tds.get(5);
 
-                        String likeId = td2.select("div>div>a.fc_gray").attr("href").toString();
+                        String likeId = td2.select("div>div>a.fc_gray").attr("href");
                         Matcher matcher = pattern.matcher(likeId);
                         String like = null;
                         if(matcher.find()){
@@ -259,11 +231,11 @@ public class MelonCrawlService {
                         list.add(chartDto);
                     }
                 }catch (Exception ex){
-                    ex.printStackTrace();
+                    ex.printStackTrace((PrintStream) log);
                 }
             }
         }catch (Exception e){
-            e.printStackTrace();
+            e.printStackTrace((PrintStream) log);
         }
         return list;
     }
@@ -278,7 +250,7 @@ public class MelonCrawlService {
     public JSONObject getLikeNum(List<Long> likeList)throws Exception{
         String url = "https://www.melon.com/commonlike/getSongLike.json?contsIds=";
         String param = likeList.stream()
-                .map(a -> a.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(","));
         String request = url+param;
         URL obj = new URL(request);
@@ -295,8 +267,7 @@ public class MelonCrawlService {
             in.close();
 
             String jsonResponse = response.toString();
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            return jsonObject;
+            return new JSONObject(jsonResponse);
         }else{
             throw new Exception("HTTP GET 요청 실패. 응답 코드 : "+responseCode);
         }
@@ -320,7 +291,7 @@ public class MelonCrawlService {
                 writer.newLine(); // 각 데이터를 새로운 줄에 작성
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace((PrintStream) log);
         }
     }
 }

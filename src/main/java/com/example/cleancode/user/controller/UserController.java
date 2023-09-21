@@ -31,7 +31,6 @@ import java.util.*;
 public class UserController {
 
     private final UserRepository userRepository;
-    private final UserSongRepository userSongRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
     /**

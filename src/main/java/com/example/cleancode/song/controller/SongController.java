@@ -17,9 +17,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -147,5 +149,14 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
-
+    @PostMapping("/inst")
+    public ResponseEntity<Object> saveFile(@RequestBody MultipartFile file){
+        s3UploadService.instUpload(file);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/vocal")
+    public ResponseEntity<Object> saveFile2(@RequestBody MultipartFile file){
+        s3UploadService.vocalUpload(file);
+        return ResponseEntity.ok().build();
+    }
 }
