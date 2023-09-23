@@ -39,7 +39,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -50,8 +50,3 @@ spring:
     multipart:
       max-file-size: 40MB
       max-request-size: 40MB
-  http:
-    encoding:
-      charset: UTF-8
-      force: true
-      enabled: true

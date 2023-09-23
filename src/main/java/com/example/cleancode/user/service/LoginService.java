@@ -52,6 +52,7 @@ public class LoginService {
         //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기
         System.out.println("id = " + id);
         KakaoInfoResponse kakaoInfoResponse = kakaoTokenService.requestUserInfo(kakaoTokenResponse.getAccessToken());
+        kakaoTokenService.tokenfire(kakaoTokenResponse.getAccessToken());
         Optional<User> isExist = memberRepository.findById(id);
         //회원정보 저장 필요
         //사용자 추가
@@ -70,17 +71,7 @@ public class LoginService {
         }
         return jwtService.generate(isExist.get().toMemberDto());
     }
-    public boolean logout(HttpServletRequest request){
-        try{
-            JwtDto jwtDto= jwtService.resolveJwt(request).get();
-            Long expiration = jwtService.getExpiration(jwtDto);
-            redisTemplate.opsForValue().set(jwtDto.getAccessToken(),"logout",expiration);
-            return true;
-        }catch (Exception ex){
-            log.error("블랙리스트 등록 에러");
-            return false;
-        }
-    }
+
     public JwtDto login(KakaoLoginParam kakaoLoginParam, HttpServletResponse response) {
         try{
             KakaoTokenResponse KResponse = kakaoTokenService.requestAccessToken(kakaoLoginParam);

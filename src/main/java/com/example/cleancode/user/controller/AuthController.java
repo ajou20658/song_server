@@ -3,6 +3,7 @@ package com.example.cleancode.user.controller;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.service.LoginService;
 import com.example.cleancode.user.service.oauth.KakaoLoginParam;
+import com.example.cleancode.user.service.oauth.KakaoTokenService;
 import com.example.cleancode.utils.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.*;
 public class AuthController {
     private final LoginService loginService;
     private final JwtService jwtService;
-
+    private final KakaoTokenService kakaoTokenService;
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<Object> login(@RequestBody KakaoLoginParam kakaoLoginParam){
@@ -31,6 +32,7 @@ public class AuthController {
             Map<String,Object> response = new HashMap<>();
             response.put("HttpStatus",HttpStatus.OK.value());
             response.put("response",jwtDto);
+
             return new ResponseEntity<>(response,HttpStatus.OK);
         }catch (Exception ex){
             log.info("Exception");
@@ -51,9 +53,5 @@ public class AuthController {
 
     }
 
-    @PostMapping("/logout")
-    public boolean logout(HttpServletRequest request){
-        //redis blacklist에 유효기간 만큼 저장
-        return loginService.logout(request);
-    }
+
 }

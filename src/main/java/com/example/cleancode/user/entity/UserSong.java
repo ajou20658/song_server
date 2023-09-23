@@ -28,7 +28,7 @@ public class UserSong {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    public UserSongDto UserSong(){
+    public UserSongDto toUserSongDto(){
         return UserSongDto.builder()
                 .id(id)
                 .awsUrl(awsUrl)

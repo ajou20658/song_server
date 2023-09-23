@@ -149,6 +149,11 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
+    @PostMapping("/upload_song")
+    public ResponseEntity<Object> uploadSong(@RequestBody MultipartFile file){
+        String title = file.getOriginalFilename();
+        return ResponseEntity.ok().build();
+    }
     @PostMapping("/inst")
     public ResponseEntity<Object> saveFile(@RequestBody MultipartFile file){
         s3UploadService.instUpload(file);

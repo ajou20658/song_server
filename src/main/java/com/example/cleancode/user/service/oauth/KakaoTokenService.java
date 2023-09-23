@@ -103,8 +103,19 @@ public class KakaoTokenService {
         }
     }
     //토큰 만료 요청
-    public void tokenfire(String access,String refresh){
-
+    public Long tokenfire(String access){
+        String url = apiUrl+"/v1/user/logout";
+        try {
+            Long id = webClient.post()
+                    .uri(url)
+                    .header("Authorization","Bearer "+ access)
+                    .retrieve()
+                    .bodyToMono(Long.class).block();
+            log.info("kakao logout = {}",id);
+            return id;
+        }catch (WebClientResponseException ex){
+            return null;
+        }
     }
 
 }

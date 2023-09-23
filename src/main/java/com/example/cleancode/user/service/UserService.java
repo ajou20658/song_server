@@ -61,7 +61,7 @@ public class UserService {
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
         UserSong userSong = UserSong.builder()
-                .awsUrl(amazonS3.getUrl(bucket,filename).toString())
+                .awsUrl(filename)
                 .user(userOptional.get())
                 .build();
         try{
