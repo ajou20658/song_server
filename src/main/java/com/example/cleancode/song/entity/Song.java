@@ -1,6 +1,6 @@
 package com.example.cleancode.song.entity;
 
-import com.example.cleancode.song.dto.ChartDTO;
+import com.example.cleancode.song.dto.SongDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Chart100 {
+public class Song {
     @Id
     private Long id;
     @Column(name = "title", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
@@ -32,14 +32,16 @@ public class Chart100 {
     @Column(name = "genre", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
     public List<String> genre;
-
-    public ChartDTO toChartDto(){
-        return ChartDTO.builder()
+    @ElementCollection
+    public List<Long> encoded_genre;
+    public SongDto toChartDto(){
+        return SongDto.builder()
                 .id(id)
                 .title(title)
                 .imgUrl(imgUrl)
                 .artist(artist)
                 .genre(genre)
+                .encoded_genre(encoded_genre)
                 .likeId(likeId)
                 .spectr(spectr)
                 .vocalUrl(vocalUrl)

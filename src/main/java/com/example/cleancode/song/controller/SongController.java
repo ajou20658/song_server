@@ -1,8 +1,8 @@
 package com.example.cleancode.song.controller;
 
-import com.example.cleancode.song.dto.ChartDTO;
-import com.example.cleancode.song.entity.Chart100;
-import com.example.cleancode.song.repository.ChartRepository;
+import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.song.service.S3UploadService;
 import jakarta.annotation.Nullable;
@@ -12,12 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -40,21 +35,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SongController {
     private final MelonCrawlService melonService;
-    private final ChartRepository chartRepository;
+    private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
 
     @GetMapping("/chartjson")
     @ResponseBody
-    public List<Chart100> giveJson(){
-        List<Chart100> list = chartRepository.findAll();
+    public List<Song> giveJson(){
+        List<Song> list = songRepository.findAll();
         return list;
     }
 
     @GetMapping("/search")
     @ResponseBody
-    public List<ChartDTO> getList2(@RequestParam @Nullable String target, @RequestParam String mode, Model model){
+    public List<SongDto> getList2(@RequestParam @Nullable String target, @RequestParam String mode){
+
         try{
-            String decodedArtist = URLDecoder.decode(target, "UTF-8");
             log.info("아티스트명에서");
             return melonService.search_artist(target,mode);
         }catch(Exception ex){
@@ -62,6 +57,7 @@ public class SongController {
         }
         return null;
     }
+    @Deprecated
     @GetMapping("/artist_list_crawl")
     @ResponseBody
     public void getArtist(){
@@ -89,10 +85,10 @@ public class SongController {
                 }
                 for(String artist : lines){
                     likeIDSumCntMap = new HashMap<>();
-                    List<ChartDTO> songlist = melonService.search_artist(artist,"1");
+                    List<SongDto> songlist = melonService.search_artist(artist,"1");
 
                     List<Long> likeString=songlist.stream()
-                            .map(ChartDTO::getLikeId)
+                            .map(SongDto::getLikeId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -106,22 +102,22 @@ public class SongController {
                         int sumCnt = contsLikeObject.getInt("SUMMCNT");
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
-                    for(ChartDTO chartDTO:songlist){
-                        if(chartDTO.getTitle().contains("Inst")||chartDTO.getTitle().contains("inst")||
-                                chartDTO.getTitle().contains("Feat")||chartDTO.getTitle().contains("feat")||chartDTO.getTitle().contains("MR")){
-                            log.info("제외된 제목 : {}",chartDTO.getTitle());
+                    for(SongDto songDto :songlist){
+                        if(songDto.getTitle().contains("Inst")|| songDto.getTitle().contains("inst")||
+                                songDto.getTitle().contains("Feat")|| songDto.getTitle().contains("feat")|| songDto.getTitle().contains("MR")){
+                            log.info("제외된 제목 : {}", songDto.getTitle());
                             continue;
-                        } else if (!chartDTO.getArtist().equals(artist)) {
-                            log.info("제외된 가수 : {}",chartDTO.getArtist());
+                        } else if (!songDto.getArtist().equals(artist)) {
+                            log.info("제외된 가수 : {}", songDto.getArtist());
                             continue;
                         }
-                        chartDTO.setTitle(chartDTO.getTitle().replace(","," "));
-                        Long likeId = chartDTO.getLikeId();
+                        songDto.setTitle(songDto.getTitle().replace(","," "));
+                        Long likeId = songDto.getLikeId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             List<String> genreList = new ArrayList<>();
-                            Long getGenreParam = chartDTO.getId();
+                            Long getGenreParam = songDto.getId();
 
                             try {
                                 Document genreDoc = Jsoup.connect(genreUrl + getGenreParam).get();
@@ -131,7 +127,7 @@ public class SongController {
                                 //제목,가수,장르,좋아요
 
                                 Thread.sleep(2500);
-                                String csvRow = chartDTO.getTitle()+","+chartDTO.getArtist()+","+sumCnt+","+genre;
+                                String csvRow = songDto.getTitle()+","+ songDto.getArtist()+","+sumCnt+","+genre;
                                 log.info(csvRow);
                                 writer.write(csvRow);
                                 writer.newLine();
@@ -154,14 +150,5 @@ public class SongController {
         String title = file.getOriginalFilename();
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/inst")
-    public ResponseEntity<Object> saveFile(@RequestBody MultipartFile file){
-        s3UploadService.instUpload(file);
-        return ResponseEntity.ok().build();
-    }
-    @PostMapping("/vocal")
-    public ResponseEntity<Object> saveFile2(@RequestBody MultipartFile file){
-        s3UploadService.vocalUpload(file);
-        return ResponseEntity.ok().build();
-    }
+
 }

@@ -3,6 +3,7 @@ package com.example.cleancode.user.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
@@ -26,6 +27,7 @@ import java.util.*;
 public class UserService {
     private final UserRepository memberRepository;
     private final UserSongRepository userSongRepository;
+    private final SongRepository songRepository;
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -48,6 +50,7 @@ public class UserService {
             return false;
         }
     }
+    //folder 이름 형식 : user/userId_songId
     @Transactional
     public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
         String originalFilename = multipartFile.getOriginalFilename();
@@ -55,15 +58,24 @@ public class UserService {
         if(userOptional.isEmpty()){
             return false;
         }
-
+        log.info("File type : {}",multipartFile.getContentType());
+        String type = multipartFile.getContentType();
+        if(!type.contains("audio")){
+            return false;
+        }else {
+            if(!type.equals("audio/wav")){
+                //이곳에 파일형식 변경 로직 필요
+            }
+        }
         String filename = folder+"/"+id+"_"+originalFilename;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
-        UserSong userSong = UserSong.builder()
+        Optional<UserSong> userSongOptional = userSongRepository.findByAwsUrl(filename);
+        UserSong userSong = userSongOptional.orElseGet(() -> UserSong.builder()
                 .awsUrl(filename)
                 .user(userOptional.get())
-                .build();
+                .build());
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
             userSongRepository.save(userSong);
@@ -94,5 +106,15 @@ public class UserService {
         }
         return  result;
     }
+    public boolean userFileDelete(String folder,Long SongId,Long id){
 
+        String filename = folder+"/"+id+"_"+SongId;
+        Optional<UserSong> userSongOptional = userSongRepository.findByAwsUrl(filename);
+        if(userSongOptional.isEmpty()){
+            return true;
+        }
+        amazonS3.deleteObject(bucket,filename);
+        userSongRepository.delete(userSongOptional.get());
+        return true;
+    }
 }

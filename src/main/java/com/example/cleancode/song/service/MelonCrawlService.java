@@ -1,8 +1,8 @@
 package com.example.cleancode.song.service;
 
-import com.example.cleancode.song.dto.ChartDTO;
-import com.example.cleancode.song.entity.Chart100;
-import com.example.cleancode.song.repository.ChartRepository;
+import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,100 +29,79 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class MelonCrawlService {
-    private final ChartRepository chartRepository;
+    private final SongRepository songRepository;
+
+    private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
+    private final Map<String,Long> dictionary = new HashMap<String,Long>(){
+        {
+            put("발라드/댄스",0L);
+            put("발라드",1L);
+            put("락",2L);
+            put("국내밴드",3L);
+            put("인디캐스트",4L);
+            put("랜덤/팝",5L);
+            put("일렉/뷰티",6L);
+            put("흑인/힙합",7L);
+            put("R&B/Soul",8L);
+            put("성인가요/트로트",9L);
+            put("국내영화",10L);
+            put("컴필레이션/팝",11L);
+            put("키즈",12L);
+            put("뮤직",13L);
+            put("J-POP",14L);
+            put("재즈",15L);
+            put("컨트리/포크/블루스",16L);
+            put("POP",17L);
+            put("국내클래식",18L);
+            put("피아노/클래식",19L);
+            put("영화/애니메이션",20L);
+            put("락/메탈",21L);
+            put("게임",22L);
+            put("클래식",23L);
+            put("국내댄스",24L);
+            put("-",25L);
+            put("CCM",26L);
+            put("국내CCM",27L);
+            put("국외",28L);
+            put("국외가요",29L);
+            put("노래방",30L);
+            put("월드뮤직",31L);
+            put("중국남성",32L);
+            put("국외밴드",33L);
+            put("베트남발라드",34L);
+            put("희귀",35L);
+            put("가요",36L);
+            put("재즈인",37L);
+        }
+    };
 
     @Scheduled(fixedRate = 21600000)
     public void collectMelonSong() throws Exception {
-        Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
-        List<ChartDTO> pList = new LinkedList<>();
+        List<SongDto> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
 
         Document doc = Jsoup.connect(url).get();
-        String like = null;
-        // <div class="service_list_song"> 이 태그 내에 있는 HTML 소스만 element에 저장된다.
+
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
-            // 크롤링을 통해 데이터 저장하기
-            String songId = songInfo.attr("data-song-no");
-            if(chartRepository.findById(Long.valueOf(songId)).isPresent()){
-                continue;
-            }
-            String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
-            String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
-            String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");
-            Matcher matcher = pattern.matcher(likeId);
-
-            if(matcher.find()){
-                like = matcher.group();
-//                log.info(like);
-            }else {
-                like = "0";
-//                log.info(like);
-            }
-            if ((!title.isEmpty()) && (!artist.isEmpty())) {
-
-                ChartDTO chartDTO = ChartDTO.builder()
-                        .artist(artist)
-                        .likeId(Long.valueOf(like))
-                        .title(title)
-                        .id(Long.valueOf(songId))
-                        .imgUrl(imgUrl)
-                        .build();
-                pList.add(chartDTO);
-            }
+            SongDto songDto = top100CrawlParser(songInfo);
+            pList.add(songDto);
         }
 
         Thread.sleep(3000);
 
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
-            String songId = songInfo.attr("data-song-no");
-            if(chartRepository.findById(Long.valueOf(songId)).isPresent()){
-                continue;
-            }
-//            String albumId = songInfo.select("div.ellipsis.rank03 a").attr("href").substring(37,45);
-            String title = songInfo.select("div.ellipsis.rank01 a").text(); //노래
-            String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
-            String imgUrl = songInfo.select(".image_typeAll img").attr("src");
-            String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");
-            Matcher matcher = pattern.matcher(likeId);
-            if(matcher.find()){
-                like = matcher.group();
-//                log.info(like);
-            }else {
-                like = "0";
-//                log.info(like);
-            }
-            if ((!title.isEmpty()) && (!artist.isEmpty())) {
-
-                ChartDTO chartDTO = ChartDTO.builder()
-                        .likeId(Long.valueOf(like))
-                        .artist(artist)
-                        .title(title)
-                        .id(Long.valueOf(songId))
-                        .imgUrl(imgUrl)
-                        .build();
-                //한 번에 여러 개의 데이터를 MongoDB에 저장할 List 형태의 데이터 저장하기
-                pList.add(chartDTO);
-            }
+            SongDto songDto = top100CrawlParser(songInfo);
+            pList.add(songDto);
         }
-        //MongoDB에 데이터저장하기
-        //res = iMelonMapper.insertSong(pList, cloNm);
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
-        for(ChartDTO chart: pList){
-            String getGenreParam = String.valueOf(chart.getId());
+        for(SongDto song: pList){
+            String getGenreParam = String.valueOf(song.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
-            String genre = genreDoc.select("div.meta dd").eq(2).text();
-            List<String> genreArray = new ArrayList<>();
-            if(genre.contains(",")){
-                genreArray = List.of(genre.split(", "));
-            }else{
-                genreArray = List.of(genre);
-            }
-            chart.setGenre(genreArray);
-            chartRepository.save(chart.toChartEntity());
+            song = genreImgUrlParser(genreDoc,song);
+            songRepository.save(song.toChartEntity());
         }
     }
     public void artistCrawl() throws Exception{
@@ -160,9 +139,9 @@ public class MelonCrawlService {
         }
         writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
     }
-    public List<ChartDTO> search_artist(String artist, String mode) throws Exception{
+    public List<SongDto> search_artist(String artist, String mode) throws Exception{
         Long res =0L;
-        List<ChartDTO> list = new LinkedList<>();
+        List<SongDto> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
 //        String all = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=all&searchGnbYn=Y&kkoSpl=N&kkoDpType=#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=all&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=51";
         String m ="";
@@ -172,10 +151,10 @@ public class MelonCrawlService {
                 break;
             case "1":
                 m="artist";
-                Page<Chart100> result = chartRepository.findByArtistContaining(artist, PageRequest.of(0,100));
+                List<Song> result = songRepository.findByArtistContaining(artist);
                 if(!result.isEmpty()){
-                    return result.getContent().stream()
-                            .map(Chart100::toChartDto)
+                    return result.stream()
+                            .map(Song::toChartDto)
                             .collect(Collectors.toList());
                 }
                 break;
@@ -219,16 +198,19 @@ public class MelonCrawlService {
                         }
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
-                        ChartDTO chartDto = ChartDTO.builder()
+                        SongDto songDto = SongDto.builder()
                                 .title(title)
                                 .artist(singer)
                                 .id(Long.valueOf(parse[4]))
                                 .likeId(Long.valueOf(like))
                                 .build();
-                        if(chartRepository.findById(Long.valueOf(parse[4])).isEmpty()){
-                            chartRepository.save(chartDto.toChartEntity());
+                        if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
+                            String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
+                            Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
+                            songDto = genreImgUrlParser(genreDoc,songDto);
+                            songRepository.save(songDto.toChartEntity());
                         }
-                        list.add(chartDto);
+                        list.add(songDto);
                     }
                 }catch (Exception ex){
                     ex.printStackTrace((PrintStream) log);
@@ -238,13 +220,6 @@ public class MelonCrawlService {
             e.printStackTrace((PrintStream) log);
         }
         return list;
-    }
-    public List<Chart100> getAllChart() throws Exception{
-        return chartRepository.findAll(PageRequest.of(0,100)).getContent();
-    }
-
-    public Long getNumChart() throws Exception{
-        return chartRepository.count();
     }
 
     public JSONObject getLikeNum(List<Long> likeList)throws Exception{
@@ -283,6 +258,48 @@ public class MelonCrawlService {
             values[index++] = matcher.group(1);
         }
         return values;
+    }
+    private SongDto genreImgUrlParser(Document genreDoc,SongDto songDto){
+        String genre = genreDoc.select("div.meta dd").eq(2).text();
+        String imgUrl = genreDoc.select("#d_song_org > a > img").attr("src");
+        List<String> genreArray;
+        List<Long> encodedGenre = new ArrayList<>();
+        if(genre.contains(",")){
+            genreArray = List.of(genre.split(", "));
+            for(String tmp:genreArray){
+                encodedGenre.add(dictionary.get(tmp));
+            }
+        }else{
+            genreArray = List.of(genre);
+            encodedGenre = List.of(dictionary.get(genreArray.get(0)));
+        }
+        songDto.setImgUrl(imgUrl);
+        songDto.setEncoded_genre(encodedGenre);
+        songDto.setGenre(genreArray);
+        return songDto;
+    }
+    private SongDto top100CrawlParser(Element songInfo){
+        String songId = songInfo.attr("data-song-no");
+        String like = null;
+        if(songRepository.findById(Long.valueOf(songId)).isPresent()){
+            return null;
+        }
+        String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
+        String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+        String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");//좋아요 수 ID
+        Matcher matcher = pattern.matcher(likeId);
+        if(matcher.find()){
+            like = matcher.group();
+        }else {
+            like = "0";
+        }
+        SongDto songDto = SongDto.builder()
+                .likeId(Long.valueOf(like))
+                .artist(artist)
+                .title(title)
+                .id(Long.valueOf(songId))
+                .build();
+        return songDto;
     }
     public void writeListToFile(Set<String> dataList,String filePath){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true))) {

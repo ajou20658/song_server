@@ -94,4 +94,12 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResponseEntity<Object> vocalDelete(@RequestBody Long SongId,@AuthenticationPrincipal UserPrinciple userPrinciple){
+        if(userService.userFileDelete("user",SongId, userPrinciple.getId())){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
 }

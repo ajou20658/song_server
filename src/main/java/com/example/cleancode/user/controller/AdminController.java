@@ -1,7 +1,7 @@
 package com.example.cleancode.user.controller;
 
-import com.example.cleancode.song.entity.Chart100;
-import com.example.cleancode.song.repository.ChartRepository;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.UserDto;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
     private final UserRepository memberRepository;
-    private final ChartRepository chartRepository;
+    private final SongRepository songRepository;
     private final JwtService jwtService;
     @GetMapping("/generate")
     @ResponseBody
@@ -60,7 +60,7 @@ public class AdminController {
 
     @GetMapping("/showall")
     public String getList(Model model){
-        List<Chart100> charts = chartRepository.findAll();
+        List<Song> charts = songRepository.findAll();
         model.addAttribute("charts",charts);
         return "chart-list";
     }
