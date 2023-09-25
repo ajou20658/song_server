@@ -12,6 +12,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -103,22 +110,29 @@ public class KakaoTokenService {
         }
     }
     //토큰 만료 요청
-    public Long tokenfire(String access,Long userId){
+    public void tokenfire(String access,Long userId){
         String url = apiUrl+"/v1/user/logout";
         try {
 //            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 //            body.add("target_id_type","user_id");
 //            body.add("target_id", String.valueOf(userId));
-            Long id = webClient.post()
-                    .uri(url)
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .header("Authorization","Bearer "+ access)
-                    .retrieve()
-                    .bodyToMono(Long.class).block();
-            log.info("kakao logout = {}",id);
-            return id;
-        }catch (WebClientResponseException ex){
-            return null;
+            URL url1 = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection)url1.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization","Bearer "+access);
+
+            int responseCode = conn.getResponseCode();
+
+            log.info("kakao logout status= {}",responseCode);
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String result = "";
+            String line = "";
+            while((line=br.readLine())!=null){
+                result += line;
+            }
+            log.info(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
