@@ -42,7 +42,7 @@ public class LoginService {
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenService.requestAccessToken(kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         //1-2 토큰 유효성 검사 + 회원번호 획득
-        if(kakaoTokenResponse==null){
+        if(kakaoTokenResponse.getAccessToken()==null){
             log.info("받은 액세스 토큰 : {}",kakaoLoginParam.getAuthorizationCode());
             log.error("유효하지않은 카카오 accessToken");
             throw new Exception();
