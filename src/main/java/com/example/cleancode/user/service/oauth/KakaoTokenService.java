@@ -111,6 +111,7 @@ public class KakaoTokenService {
 //            body.add("target_id", String.valueOf(userId));
             Long id = webClient.post()
                     .uri(url)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .header("Authorization","Bearer "+ access)
                     .retrieve()
                     .bodyToMono(Long.class).block();

@@ -75,7 +75,7 @@ public class MelonCrawlService {
         }
     };
 
-    @Scheduled(fixedRate = 21600000)
+//    @Scheduled(fixedRate = 21600000)
     public void collectMelonSong() throws Exception {
         List<SongDto> pList = new LinkedList<>();
         String url = "https://www.melon.com/chart/index.htm";
