@@ -100,8 +100,8 @@ public class MelonCrawlService {
         for(SongDto song: pList){
             String getGenreParam = String.valueOf(song.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
-            song = genreImgUrlParser(genreDoc,song);
-            songRepository.save(song.toChartEntity());
+            SongDto songdto = genreImgUrlParser(genreDoc,song);
+            songRepository.save(songdto.toChartEntity());
         }
     }
     public void artistCrawl() throws Exception{

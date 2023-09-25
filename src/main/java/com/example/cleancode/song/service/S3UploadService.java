@@ -13,7 +13,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class S3UploadService {
     private final AmazonS3 amazonS3;
     private final SongRepository songRepository;
+    private final WebClient webClient;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     public Resource stream(String url){
@@ -31,9 +34,14 @@ public class S3UploadService {
     }
     //input : 원곡
     //logic : vocal + instru
-    public void split(MultipartFile multipartFile){
-        Long id = Long.valueOf(multipartFile.getOriginalFilename());
-
+    public void split(MultipartFile multipartFile) throws IOException {
+        String path = "/home/ubuntu/2023-2/paran/song_server/src/main/resources/static/";
+        String name = multipartFile.getOriginalFilename();
+        multipartFile.transferTo(new File(path+name));
+        String input_path = path+name;
+        String url = "localhost:8000/separate_audio?input_file="+input_path+"&output_dir="+path;
+        webClient.get()
+                .uri(url);
     }
     private boolean vocalUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();

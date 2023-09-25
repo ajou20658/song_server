@@ -69,7 +69,11 @@ public class UserController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
-
+    }
+    @PostMapping("/split")
+    public ResponseEntity<Object> splitFile(@RequestBody MultipartFile file) throws IOException {
+        s3UploadService.split(file);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/vocal_list")
