@@ -103,9 +103,12 @@ public class KakaoTokenService {
         }
     }
     //토큰 만료 요청
-    public Long tokenfire(String access){
+    public Long tokenfire(String access,Long userId){
         String url = apiUrl+"/v1/user/logout";
         try {
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("target_id_type","user_id");
+            body.add("target_id", String.valueOf(userId));
             Long id = webClient.post()
                     .uri(url)
                     .header("Authorization","Bearer "+ access)

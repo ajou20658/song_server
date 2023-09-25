@@ -21,19 +21,15 @@ public class AndroidLoginService {
     private final KakaoTokenService kakaoTokenService;
     private final JwtService jwtService;
 
-    //로그인은 앱에서 맡기고 이후 요청은 암호화된 id값으로
-    //여기서는 멤버객체 추가만 구현
     @Transactional
     public JwtDto join(AndroidRequestParam androidRequestParam){
         KakaoValidateResponse kakaoValidateResponse = kakaoTokenService.tokenInfo(androidRequestParam.getAccessToken());
         System.out.println(kakaoValidateResponse);
         Long id = kakaoValidateResponse.getId();
-        //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기
         System.out.println("id = " + id);
         KakaoInfoResponse kakaoInfoResponse = kakaoTokenService.requestUserInfo(androidRequestParam.getAccessToken());
+        kakaoTokenService.tokenfire(androidRequestParam.getAccessToken(), id);
         Optional<User> isExist = memberRepository.findById(id);
-        //회원정보 저장 필요
-        //사용자 추가
         if(isExist.isEmpty()) {
             User member = User.builder()
                     .id(id)
