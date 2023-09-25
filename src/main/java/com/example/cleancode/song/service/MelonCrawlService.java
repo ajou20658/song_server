@@ -34,44 +34,44 @@ public class MelonCrawlService {
     private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
     private final Map<String,Long> dictionary = new HashMap<String,Long>(){
         {
-            put("발라드/댄스",0L);
+            put("랩/힙합",0L);
             put("발라드",1L);
-            put("락",2L);
-            put("국내밴드",3L);
-            put("인디캐스트",4L);
-            put("랜덤/팝",5L);
-            put("일렉/뷰티",6L);
-            put("흑인/힙합",7L);
+            put("댄스",2L);
+            put("국내드라마",3L);
+            put("인디음악",4L);
+            put("록/메탈",5L);
+            put("일렉트로니카",6L);
+            put("포크/블루스",7L);
             put("R&B/Soul",8L);
             put("성인가요/트로트",9L);
             put("국내영화",10L);
-            put("컴필레이션/팝",11L);
+            put("애니메이션/웹툰",11L);
             put("키즈",12L);
-            put("뮤직",13L);
+            put("만화",13L);
             put("J-POP",14L);
             put("재즈",15L);
-            put("컨트리/포크/블루스",16L);
+            put("애시드/퓨전/팝",16L);
             put("POP",17L);
-            put("국내클래식",18L);
-            put("피아노/클래식",19L);
-            put("영화/애니메이션",20L);
-            put("락/메탈",21L);
+            put("국외영화",18L);
+            put("클래식",19L);
+            put("오페라/성악",20L);
+            put("크로스오버",21L);
             put("게임",22L);
-            put("클래식",23L);
-            put("국내댄스",24L);
+            put("창작동요",23L);
+            put("국내뮤지컬",24L);
             put("-",25L);
             put("CCM",26L);
             put("국내CCM",27L);
-            put("국외",28L);
-            put("국외가요",29L);
-            put("노래방",30L);
+            put("국악",28L);
+            put("국악가요",29L);
+            put("뉴에이지",30L);
             put("월드뮤직",31L);
-            put("중국남성",32L);
-            put("국외밴드",33L);
-            put("베트남발라드",34L);
-            put("희귀",35L);
-            put("가요",36L);
-            put("재즈인",37L);
+            put("중국음악",32L);
+            put("국외드라마",33L);
+            put("보사노바",34L);
+            put("포크",35L);
+            put("자장가",36L);
+            put("워십",37L);
         }
     };
 
@@ -271,7 +271,9 @@ public class MelonCrawlService {
             }
         }else{
             genreArray = List.of(genre);
-            encodedGenre = List.of(dictionary.get(genreArray.get(0)));
+            System.out.println("genreArray = " + genreArray);
+            encodedGenre.add(dictionary.get(genreArray.get(0)));
+            System.out.println("encodedGenre = " + encodedGenre);
         }
         songDto.setImgUrl(imgUrl);
         songDto.setEncoded_genre(encodedGenre);
