@@ -52,7 +52,7 @@ public class LoginService {
         //2. 받아온 accesstoken이용하여 사용자 정보 요청 & 받아오기
         System.out.println("id = " + id);
         KakaoInfoResponse kakaoInfoResponse = kakaoTokenService.requestUserInfo(kakaoTokenResponse.getAccessToken());
-        kakaoTokenService.tokenfire(kakaoTokenResponse.getAccessToken(),id);
+//        kakaoTokenService.tokenfire(kakaoTokenResponse.getAccessToken(),id);
         Optional<User> isExist = memberRepository.findById(id);
         //회원정보 저장 필요
         //사용자 추가

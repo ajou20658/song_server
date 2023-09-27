@@ -120,9 +120,7 @@ public class KakaoTokenService {
             HttpURLConnection conn = (HttpURLConnection)url1.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization","Bearer "+access);
-
             int responseCode = conn.getResponseCode();
-
             log.info("kakao logout status= {}",responseCode);
             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String result = "";

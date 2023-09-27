@@ -39,7 +39,7 @@ public class S3UploadService {
         String name = multipartFile.getOriginalFilename();
         multipartFile.transferTo(new File(path+name));
         String input_path = path+name;
-        String url = "localhost:8000/separate_audio?input_file="+input_path+"&output_dir="+path;
+        String url = "http://localhost:8000/separate_audio?input_file="+input_path+"&output_dir="+path;
         webClient.get()
                 .uri(url);
     }
