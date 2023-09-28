@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,6 @@ public class LoginService {
     private final UserRepository memberRepository;
     private final KakaoTokenService kakaoTokenService;
     private final JwtService jwtService;
-    private final RedisTemplate<String,Object> redisTemplate;
     @Value("${jwt.token.expiration-time}")
     private Long tokenMillisecond;
     @Value("${jwt.token.refresh-expiration-time}")
