@@ -85,6 +85,14 @@ public class MelonCrawlService {
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
             SongDto songDto = top100CrawlParser(songInfo);
+            try{
+                songDto.getId();
+            }catch (Exception ex){
+                log.info("오류 발생");
+            }finally {
+                songDto.getTitle();
+            }
+            if(songRepository.existsById(songDto.getId()))
             pList.add(songDto);
         }
 
