@@ -68,7 +68,8 @@ public class S3UploadService {
         RequestEntity<MultiValueMap<String,Object>> requestEntity =
                 new RequestEntity<>(body,headers, HttpMethod.POST, URI.create(url));
         ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
-        log.info(String.valueOf(response));
+//        log.info(String.valueOf(response));
+        log.info("status code = {}",response.getStatusCode());
     }
     private boolean vocalUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();
