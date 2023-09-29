@@ -64,7 +64,7 @@ public class S3UploadService {
         body.add("userId",userId);
         body.add("output_dir",path);
         body.add("isUser",true);
-        String url = "http://localhost:8000/separate_audio";
+        String url = "http://localhost:8000/seperate_audio";
         RequestEntity<MultiValueMap<String,Object>> requestEntity =
                 new RequestEntity<>(body,headers, HttpMethod.POST, URI.create(url));
         ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
