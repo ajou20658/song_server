@@ -71,7 +71,7 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
     @PostMapping(value="/split",consumes = "multipart/form-data")
-    public ResponseEntity<Object> splitFile(@RequestBody MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestParam("songId") Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         s3UploadService.split(file,songId,userPrinciple.getId());
         return ResponseEntity.ok().build();
     }
