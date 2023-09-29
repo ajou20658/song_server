@@ -22,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,11 +65,17 @@ public class S3UploadService {
         body.add("userId",userId);
         body.add("output_dir",path);
         body.add("isUser",true);
-        String url = "http://localhost:8000/seperate_audio";
-        RequestEntity<MultiValueMap<String,Object>> requestEntity =
-                new RequestEntity<>(body,headers, HttpMethod.POST, URI.create(url));
-        ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
-//        log.info(String.valueOf(response));
+        String url = "http://localhost:8000/seperate_audio/";
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                builder.toUriString(),
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
         log.info("status code = {}",response.getStatusCode());
     }
     private boolean vocalUpload(MultipartFile multipartFile){
