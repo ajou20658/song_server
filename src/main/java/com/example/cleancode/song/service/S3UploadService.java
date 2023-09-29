@@ -61,10 +61,10 @@ public class S3UploadService {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file",resource);
-        body.add("songId",songId);
-        body.add("userId",userId);
         body.add("output_dir",path);
         body.add("isUser",true);
+        body.add("songId",songId);
+        body.add("userId",userId);
         String url = "http://localhost:8000/seperate_audio/";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
 
