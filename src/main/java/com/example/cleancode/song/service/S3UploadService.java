@@ -8,23 +8,32 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
+import org.apache.http.client.methods.HttpHead;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3UploadService {
     private final AmazonS3 amazonS3;
     private final SongRepository songRepository;
     private final WebClient webClient;
+    private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     public Resource stream(String url){
@@ -34,12 +43,28 @@ public class S3UploadService {
     }
     //input : 원곡
     //logic : vocal + instru
-    public void split(MultipartFile multipartFile) throws IOException {
+    public void split(MultipartFile multipartFile){
         String path = "/home/ubuntu/2023-2/paran/song_server/src/main/resources/static/";
         String name = multipartFile.getOriginalFilename();
-        multipartFile.transferTo(new File(path+name));
+        byte[] fileBytes = new byte[0];
+        try {
+            fileBytes = multipartFile.getBytes();
+        }catch (IOException ex){
+            log.info(ex.getMessage());
+        }
+        Resource resource = new ByteArrayResource(fileBytes);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file",resource);
+        String url = "http://localhost:8000/separate_audio";
+
+        RequestEntity<MultiValueMap<String,Object>> requestEntity =
+                new RequestEntity<>(body,headers, HttpMethod.POST, URI.create(url));
+        ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
         String input_path = path+name;
-        String url = "http://localhost:8000/separate_audio?input_file="+input_path+"&output_dir="+path;
         webClient.get()
                 .uri(url);
     }
