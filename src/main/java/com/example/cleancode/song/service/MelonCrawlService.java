@@ -85,15 +85,9 @@ public class MelonCrawlService {
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
             SongDto songDto = top100CrawlParser(songInfo);
-            try{
-                songDto.getId();
-            }catch (Exception ex){
-                log.info("오류 발생");
-            }finally {
-                songDto.getTitle();
+            if(songDto!=null){
+                pList.add(songDto);
             }
-            if(songRepository.existsById(songDto.getId()))
-            pList.add(songDto);
         }
 
         Thread.sleep(3000);
@@ -101,7 +95,9 @@ public class MelonCrawlService {
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
             SongDto songDto = top100CrawlParser(songInfo);
-            pList.add(songDto);
+            if(songDto!=null){
+                pList.add(songDto);
+            }
         }
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
