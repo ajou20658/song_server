@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -43,8 +44,8 @@ public class S3UploadService {
     }
     //input : 원곡
     //logic : vocal + instru
-    public void split(MultipartFile multipartFile){
-        String path = "/home/ubuntu/2023-2/paran/song_server/src/main/resources/static/";
+    public void split(MultipartFile multipartFile, Long songId, @Nullable Long userId){
+        String path = "/home/ubuntu/git/song_server/src/main/resources/static/";
         String name = multipartFile.getOriginalFilename();
         byte[] fileBytes = new byte[0];
         try {
@@ -59,14 +60,15 @@ public class S3UploadService {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file",resource);
+        body.add("songId",songId);
+        body.add("userId",userId);
+        body.add("output_dir",path);
+        body.add("isUser",true);
         String url = "http://localhost:8000/separate_audio";
-
         RequestEntity<MultiValueMap<String,Object>> requestEntity =
                 new RequestEntity<>(body,headers, HttpMethod.POST, URI.create(url));
         ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
-        String input_path = path+name;
-        webClient.get()
-                .uri(url);
+        log.info(String.valueOf(response));
     }
     private boolean vocalUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();
