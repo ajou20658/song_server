@@ -153,6 +153,7 @@ public class MelonCrawlService {
             case "0":
                 m="all";
                 List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
+                log.info(result3.toString());
                 if(!result3.isEmpty()){
                     log.info("any exists");
                     return result3.stream()
@@ -163,6 +164,7 @@ public class MelonCrawlService {
             case "1":
                 m="artist";
                 List<Song> result = songRepository.findByArtistContaining(artist);
+                log.info(result.toString());
                 if(!result.isEmpty()){
                     log.info("artist exists");
                     return result.stream()
