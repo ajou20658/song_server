@@ -45,39 +45,33 @@ public class S3UploadService {
     }
     //input : 원곡
     //logic : vocal + instru
-    public void split(MultipartFile multipartFile, Long songId, @Nullable Long userId){
-        String path = "/home/ubuntu/git/song_server/src/main/resources/static/";
-        String name = multipartFile.getOriginalFilename();
-        byte[] fileBytes = new byte[0];
-        try {
-            fileBytes = multipartFile.getBytes();
-        }catch (IOException ex){
-            log.info(ex.getMessage());
-        }
-        Resource resource = new ByteArrayResource(fileBytes);
+    public void split(MultipartFile multipartFile, Long songId, @Nullable Long userId) throws IOException {
+        String url = "http://localhost:8000/separate_audio/";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file",resource);
-        body.add("output_dir",path);
-        body.add("isUser",true);
-        body.add("songId",songId);
-        body.add("userId",userId);
-        String url = "http://localhost:8000/seperate_audio/";
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
+        body.add("file", new ByteArrayResource(multipartFile.getBytes()));
+        body.add("output_dir", "/home/ubuntu/git/song_server/src/main/resources/static/");
+        body.add("isUser", true);
+        body.add("songId", songId);
+        if (userId != null) {
+            body.add("userId", userId);
+        }
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                builder.toUriString(),
+                url,
                 HttpMethod.POST,
                 requestEntity,
                 String.class
         );
-        log.info("status code = {}",response.getStatusCode());
+
+        log.info("status code = {}", response.getStatusCode());
     }
+
     private boolean vocalUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();
         String[] concat = originalFilename.split("_");

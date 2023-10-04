@@ -152,11 +152,19 @@ public class MelonCrawlService {
         switch(mode){
             case "0":
                 m="all";
+                List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
+                if(!result3.isEmpty()){
+                    log.info("any exists");
+                    return result3.stream()
+                            .map(Song::toChartDto)
+                            .collect(Collectors.toList());
+                }
                 break;
             case "1":
                 m="artist";
                 List<Song> result = songRepository.findByArtistContaining(artist);
                 if(!result.isEmpty()){
+                    log.info("artist exists");
                     return result.stream()
                             .map(Song::toChartDto)
                             .collect(Collectors.toList());
@@ -164,6 +172,13 @@ public class MelonCrawlService {
                 break;
             case "2":
                 m="song";
+                List<Song> result2 = songRepository.findByTitleContaining(artist);
+                if(!result2.isEmpty()){
+                    log.info("title exists");
+                    return result2.stream()
+                            .map(Song::toChartDto)
+                            .collect(Collectors.toList());
+                }
                 break;
             case "3":
                 m="album";
@@ -181,17 +196,17 @@ public class MelonCrawlService {
                 try {
                     Elements tds = row.select("td");
                     Element td2 = tds.get(2);
-                    String title = td2.select("div>div>a.fc_gray").first().text();
+                    String title = td2.select("div>div>a.fc_gray").first().text(); //title
                     title = title.replace(","," ");
                     System.out.println("title = " + title);
                     //            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
                     Element td3 = tds.get(3);
-                    String singer = td3.select("div>div>a").first().text();
+                    String singer = td3.select("div>div>a").first().text(); //artist
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
                         Element td5 = tds.get(5);
 
-                        String likeId = td2.select("div>div>a.fc_gray").attr("href");
+                        String likeId = td2.select("div>div>a.fc_gray").attr("href"); //likeId
                         Matcher matcher = pattern.matcher(likeId);
                         String like = null;
                         if(matcher.find()){
