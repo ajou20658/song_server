@@ -223,6 +223,7 @@ public class MelonCrawlService {
                                 .id(Long.valueOf(parse[4]))
                                 .likeId(Long.valueOf(like))
                                 .build();
+                        log.info("SongId : ",Long.valueOf(parse[4]));
                         if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();

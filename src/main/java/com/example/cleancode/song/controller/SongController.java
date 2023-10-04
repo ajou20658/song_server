@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequestMapping("/song")
 @RequiredArgsConstructor
-public class sSongController {
+public class SongController {
     private final MelonCrawlService melonService;
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
