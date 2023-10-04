@@ -198,7 +198,7 @@ public class MelonCrawlService {
                     Element td2 = tds.get(2);
                     String title = td2.select("div>div>a.fc_gray").first().text(); //title
                     title = title.replace(","," ");
-                    System.out.println("title = " + title);
+                    log.info("title = {}",title);
                     //            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
@@ -223,7 +223,7 @@ public class MelonCrawlService {
                                 .id(Long.valueOf(parse[4]))
                                 .likeId(Long.valueOf(like))
                                 .build();
-                        log.info("SongId : ",Long.valueOf(parse[4]));
+                        log.info("SongId : {}",Long.valueOf(parse[4]));
                         if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
