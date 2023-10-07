@@ -117,7 +117,6 @@ public class MelonCrawlService {
     }
 
     public List<SongDto> search_artist(String artist, String mode){
-        Long res =0L;
         List<SongDto> list = new LinkedList<>();
         Pattern localpattern = Pattern.compile("'(\\d+)'");
         String m ="";
@@ -204,11 +203,11 @@ public class MelonCrawlService {
                         list.add(songDto);
                     }
                 }catch (Exception ex){
-                    ex.printStackTrace((PrintStream) log);
+                    log.error("An error occured : ", ex);
                 }
             }
-        }catch (Exception e){
-            e.printStackTrace((PrintStream) log);
+        }catch (Exception ex){
+            log.error("An error occured : ", ex);
         }
         return list;
     }
