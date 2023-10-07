@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,42 +115,8 @@ public class MelonCrawlService {
             songRepository.save(newSong.toSongEntity());
         }
     }
-    public void artistCrawl() throws Exception{
-        Set<String> artistList = new HashSet<>();
-        List<String> mode = new ArrayList<String>(Arrays.asList("100","200","300","400","500","600","700","800"));
-        for(String i :mode){
-            String url = "https://www.melon.com/chart/month/index.htm?classCd=GN0"+i;
-            Connection connect = Jsoup.connect(url);
-            Document doc=null;
-            try{
-                Thread.sleep(10000);
-                doc = connect.get();
-            }catch (InterruptedException ex){
-                ex.printStackTrace((PrintStream) log);
-            }
 
-            assert doc != null;
-            Elements elements = doc.select("div.service_list_song");
-            System.out.println("elements = " + elements);
-            for(Element element : elements.select("#lst50")){
-                String artist = element.select("div.ellipsis.rank02 a").eq(0).text(); //가수
-                log.info(artist);
-                if(!artist.contains(",")) {
-                    artistList.add(artist);
-                }
-            }
-            for(Element element : elements.select("#lst100")){
-                String artist = element.select("div.ellipsis.rank02 a").eq(0).text(); //가수
-                log.info(artist);
-                if(!artist.contains(",")) {
-                    artistList.add(artist);
-                }
-            }
-            log.info(artistList.toString());
-        }
-        writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
-    }
-    public List<SongDto> search_artist(String artist, String mode){
+    public List<SongDto> search_artist(String artist, String mode) throws UnsupportedEncodingException {
         Long res =0L;
         List<SongDto> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
@@ -191,8 +159,8 @@ public class MelonCrawlService {
                 m="album";
                 break;
         }
-//        String EncodingArtist = URLEncoder.encode(artist, "UTF-8");
-        String url = "https://www.melon.com/search/song/index.htm?q="+artist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+        String EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
+        String url = "https://www.melon.com/search/song/index.htm?q="+EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
         Connection connection = Jsoup.connect(url);
         try{
@@ -234,8 +202,8 @@ public class MelonCrawlService {
                         if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
-                            songDto = genreImgUrlParser(genreDoc,songDto);
-                            songRepository.save(songDto.toSongEntity());
+                            SongDto result = genreImgUrlParser(genreDoc,songDto);
+                            songRepository.save(result.toSongEntity());
                         }
                         list.add(songDto);
                     }
@@ -339,5 +307,41 @@ public class MelonCrawlService {
         } catch (IOException e) {
             e.printStackTrace((PrintStream) log);
         }
+    }
+    @Deprecated
+    public void artistCrawl() throws Exception{
+        Set<String> artistList = new HashSet<>();
+        List<String> mode = new ArrayList<String>(Arrays.asList("100","200","300","400","500","600","700","800"));
+        for(String i :mode){
+            String url = "https://www.melon.com/chart/month/index.htm?classCd=GN0"+i;
+            Connection connect = Jsoup.connect(url);
+            Document doc=null;
+            try{
+                Thread.sleep(10000);
+                doc = connect.get();
+            }catch (InterruptedException ex){
+                ex.printStackTrace((PrintStream) log);
+            }
+
+            assert doc != null;
+            Elements elements = doc.select("div.service_list_song");
+            System.out.println("elements = " + elements);
+            for(Element element : elements.select("#lst50")){
+                String artist = element.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+                log.info(artist);
+                if(!artist.contains(",")) {
+                    artistList.add(artist);
+                }
+            }
+            for(Element element : elements.select("#lst100")){
+                String artist = element.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+                log.info(artist);
+                if(!artist.contains(",")) {
+                    artistList.add(artist);
+                }
+            }
+            log.info(artistList.toString());
+        }
+        writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
     }
 }
