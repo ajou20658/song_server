@@ -160,7 +160,7 @@ public class MelonCrawlService {
         try {
             EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
         }catch (Exception ex){
-            ex.printStackTrace();
+            log.error("An error occured : ", ex);
         }
         String url = "https://www.melon.com/search/song/index.htm?q="+EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
@@ -183,7 +183,11 @@ public class MelonCrawlService {
 
                         String likeId = td2.select("div>div>a.fc_gray").attr("href"); //likeId
                         Matcher matcher = localpattern.matcher(likeId);
-                        String like = matcher.group(1);
+                        String like = "";
+                        while(matcher.find()){
+                            like = matcher.group(1);
+                            log.info("likeId = {}",like);
+                        }
 
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
@@ -299,8 +303,8 @@ public class MelonCrawlService {
                 writer.write(data);
                 writer.newLine(); // 각 데이터를 새로운 줄에 작성
             }
-        } catch (IOException e) {
-            e.printStackTrace((PrintStream) log);
+        } catch (IOException ex) {
+            log.error("An error occured : ", ex);
         }
     }
     @Deprecated
@@ -315,7 +319,7 @@ public class MelonCrawlService {
                 Thread.sleep(10000);
                 doc = connect.get();
             }catch (InterruptedException ex){
-                ex.printStackTrace((PrintStream) log);
+                log.error("An error occured : ", ex);
             }
 
             assert doc != null;
