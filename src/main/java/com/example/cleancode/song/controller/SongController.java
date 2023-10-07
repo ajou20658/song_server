@@ -4,7 +4,7 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
-import com.example.cleancode.song.service.S3UploadService;
+import com.example.cleancode.aws.service.S3UploadService;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +14,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,17 +39,17 @@ public class SongController {
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
-        List<Song> list = songRepository.findAll();
+        List<Song> list = songRepository.findByIsTopTrue();
         return list;
     }
 
     @GetMapping("/search")
     @ResponseBody
-    public List<SongDto> getList2(@RequestParam @Nullable String target, @RequestParam String mode){
+    public List<SongDto> getList2(@RequestParam String target, @RequestParam @Nullable String mode){
 
         try{
             log.info("아티스트명에서");
-            return melonService.search_artist(target,mode);
+            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"));
         }catch(Exception ex){
             log.info("decode err: "+ex.toString());
         }

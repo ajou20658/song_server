@@ -1,6 +1,8 @@
 package com.example.cleancode.user.controller;
 
-import com.example.cleancode.song.service.S3UploadService;
+import com.example.cleancode.aws.entity.UploadStatus;
+import com.example.cleancode.aws.service.S3UploadService;
+import com.example.cleancode.config.GlobalArray;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.entity.User;
@@ -8,6 +10,8 @@ import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,17 +23,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Controller
 @RequestMapping("/member")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserRepository userRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
+    private final Map<String,UploadStatus> userUploadStatusMap;
+
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 반환
      */
@@ -59,7 +66,7 @@ public class UserController {
         }
         Map<String,Object> response = new HashMap<>();
         response.put("response",userOptional.get().getSelected());
-        return  new ResponseEntity<>(response,HttpStatus.OK);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
     @PostMapping("/upload")
     public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
@@ -72,10 +79,14 @@ public class UserController {
     }
     @PostMapping(value="/split",consumes = "multipart/form-data")
     public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestParam("songId") Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
-        s3UploadService.split(file,songId,userPrinciple.getId());
+        String taskId = UUID.randomUUID().toString();
+        UploadStatus newTask = new UploadStatus();
+        userUploadStatusMap.put(taskId,newTask);
+
+        s3UploadService.split(taskId,IOUtils.toByteArray((InputStream) file),songId,userPrinciple.getId()); //분기 발생 스레드
         return ResponseEntity.ok().build();
     }
-
+    @PostMapping()
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();
@@ -100,10 +111,16 @@ public class UserController {
     }
     @PostMapping("/delete")
     @ResponseBody
-    public ResponseEntity<Object> vocalDelete(@RequestBody Long SongId,@AuthenticationPrincipal UserPrinciple userPrinciple){
-        if(userService.userFileDelete("user",SongId, userPrinciple.getId())){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
+    public ResponseEntity<Object> vocalDelete(@RequestBody String url, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        userService.userFileDelete(url, userPrinciple.getId());
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/upload")
+    @ResponseBody
+    public ResponseEntity<Object> uploadCheck(@RequestParam String taskId){
+        String result = userService.userUploadCheck(taskId);
+        Map<String,String> response = new HashMap<>();
+        response.put("response",result);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

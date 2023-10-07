@@ -12,8 +12,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -75,9 +73,10 @@ public class MelonCrawlService {
         }
     };
 
-    @Scheduled(fixedRate = 21600000)
+    @Scheduled(fixedRate = 86400000) //top100인것 초기화 후 표시하기
     public void collectMelonSong() throws Exception {
         List<SongDto> pList = new LinkedList<>();
+        TopReset();
         String url = "https://www.melon.com/chart/index.htm";
 
         Document doc = Jsoup.connect(url).get();
@@ -89,9 +88,6 @@ public class MelonCrawlService {
                 pList.add(songDto);
             }
         }
-
-        Thread.sleep(3000);
-
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
             SongDto songDto = top100CrawlParser(songInfo);
@@ -104,8 +100,17 @@ public class MelonCrawlService {
         for(SongDto song: pList){
             String getGenreParam = String.valueOf(song.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
+            Thread.sleep(500);
             SongDto songdto = genreImgUrlParser(genreDoc,song);
-            songRepository.save(songdto.toChartEntity());
+            songRepository.save(songdto.toSongEntity());
+        }
+    }
+    private void TopReset(){
+        List<Song> old = songRepository.findByIsTopTrue();
+        for(Song i : old){
+            SongDto newSong = i.toSongDto();
+            newSong.setTop(false);
+            songRepository.save(newSong.toSongEntity());
         }
     }
     public void artistCrawl() throws Exception{
@@ -143,7 +148,7 @@ public class MelonCrawlService {
         }
         writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
     }
-    public List<SongDto> search_artist(String artist, String mode) throws Exception{
+    public List<SongDto> search_artist(String artist, String mode){
         Long res =0L;
         List<SongDto> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
@@ -154,31 +159,31 @@ public class MelonCrawlService {
                 m="all";
                 List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
                 log.info("first artist : {}",result3.get(0).getArtist());
-                if(!result3.isEmpty()){
+                if(result3.size()>=10){
                     log.info("any exists");
                     return result3.stream()
-                            .map(Song::toChartDto)
+                            .map(Song::toSongDto)
                             .collect(Collectors.toList());
                 }
                 break;
             case "1":
                 m="artist";
                 List<Song> result = songRepository.findByArtistContaining(artist);
-                log.info(result.toString());
-                if(!result.isEmpty()){
+//                log.info(result.toString());
+                if(result.size()>=10){
                     log.info("artist exists");
                     return result.stream()
-                            .map(Song::toChartDto)
+                            .map(Song::toSongDto)
                             .collect(Collectors.toList());
                 }
                 break;
             case "2":
                 m="song";
                 List<Song> result2 = songRepository.findByTitleContaining(artist);
-                if(!result2.isEmpty()){
+                if(result2.size()>=10){
                     log.info("title exists");
                     return result2.stream()
-                            .map(Song::toChartDto)
+                            .map(Song::toSongDto)
                             .collect(Collectors.toList());
                 }
                 break;
@@ -230,7 +235,7 @@ public class MelonCrawlService {
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
                             songDto = genreImgUrlParser(genreDoc,songDto);
-                            songRepository.save(songDto.toChartEntity());
+                            songRepository.save(songDto.toSongEntity());
                         }
                         list.add(songDto);
                     }
@@ -317,13 +322,13 @@ public class MelonCrawlService {
         }else {
             like = "0";
         }
-        SongDto songDto = SongDto.builder()
+        return SongDto.builder()
                 .likeId(Long.valueOf(like))
                 .artist(artist)
                 .title(title)
                 .id(Long.valueOf(songId))
+                .isTop(true)
                 .build();
-        return songDto;
     }
     public void writeListToFile(Set<String> dataList,String filePath){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true))) {

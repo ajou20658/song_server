@@ -21,7 +21,7 @@ public class UserSong {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id")
-    private Song sondId;
+    private Song song;
     @Column(name = "awsUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String awsUrl;
     @ElementCollection
@@ -35,9 +35,11 @@ public class UserSong {
     public UserSongDto toUserSongDto(){
         return UserSongDto.builder()
                 .id(id)
+                .song(song)
                 .awsUrl(awsUrl)
                 .spectr(spectr)
                 .createdAt(createdAt)
+                .user(user)
                 .build();
     }
 }

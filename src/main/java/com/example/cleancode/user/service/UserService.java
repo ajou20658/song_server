@@ -3,6 +3,7 @@ package com.example.cleancode.user.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.cleancode.aws.entity.UploadStatus;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
@@ -10,6 +11,9 @@ import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
+import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.NoUserException;
+import com.example.cleancode.utils.CustomException.NoUserSongException;
 import com.example.cleancode.utils.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,26 +29,34 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
     private final UserSongRepository userSongRepository;
     private final SongRepository songRepository;
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    private Map<String, UploadStatus> userUploadStatusMap;
+
     public UserDto findMember(Long id){
         log.info(id.toString());
-        Optional<User> mem = memberRepository.findById(id);
+        Optional<User> mem = userRepository.findById(id);
         if(mem.isEmpty()) return null;
         User member = mem.get();
         return member.toMemberDto();
     }
-
+    public String userUploadCheck(String taskId){
+        UploadStatus tmp = userUploadStatusMap.get(taskId);
+        if(tmp.getStatus().equals("COMPLETE")){
+            userUploadStatusMap.remove(taskId);
+        }
+        return tmp.getStatus();
+    }
     public boolean updateUser(UserDto memberDto, Long id){
         UserDto member = findMember(id);
         memberDto.setId(member.getId());
         memberDto.setRole(Role.ROLE_USER);
         try {
-            memberRepository.save(memberDto.makeMember());
+            userRepository.save(memberDto.makeMember());
             return true;
         }catch (Exception e){
             return false;
@@ -54,7 +66,7 @@ public class UserService {
     @Transactional
     public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
         String originalFilename = multipartFile.getOriginalFilename();
-        Optional<User> userOptional = memberRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()){
             return false;
         }
@@ -87,11 +99,11 @@ public class UserService {
     @Transactional
     public boolean changeSelectList(List<Long> song,Long id){
 
-        Optional<User> userOptional = memberRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty())return false;
         UserDto userDto = userOptional.get().toMemberDto();
         userDto.setSelected(song);
-        memberRepository.save(userDto.makeMember());
+        userRepository.save(userDto.makeMember());
         return true;
     }
     public List<UserSong> readUserSongList(Long id){
@@ -106,15 +118,13 @@ public class UserService {
         }
         return  result;
     }
-    public boolean userFileDelete(String folder,Long SongId,Long id){
-
-        String filename = folder+"/"+id+"_"+SongId;
-        Optional<UserSong> userSongOptional = userSongRepository.findByAwsUrl(filename);
-        if(userSongOptional.isEmpty()){
-            return true;
+    public void userFileDelete(String url,Long id){
+        amazonS3.deleteObject(bucket,url);
+        String[] songId = url.split("_");
+        Optional<UserSong> tmp = userSongRepository.findByUserIdAndSongId(id, Long.valueOf(songId[1]));
+        if(tmp.isEmpty()){
+            throw new NoUserSongException(ExceptionCode.SONG_INVALID);
         }
-        amazonS3.deleteObject(bucket,filename);
-        userSongRepository.delete(userSongOptional.get());
-        return true;
+        userSongRepository.delete(tmp.get());
     }
 }

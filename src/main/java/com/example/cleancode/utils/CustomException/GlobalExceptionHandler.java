@@ -1,4 +1,4 @@
-package com.example.cleancode.utils;
+package com.example.cleancode.utils.CustomException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -37,5 +37,18 @@ public class GlobalExceptionHandler {
         response.put("message","IOException 발생");
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
-//    @ExceptionHandler(SizeLimitExceededException)
+    @ExceptionHandler(NoUserSongException.class)
+    public ResponseEntity<Object> UserSongBadRequest(NoUserSongException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
+    @ExceptionHandler(NoUserException.class)
+    public ResponseEntity<Object> UserBadRequest(NoUserException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
 }

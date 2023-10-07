@@ -9,8 +9,4 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long> {
 
-    List<UserSong> findUserSongById(Long memberId);
-    Optional<User> findById(Long Id);
-
-
 }
