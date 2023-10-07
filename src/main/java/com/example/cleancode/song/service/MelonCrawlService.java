@@ -119,14 +119,12 @@ public class MelonCrawlService {
     public List<SongDto> search_artist(String artist, String mode){
         Long res =0L;
         List<SongDto> list = new LinkedList<>();
-        Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
-//        String all = "https://www.melon.com/search/song/index.htm?q="+artist+"&section=all&searchGnbYn=Y&kkoSpl=N&kkoDpType=#params%5Bq%5D="+artist+"&params%5Bsort%5D=hit&params%5Bsection%5D=all&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=51";
+        Pattern localpattern = Pattern.compile("'(\\d+)'");
         String m ="";
         switch(mode){
             case "0":
                 m="all";
                 List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
-                log.info("first artist : {}",result3.get(0).getArtist());
                 if(result3.size()>=10){
                     log.info("any exists");
                     return result3.stream()
@@ -179,22 +177,15 @@ public class MelonCrawlService {
                     String title = td2.select("div>div>a.fc_gray").first().text(); //title
                     title = title.replace(","," ");
                     log.info("title = {}",title);
-                    //            #frm_defaultList > div > table > tbody > tr:nth-child(17) > td:nth-child(3) > div > div > a.fc_gray
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
-                        Element td5 = tds.get(5);
 
                         String likeId = td2.select("div>div>a.fc_gray").attr("href"); //likeId
-                        Matcher matcher = pattern.matcher(likeId);
-                        String like = null;
-                        if(matcher.find()){
-                            like = matcher.group();
-                            log.info(like);
-                        }else {
-                            like = "0";
-                        }
+                        Matcher matcher = localpattern.matcher(likeId);
+                        String like = matcher.group(1);
+
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
                         SongDto songDto = SongDto.builder()

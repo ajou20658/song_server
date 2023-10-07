@@ -46,7 +46,6 @@ public class SongController {
     @GetMapping("/search")
     @ResponseBody
     public List<SongDto> getList2(@RequestParam String target, @RequestParam @Nullable String mode){
-
         try{
             log.info("아티스트명에서");
             return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"));
