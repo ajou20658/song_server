@@ -116,7 +116,7 @@ public class MelonCrawlService {
         }
     }
 
-    public List<SongDto> search_artist(String artist, String mode) throws UnsupportedEncodingException {
+    public List<SongDto> search_artist(String artist, String mode){
         Long res =0L;
         List<SongDto> list = new LinkedList<>();
         Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
@@ -159,7 +159,12 @@ public class MelonCrawlService {
                 m="album";
                 break;
         }
-        String EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
+        String EncodingArtist="";
+        try {
+            EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
         String url = "https://www.melon.com/search/song/index.htm?q="+EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
         Connection connection = Jsoup.connect(url);
