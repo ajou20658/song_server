@@ -103,7 +103,7 @@ public class S3UploadService {
         }
     }
     @Transactional
-    private void uploadSongWav(Long songId,String uuid) throws Exception {
+    public void uploadSongWav(Long songId,String uuid) throws Exception {
         Optional<Song> optionalSong = songRepository.findById(songId);
         SongDto tmp = null;
         if(optionalSong.isPresent()){
