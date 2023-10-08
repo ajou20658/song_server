@@ -283,6 +283,7 @@ public class MelonCrawlService {
 
         Optional<Song> tmp = songRepository.findById(Long.valueOf(songId));
         if(tmp.isPresent()){
+            log.info("top100 crawling:{}", tmp.get());
             return tmp.get().toSongDto();
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
