@@ -101,6 +101,10 @@ public class MelonCrawlService {
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
         for(SongDto song: pList){
+            if(!song.getGenre().isEmpty()){
+                songRepository.save(song.toSongEntity());
+                continue;
+            }
             String getGenreParam = String.valueOf(song.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
             Thread.sleep(500);
@@ -276,8 +280,10 @@ public class MelonCrawlService {
     private SongDto top100CrawlParser(Element songInfo){
         String songId = songInfo.attr("data-song-no");
         String like = null;
-        if(songRepository.findById(Long.valueOf(songId)).isPresent()){
-            return null;
+
+        Optional<Song> tmp = songRepository.findById(Long.valueOf(songId));
+        if(tmp.isPresent()){
+            return tmp.get().toSongDto();
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
         String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
