@@ -14,5 +14,5 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByArtistContaining(String artist);
     List<Song> findByTitleContaining(String title);
     List<Song> findByArtistContainingOrTitleContaining(String artist,String title);
-    List<Song> findByTopTrue();
+    List<Song> findByIsTopTrue();
 }
