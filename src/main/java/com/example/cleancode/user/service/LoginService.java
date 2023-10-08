@@ -11,7 +11,6 @@ import com.example.cleancode.user.service.oauth.KakaoLoginParam;
 import com.example.cleancode.user.service.oauth.KakaoTokenService;
 import com.example.cleancode.user.service.oauth.KakaoTokenResponse;
 import com.example.cleancode.user.service.oauth.KakaoValidateResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

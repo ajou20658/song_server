@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class MelonCrawlService {
-    private final SongRepository songRepository;
+        private final SongRepository songRepository;
 
     private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
     private final Map<String,Long> dictionary = new HashMap<String,Long>(){
@@ -74,8 +75,8 @@ public class MelonCrawlService {
             put("워십",37L);
         }
     };
-
     @Scheduled(fixedRate = 86400000) //top100인것 초기화 후 표시하기
+    @Transactional
     public void collectMelonSong() throws Exception {
         List<SongDto> pList = new LinkedList<>();
         TopReset();
@@ -103,19 +104,19 @@ public class MelonCrawlService {
             String getGenreParam = String.valueOf(song.getId());
             Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
             Thread.sleep(500);
-            SongDto songdto = genreImgUrlParser(genreDoc,song);
-            songRepository.save(songdto.toSongEntity());
+            genreImgUrlParser(genreDoc,song);
         }
     }
-    private void TopReset(){
-        List<Song> old = songRepository.findByIsTopTrue();
+    @Transactional
+    public void TopReset(){
+        List<Song> old = songRepository.findByTopTrue();
         for(Song i : old){
             SongDto newSong = i.toSongDto();
             newSong.setTop(false);
             songRepository.save(newSong.toSongEntity());
         }
     }
-
+    @Transactional
     public List<SongDto> search_artist(String artist, String mode){
         List<SongDto> list = new LinkedList<>();
         Pattern localpattern = Pattern.compile("'(\\d+)'");
@@ -180,7 +181,6 @@ public class MelonCrawlService {
                     String singer = td3.select("div>div>a").first().text(); //artist
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
-
                         String likeId = td2.select("div>div>a.fc_gray").attr("href"); //likeId
                         Matcher matcher = localpattern.matcher(likeId);
                         String like = "";
@@ -188,7 +188,6 @@ public class MelonCrawlService {
                             like = matcher.group(1);
                             log.info("likeId = {}",like);
                         }
-
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
                         SongDto songDto = SongDto.builder()
@@ -201,8 +200,7 @@ public class MelonCrawlService {
                         if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
-                            SongDto result = genreImgUrlParser(genreDoc,songDto);
-                            songRepository.save(result.toSongEntity());
+                            genreImgUrlParser(genreDoc,songDto);
                         }
                         list.add(songDto);
                     }
@@ -253,7 +251,8 @@ public class MelonCrawlService {
         }
         return values;
     }
-    private SongDto genreImgUrlParser(Document genreDoc,SongDto songDto){
+    @Transactional
+    public void genreImgUrlParser(Document genreDoc,SongDto songDto){
         String genre = genreDoc.select("div.meta dd").eq(2).text();
         String imgUrl = genreDoc.select("#d_song_org > a > img").attr("src");
         List<String> genreArray;
@@ -272,7 +271,7 @@ public class MelonCrawlService {
         songDto.setImgUrl(imgUrl);
         songDto.setEncoded_genre(encodedGenre);
         songDto.setGenre(genreArray);
-        return songDto;
+        songRepository.save(songDto.toSongEntity());
     }
     private SongDto top100CrawlParser(Element songInfo){
         String songId = songInfo.attr("data-song-no");
