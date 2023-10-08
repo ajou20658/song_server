@@ -6,6 +6,7 @@ import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.aws.service.S3UploadService;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -53,6 +54,11 @@ public class SongController {
         }
         return null;
     }
+
+
+
+
+
     @Deprecated
     @GetMapping("/artist_list_crawl")
     @ResponseBody
@@ -63,6 +69,7 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
+    @Deprecated
     @GetMapping("/artist_50Song")
     @ResponseBody
     public void get50SongPerArtist(){
@@ -146,5 +153,4 @@ public class SongController {
         String title = file.getOriginalFilename();
         return ResponseEntity.ok().build();
     }
-
 }
