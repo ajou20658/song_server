@@ -9,10 +9,12 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 @Getter
 public enum ExceptionCode {
-    MEMBER_INVALID(BAD_REQUEST, "등록되지 않은 유저."),
-    MEMBER_AUTHORIZATION(FORBIDDEN,"로그인이 필요."),
-    MEMBER_AUTHENTICATION(UNAUTHORIZED,"인증되지 않은 사용자."),
-    SONG_INVALID(BAD_REQUEST,"등록되지 않은 곡.");
+    USER_INVALID(BAD_REQUEST, "등록되지 않은 유저."),
+    USER_AUTHORIZATION(FORBIDDEN,"로그인이 필요."),
+    USER_AUTHENTICATION(UNAUTHORIZED,"인증되지 않은 사용자."),
+    SONG_INVALID(BAD_REQUEST,"등록되지 않은 곡."),
+    USER_SONG_INVALID(BAD_REQUEST,"존재하지 않은 곡");
+
     private final HttpStatus status;
     private final String message;
 }

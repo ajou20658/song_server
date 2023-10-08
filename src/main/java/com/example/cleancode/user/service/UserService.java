@@ -44,23 +44,13 @@ public class UserService {
         User member = mem.get();
         return member.toMemberDto();
     }
+    @Transactional
     public String userUploadCheck(String taskId){
         UploadStatus tmp = userUploadStatusMap.get(taskId);
         if(tmp.getStatus().equals("COMPLETE")){
             userUploadStatusMap.remove(taskId);
         }
         return tmp.getStatus();
-    }
-    public boolean updateUser(UserDto memberDto, Long id){
-        UserDto member = findMember(id);
-        memberDto.setId(member.getId());
-        memberDto.setRole(Role.ROLE_USER);
-        try {
-            userRepository.save(memberDto.makeMember());
-            return true;
-        }catch (Exception e){
-            return false;
-        }
     }
     //folder 이름 형식 : user/userId_songId
     @Transactional
@@ -118,6 +108,7 @@ public class UserService {
         }
         return  result;
     }
+    @Transactional
     public void userFileDelete(String url,Long id){
         amazonS3.deleteObject(bucket,url);
         String[] songId = url.split("_");

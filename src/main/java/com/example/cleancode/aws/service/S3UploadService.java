@@ -13,6 +13,10 @@ import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
+import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.NoSongException;
+import com.example.cleancode.utils.CustomException.NoUserException;
+import com.example.cleancode.utils.CustomException.NoUserSongException;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -119,18 +123,25 @@ public class S3UploadService {
         Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
         Optional<User> optionalUser = userRepository.findById(userId);
         Optional<Song> optionalSong = songRepository.findById(songId);
+        if(optionalSong.isEmpty()){
+            throw new NoSongException(ExceptionCode.SONG_INVALID);
+        }
+        if(optionalUser.isEmpty()){
+            throw new NoUserException(ExceptionCode.USER_INVALID);
+        }
         UserSongDto tmp = null;
         if(optionalUserSong.isPresent()){
             tmp = optionalUserSong.get().toUserSongDto();
         }else {
+
             tmp = UserSong.builder()
                     .song(optionalSong.get())
                     .user(optionalUser.get())
                     .build().toUserSongDto();
         }
         tmp.setAwsUrl("user/"+uuid+"_"+songId);
-
     }
+    @Deprecated
     private boolean vocalUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();
         String[] concat = originalFilename.split("_");
@@ -153,6 +164,7 @@ public class S3UploadService {
         }
         return true;
     }
+    @Deprecated
     private boolean instUpload(MultipartFile multipartFile){
         String originalFilename = multipartFile.getOriginalFilename();
         String[] concat = originalFilename.split("_");
