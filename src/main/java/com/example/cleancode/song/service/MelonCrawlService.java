@@ -101,7 +101,7 @@ public class MelonCrawlService {
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
         for(SongDto song: pList){
-            if(song.getGenre().isEmpty()){
+            if(song.getGenre()!=null){
                 String getGenreParam = String.valueOf(song.getId());
                 Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
                 Thread.sleep(500);
