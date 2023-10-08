@@ -101,14 +101,14 @@ public class MelonCrawlService {
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
         for(SongDto song: pList){
-            if(!song.getGenre().isEmpty()){
+            if(song.getGenre().isEmpty()){
+                String getGenreParam = String.valueOf(song.getId());
+                Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
+                Thread.sleep(500);
+                genreImgUrlParser(genreDoc,song);
+            }else{
                 songRepository.save(song.toSongEntity());
-                continue;
             }
-            String getGenreParam = String.valueOf(song.getId());
-            Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
-            Thread.sleep(500);
-            genreImgUrlParser(genreDoc,song);
         }
     }
     @Transactional
