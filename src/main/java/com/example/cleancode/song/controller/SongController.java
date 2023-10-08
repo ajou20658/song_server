@@ -40,7 +40,7 @@ public class SongController {
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
-        return songRepository.findByIsTopTrue();
+        return songRepository.findByIsTop(true);
     }
 
     @GetMapping("/search")

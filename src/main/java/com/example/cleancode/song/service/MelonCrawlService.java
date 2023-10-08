@@ -113,7 +113,7 @@ public class MelonCrawlService {
     }
     @Transactional
     public void TopReset(){
-        List<Song> old = songRepository.findByIsTopTrue();
+        List<Song> old = songRepository.findByIsTop(true);
         for(Song i : old){
             SongDto newSong = i.toSongDto();
             newSong.setTop(false);
