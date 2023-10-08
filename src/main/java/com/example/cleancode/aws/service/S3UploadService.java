@@ -23,6 +23,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -101,6 +102,7 @@ public class S3UploadService {
             uploadStatus.setStatus("FAILED");
         }
     }
+    @Transactional
     private void uploadSongWav(Long songId,String uuid) throws Exception {
         Optional<Song> optionalSong = songRepository.findById(songId);
         SongDto tmp = null;

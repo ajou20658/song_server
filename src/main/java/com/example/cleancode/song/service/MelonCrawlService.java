@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -74,7 +75,7 @@ public class MelonCrawlService {
             put("워십",37L);
         }
     };
-
+    @Transactional
     @Scheduled(fixedRate = 86400000) //top100인것 초기화 후 표시하기
     public void collectMelonSong() throws Exception {
         List<SongDto> pList = new LinkedList<>();
@@ -107,6 +108,7 @@ public class MelonCrawlService {
             songRepository.save(songdto.toSongEntity());
         }
     }
+    @Transactional
     private void TopReset(){
         List<Song> old = songRepository.findByIsTopTrue();
         for(Song i : old){
@@ -115,7 +117,7 @@ public class MelonCrawlService {
             songRepository.save(newSong.toSongEntity());
         }
     }
-
+    @Transactional
     public List<SongDto> search_artist(String artist, String mode){
         List<SongDto> list = new LinkedList<>();
         Pattern localpattern = Pattern.compile("'(\\d+)'");
@@ -201,6 +203,7 @@ public class MelonCrawlService {
                         if(songRepository.findById(Long.valueOf(parse[4])).isEmpty()){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
+                            Thread.sleep(1000);
                             SongDto result = genreImgUrlParser(genreDoc,songDto);
                             songRepository.save(result.toSongEntity());
                         }
