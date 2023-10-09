@@ -77,14 +77,16 @@ public class UserController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping(value="/split")
-    public ResponseEntity<Object> splitFile(@RequestBody MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    @PostMapping("/split")
+    public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         String taskId = UUID.randomUUID().toString();
         UploadStatus newTask = new UploadStatus();
         userUploadStatusMap.put(taskId,newTask);
 
-        s3UploadService.split(taskId,IOUtils.toByteArray((InputStream) file),songId,userPrinciple.getId()); //분기 발생 스레드
-        return ResponseEntity.ok().build();
+        s3UploadService.split(taskId,IOUtils.toByteArray(file.getInputStream()),songId,userPrinciple.getId()); //분기 발생 스레드
+        Map<String,Object> response = new HashMap<>();
+        response.put("response",taskId);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
     @PostMapping()
     @GetMapping("/vocal_list")
