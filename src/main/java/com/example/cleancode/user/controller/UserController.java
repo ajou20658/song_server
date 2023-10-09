@@ -77,7 +77,7 @@ public class UserController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping(value="/split",consumes = "multipart/form-data")
+    @PostMapping(value="/split")
     public ResponseEntity<Object> splitFile(@RequestBody MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         String taskId = UUID.randomUUID().toString();
         UploadStatus newTask = new UploadStatus();
