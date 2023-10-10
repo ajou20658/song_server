@@ -35,7 +35,7 @@ public class UserService {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private Map<String, UploadStatus> userUploadStatusMap;
+    private final Map<String, UploadStatus> userUploadStatusMap;
 
     public UserDto findMember(Long id){
         log.info(id.toString());

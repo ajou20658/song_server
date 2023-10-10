@@ -51,7 +51,7 @@ public class S3UploadService {
     private String bucket;
     private final Map<String,UploadStatus> userUploadStatusMap;
 
-    private final String url = "http://localhost:8000/separate_audio/";
+    private final String url = "http://localhost:8000/songssam/post";
 
     public Resource stream(String url){
         S3Object s3Object = amazonS3.getObject(bucket,url);
@@ -75,7 +75,7 @@ public class S3UploadService {
             body.add("file", new ByteArrayResource(bs));
             body.add("isUser", true);
             body.add("songId", songId);
-            body.add("UUID",uuid);
+            body.add("uuid",uuid);
             if (userId != null) {
                 body.add("userId", userId);
             }

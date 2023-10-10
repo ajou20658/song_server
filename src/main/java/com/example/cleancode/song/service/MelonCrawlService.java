@@ -283,8 +283,10 @@ public class MelonCrawlService {
 
         Optional<Song> tmp = songRepository.findById(Long.valueOf(songId));
         if(tmp.isPresent()){
-            log.info("top100 crawling:{}", tmp.get());
-            return tmp.get().toSongDto();
+            //log.info("top100 crawling:{}", tmp.get());
+            SongDto tmp2 = tmp.get().toSongDto();
+            tmp2.setTop(true);
+            return tmp2;
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
         String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
