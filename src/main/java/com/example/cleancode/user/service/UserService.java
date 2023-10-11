@@ -101,7 +101,7 @@ public class UserService {
         return true;
     }
 
-    @Async
+
     @Transactional
     public boolean preprocessUpload(Long songId, Long userId){
         Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
@@ -123,6 +123,7 @@ public class UserService {
         return true;
     }
     @Async
+    @Transactional
     public void djangoRequest(Resource resource, UserSong userSong){
         String uuid = userSong.getOriginUrl().split("/")[1];
         HttpHeaders headers = new HttpHeaders();
