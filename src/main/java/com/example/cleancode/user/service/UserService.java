@@ -44,7 +44,7 @@ public class UserService {
     private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private final String url = "http://localhost:8000/songssam/post";
+    private final String url = "http://localhost:8000/songssam/post/";
     public UserDto findMember(Long id){
         log.info(id.toString());
         Optional<User> mem = userRepository.findById(id);
