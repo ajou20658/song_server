@@ -20,7 +20,7 @@ public class SongDto {
     private List<Float> spectr;
     private String vocalUrl;
     private String instUrl;
-
+    private String originUrl;
     public Song toSongEntity(){
         return Song.builder()
                 .id(id)
@@ -32,6 +32,7 @@ public class SongDto {
                 .genre(genre)
                 .encoded_genre(encoded_genre)
                 .spectr(spectr)
+                .originUrl(originUrl)
                 .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
                 .build();

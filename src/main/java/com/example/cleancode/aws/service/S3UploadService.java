@@ -4,8 +4,8 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.example.cleancode.aws.entity.UploadStatus;
 import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
@@ -17,7 +17,6 @@ import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.NoSongException;
 import com.example.cleancode.utils.CustomException.NoUserException;
 import com.example.cleancode.utils.CustomException.NoUserSongException;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -49,7 +48,6 @@ public class S3UploadService {
     private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private final Map<String,UploadStatus> userUploadStatusMap;
 
     private final String url = "http://localhost:8000/songssam/post";
 
@@ -60,13 +58,11 @@ public class S3UploadService {
     //input : 원곡
     //logic : vocal + instru
     @Async
-    public void split(String taskId ,byte[] bs, Long songId, @Nullable Long userId) throws IOException {
+    @Transactional
+    public void userSongSplit(String taskId , byte[] bs, Long songId, Long userId) throws IOException {
         try {
             //전역변수 갱신
-            UploadStatus uploadStatus = userUploadStatusMap.get(taskId);
-            uploadStatus.setStatus("IN_PROGRESS");
-            uploadStatus.setExpectTime(600L);
-            userUploadStatusMap.put(taskId,uploadStatus);
+
             String uuid = UUID.randomUUID().toString();
             //헤더 설정
             HttpHeaders headers = new HttpHeaders();
@@ -76,9 +72,8 @@ public class S3UploadService {
             body.add("isUser", true);
             body.add("songId", songId);
             body.add("uuid",uuid);
-            if (userId != null) {
-                body.add("userId", userId);
-            }
+            body.add("userId", userId);
+
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             //응답 받기
@@ -89,10 +84,13 @@ public class S3UploadService {
                     String.class
             );
             log.info("status code = {}", response.getStatusCode());
-            uploadStatus.setStatus("COMPLETE");
-            userUploadStatusMap.put(taskId,uploadStatus);
-
-
+            Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
+            if(optionalUserSong.isEmpty()){
+                throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
+            }
+            UserSongDto userSongDto = optionalUserSong.get().toUserSongDto();
+            userSongDto.setStatus(ProgressStatus.COMPLETE);
+            userSongRepository.save(userSongDto.toUserSong());
             if(userId==null){
                 //노래 전송이라면
                 uploadSongWav(songId,uuid);
@@ -102,8 +100,7 @@ public class S3UploadService {
             }
             log.info("전처리 완료 taskId = {}",taskId);
         }catch (Exception e){
-            UploadStatus uploadStatus = new UploadStatus();
-            uploadStatus.setStatus("FAILED");
+            throw new RuntimeException();
         }
     }
     @Transactional

@@ -1,5 +1,6 @@
 package com.example.cleancode.user.entity;
 
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.dto.UserSongDto;
 import jakarta.persistence.*;
@@ -24,10 +25,11 @@ public class UserSong {
     private Song song;
     @Column(name = "awsUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String awsUrl;
+    @Column(name = "originUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String originUrl;
     @ElementCollection
     private List<Float> spectr;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    private ProgressStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -37,8 +39,9 @@ public class UserSong {
                 .id(id)
                 .song(song)
                 .awsUrl(awsUrl)
+                .originUrl(originUrl)
                 .spectr(spectr)
-                .createdAt(createdAt)
+                .status(status)
                 .user(user)
                 .build();
     }

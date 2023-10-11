@@ -1,17 +1,23 @@
 package com.example.cleancode.user.controller;
 
-import com.example.cleancode.aws.entity.UploadStatus;
 import com.example.cleancode.aws.service.S3UploadService;
-import com.example.cleancode.config.GlobalArray;
+import com.example.cleancode.song.entity.ProgressStatus;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
+import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
+import com.example.cleancode.user.entity.UserSong;
+import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.NoSongException;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.service.UserService;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,9 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Controller
@@ -33,9 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
+    private final SongRepository songRepository;
+    private final UserSongRepository userSongRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
-    private final Map<String,UploadStatus> userUploadStatusMap;
 
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 반환
@@ -68,7 +73,8 @@ public class UserController {
         response.put("response",userOptional.get().getSelected());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-    @PostMapping("/upload")
+    @Deprecated
+    @PostMapping("/upload2")
     public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
         log.info("file : {}",file);
@@ -77,15 +83,24 @@ public class UserController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/split")
+    @PostMapping("/upload")
     public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         String taskId = UUID.randomUUID().toString();
-        UploadStatus newTask = new UploadStatus();
-        userUploadStatusMap.put(taskId,newTask);
-
-        s3UploadService.split(taskId,IOUtils.toByteArray(file.getInputStream()),songId,userPrinciple.getId()); //분기 발생 스레드
+        Optional<User> optionalUser = userRepository.findById(userPrinciple.getId());
+        Optional<Song> optionalSong = songRepository.findById(songId);
+        if(optionalUser.isEmpty()| optionalSong.isEmpty()){
+            throw new NoSongException(ExceptionCode.SONG_INVALID);
+        }
+        UserSongDto userSongDto = UserSongDto.builder()
+                .song(optionalSong.get())
+                .user(optionalUser.get())
+                .status(ProgressStatus.PROGRESS)
+                .build();
+        userSongRepository.save(userSongDto.toUserSong());
+        s3UploadService.userSongSplit(taskId,IOUtils.toByteArray(file.getInputStream()),songId,userPrinciple.getId()); //분기 발생 스레드
+        //----------------------------------------------------------------------------------------
         Map<String,Object> response = new HashMap<>();
-        response.put("response",taskId);
+        response.put("response",songId);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
     @PostMapping()
@@ -119,10 +134,10 @@ public class UserController {
     }
     @GetMapping("/upload")
     @ResponseBody
-    public ResponseEntity<Object> uploadCheck(@RequestParam String taskId){
-        String result = userService.userUploadCheck(taskId);
+    public ResponseEntity<Object> uploadCheck(@RequestParam Long sondId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        ProgressStatus result = userService.userUploadCheck(userPrinciple.getId(),sondId);
         Map<String,String> response = new HashMap<>();
-        response.put("response",result);
+        response.put("response",result.toString());
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

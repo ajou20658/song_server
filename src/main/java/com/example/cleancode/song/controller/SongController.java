@@ -5,6 +5,7 @@ import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.aws.service.S3UploadService;
+import com.example.cleancode.song.service.VocalPreProcessService;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class SongController {
     private final MelonCrawlService melonService;
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
-
+    private final VocalPreProcessService vocalPreProcessService;
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
@@ -55,7 +56,15 @@ public class SongController {
         return null;
     }
 
-
+    @PostMapping("/upload")
+    public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
+        try{
+            vocalPreProcessService.songUpload(multipartFile,songId);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return ResponseEntity.ok().build();
+    }
 
 
 

@@ -38,6 +38,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter:3.1.2'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux:3.0.4'

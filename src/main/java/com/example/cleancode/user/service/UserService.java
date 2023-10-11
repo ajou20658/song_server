@@ -3,7 +3,7 @@ package com.example.cleancode.user.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cleancode.aws.entity.UploadStatus;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
@@ -12,9 +12,7 @@ import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.NoUserException;
 import com.example.cleancode.utils.CustomException.NoUserSongException;
-import com.example.cleancode.utils.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,8 +33,6 @@ public class UserService {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private final Map<String, UploadStatus> userUploadStatusMap;
-
     public UserDto findMember(Long id){
         log.info(id.toString());
         Optional<User> mem = userRepository.findById(id);
@@ -45,13 +41,14 @@ public class UserService {
         return member.toMemberDto();
     }
     @Transactional
-    public String userUploadCheck(String taskId){
-        UploadStatus tmp = userUploadStatusMap.get(taskId);
-        if(tmp.getStatus().equals("COMPLETE")){
-            userUploadStatusMap.remove(taskId);
+    public ProgressStatus userUploadCheck(Long userId,Long songId){
+        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
+        if(optionalUserSong.isEmpty()){
+            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
-        return tmp.getStatus();
+        return optionalUserSong.get().getStatus();
     }
+
     //folder 이름 형식 : user/userId_songId
     @Transactional
     public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
@@ -103,7 +100,6 @@ public class UserService {
         for(UserSong song1: list){
             userSongDto.setAwsUrl(song1.getAwsUrl());
             userSongDto.setSpectr(song1.getSpectr());
-            userSongDto.setCreatedAt(song1.getCreatedAt());
             result.add(userSongDto.toUserSong());
         }
         return  result;

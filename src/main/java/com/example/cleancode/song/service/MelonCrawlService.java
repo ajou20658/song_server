@@ -30,8 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class MelonCrawlService {
-        private final SongRepository songRepository;
-
+    private final SongRepository songRepository;
     private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
     private final Map<String,Long> dictionary = new HashMap<String,Long>(){
         {

@@ -27,8 +27,10 @@ public class Song {
     private List<Float> spectr;
     @Column(name = "vocalUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String vocalUrl;
-    @Column(name = "instruUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "instrUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String instUrl;
+    @Column(name = "originUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String originUrl;
     @Column(name = "genre", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
     public List<String> genre;
@@ -44,6 +46,7 @@ public class Song {
                 .encoded_genre(encoded_genre)
                 .likeId(likeId)
                 .isTop(isTop)
+                .originUrl(originUrl)
                 .spectr(spectr)
                 .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
