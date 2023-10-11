@@ -62,6 +62,7 @@ public class UserService {
         }
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
+
         if(!type.contains("audio")){
             return false;
         }else {
