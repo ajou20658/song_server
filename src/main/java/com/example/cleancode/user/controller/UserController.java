@@ -73,35 +73,26 @@ public class UserController {
         response.put("response",userOptional.get().getSelected());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-    @Deprecated
-    @PostMapping("/upload2")
-    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
-        //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        log.info("file : {}",file);
-        if(userService.userFileUpload("user",file,userPrinciple.getId())){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
-    }
+//    @Deprecated
+//    @PostMapping("/upload2")
+//    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+//        //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
+//        log.info("file : {}",file);
+//        if(userService.userFileUpload("user",file,userPrinciple.getId())){
+//            return ResponseEntity.ok().build();
+//        }
+//        return ResponseEntity.badRequest().build();
+//    }
     @PostMapping("/upload")
     public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
-        String taskId = UUID.randomUUID().toString();
-        Optional<User> optionalUser = userRepository.findById(userPrinciple.getId());
-        Optional<Song> optionalSong = songRepository.findById(songId);
-        if(optionalUser.isEmpty()| optionalSong.isEmpty()){
-            throw new NoSongException(ExceptionCode.SONG_INVALID);
+        if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",songId);
+            return new ResponseEntity<>(response,HttpStatus.OK);
         }
-        UserSongDto userSongDto = UserSongDto.builder()
-                .song(optionalSong.get())
-                .user(optionalUser.get())
-                .status(ProgressStatus.PROGRESS)
-                .build();
-        userSongRepository.save(userSongDto.toUserSong());
-        s3UploadService.userSongSplit(taskId,IOUtils.toByteArray(file.getInputStream()),songId,userPrinciple.getId()); //분기 발생 스레드
+        return ResponseEntity.badRequest().build();
         //----------------------------------------------------------------------------------------
-        Map<String,Object> response = new HashMap<>();
-        response.put("response",songId);
-        return new ResponseEntity<>(response,HttpStatus.OK);
+
     }
     @PostMapping()
     @GetMapping("/vocal_list")

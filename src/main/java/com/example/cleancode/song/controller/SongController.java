@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -58,12 +59,13 @@ public class SongController {
 
     @PostMapping("/upload")
     public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
-        try{
-            vocalPreProcessService.songUpload(multipartFile,songId);
-        }catch (Exception ex){
-            ex.printStackTrace();
+
+        if(vocalPreProcessService.songUpload(multipartFile,songId)){
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",songId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.badRequest().build();
     }
 
 

@@ -4,6 +4,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.cleancode.song.entity.ProgressStatus;
+import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
@@ -40,6 +41,7 @@ public class UserService {
         User member = mem.get();
         return member.toMemberDto();
     }
+
     @Transactional
     public ProgressStatus userUploadCheck(Long userId,Long songId){
         Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
@@ -51,11 +53,12 @@ public class UserService {
 
     //folder 이름 형식 : user/userId_songId
     @Transactional
-    public boolean userFileUpload(String folder, MultipartFile multipartFile,Long id){
-        String originalFilename = multipartFile.getOriginalFilename();
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()){
-            return false;
+    public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){
+        UUID uuid = UUID.randomUUID();
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Song> songOptional = songRepository.findById(songId);
+        if(userOptional.isEmpty()|songOptional.isEmpty()){
+            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
@@ -66,14 +69,16 @@ public class UserService {
                 //이곳에 파일형식 변경 로직 필요
             }
         }
-        String filename = folder+"/"+id+"_"+originalFilename;
+        String filename = "user/"+ uuid;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
         Optional<UserSong> userSongOptional = userSongRepository.findByAwsUrl(filename);
         UserSong userSong = userSongOptional.orElseGet(() -> UserSong.builder()
-                .awsUrl(filename)
+                .originUrl(filename)
                 .user(userOptional.get())
+                .song(songOptional.get())
+                .status(ProgressStatus.PROGRESS)
                 .build());
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
