@@ -179,7 +179,7 @@ public class MelonCrawlService {
                     Element td2 = tds.get(2);
                     String title = td2.select("div>div>a.fc_gray").first().text(); //title
                     title = title.replace(","," ");
-                    log.info("title = {}",title);
+//                    log.info("title = {}",title);
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
                     if(!singer.contains(",")){
@@ -189,7 +189,7 @@ public class MelonCrawlService {
                         String like = "";
                         while(matcher.find()){
                             like = matcher.group(1);
-                            log.info("likeId = {}",like);
+//                            log.info("likeId = {}",like);
                         }
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
@@ -199,10 +199,11 @@ public class MelonCrawlService {
                                 .id(Long.valueOf(parse[4]))
                                 .likeId(Long.valueOf(like))
                                 .build();
-                        log.info("SongId : {}, likeId : {}",songDto.getId(),songDto.getLikeId());
+//                        log.info("SongId : {}, likeId : {}",songDto.getId(),songDto.getLikeId());
                         Optional<Song> song = songRepository.findById(Long.valueOf(parse[4]));
 
                         if(song.isEmpty()){
+                            log.info("search 없음");
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
                             genreImgUrlParser(genreDoc,songDto);
@@ -260,6 +261,8 @@ public class MelonCrawlService {
     public void genreImgUrlParser(Document genreDoc,SongDto songDto){
         String genre = genreDoc.select("div.meta dd").eq(2).text();
         String imgUrl = genreDoc.select("#d_song_org > a > img").attr("src");
+        log.info("genre : {}",genre);
+        log.info("imgUrl : {}",imgUrl);
         List<String> genreArray;
         List<Long> encodedGenre = new ArrayList<>();
         if(genre.contains(",")){
