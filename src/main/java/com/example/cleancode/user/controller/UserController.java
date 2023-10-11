@@ -94,7 +94,7 @@ public class UserController {
         //----------------------------------------------------------------------------------------
 
     }
-    @PostMapping()
+
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();
