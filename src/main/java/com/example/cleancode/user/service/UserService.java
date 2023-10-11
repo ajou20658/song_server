@@ -70,7 +70,7 @@ public class UserService {
                 //이곳에 파일형식 변경 로직 필요
             }
         }
-        String filename = "user/"+ uuid;
+        String filename = "origin/"+ uuid;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
@@ -99,8 +99,8 @@ public class UserService {
         userRepository.save(userDto.makeMember());
         return true;
     }
-    public List<UserSong> readUserSongList(Long id){
-        List<UserSong> list = userSongRepository.findByUserId(id);
+    public List<UserSong> readUserSongList(Long userId){
+        List<UserSong> list = userSongRepository.findByUserId(userId);
         List<UserSong> result = new ArrayList<>();
         UserSongDto userSongDto = new UserSongDto();
         for(UserSong song1: list){
@@ -108,6 +108,7 @@ public class UserService {
             userSongDto.setSpectr(song1.getSpectr());
             userSongDto.setOriginUrl(song1.getOriginUrl());
             userSongDto.setStatus(song1.getStatus());
+            userSongDto.setSong(song1.getSong());
             result.add(userSongDto.toUserSong());
         }
         return  result;
