@@ -84,7 +84,7 @@ public class UserController {
 //        return ResponseEntity.badRequest().build();
 //    }
     @PostMapping("/upload")
-    public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
