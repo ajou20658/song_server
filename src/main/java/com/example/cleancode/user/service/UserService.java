@@ -106,18 +106,25 @@ public class UserService {
         for(UserSong song1: list){
             userSongDto.setAwsUrl(song1.getAwsUrl());
             userSongDto.setSpectr(song1.getSpectr());
+            userSongDto.setOriginUrl(song1.getOriginUrl());
+            userSongDto.setStatus(song1.getStatus());
             result.add(userSongDto.toUserSong());
         }
         return  result;
     }
     @Transactional
-    public void userFileDelete(String url,Long id){
-        amazonS3.deleteObject(bucket,url);
-        String[] songId = url.split("_");
-        Optional<UserSong> tmp = userSongRepository.findByUserIdAndSongId(id, Long.valueOf(songId[1]));
-        if(tmp.isEmpty()){
-            throw new NoUserSongException(ExceptionCode.SONG_INVALID);
+    public void userFileDelete(Long songId,Long userId){
+        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
+        if(optionalUserSong.isEmpty()){
+            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
-        userSongRepository.delete(tmp.get());
+        UserSong userSong = optionalUserSong.get();
+        if(!userSong.getAwsUrl().isEmpty()){
+            amazonS3.deleteObject(bucket,userSong.getAwsUrl());
+        }
+        if(!userSong.getOriginUrl().isEmpty()){
+            amazonS3.deleteObject(bucket,userSong.getOriginUrl());
+        }
+        userSongRepository.delete(userSong);
     }
 }

@@ -119,8 +119,8 @@ public class UserController {
     }
     @PostMapping("/delete")
     @ResponseBody
-    public ResponseEntity<Object> vocalDelete(@RequestBody String url, @AuthenticationPrincipal UserPrinciple userPrinciple){
-        userService.userFileDelete(url, userPrinciple.getId());
+    public ResponseEntity<Object> vocalDelete(@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        userService.userFileDelete(songId, userPrinciple.getId());
         return ResponseEntity.ok().build();
     }
     @GetMapping("/upload")
