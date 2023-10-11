@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 public class UserSongDto {
     private Long id;
-    private Song song;
+    private Long songId;
     private String awsUrl;
     private String originUrl;
     private List<Float> spectr;
@@ -26,7 +26,6 @@ public class UserSongDto {
     public UserSong toUserSong(){
         return UserSong.builder()
                 .id(id)
-                .song(song)
                 .awsUrl(awsUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)

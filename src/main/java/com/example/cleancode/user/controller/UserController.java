@@ -73,18 +73,9 @@ public class UserController {
         response.put("response",userOptional.get().getSelected());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-//    @Deprecated
-//    @PostMapping("/upload2")
-//    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
-//        //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-//        log.info("file : {}",file);
-//        if(userService.userFileUpload("user",file,userPrinciple.getId())){
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.badRequest().build();
-//    }
+
     @PostMapping("/upload")
-    public ResponseEntity<Object> splitFile(@RequestParam("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
@@ -92,9 +83,15 @@ public class UserController {
         }
         return ResponseEntity.badRequest().build();
         //----------------------------------------------------------------------------------------
-
     }
-
+    @PostMapping("/preprocess")
+    public ResponseEntity<Object> djangoRequest(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException{
+        boolean result = userService.preprocessUpload(songId,userPrinciple.getId());
+        if(result){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();

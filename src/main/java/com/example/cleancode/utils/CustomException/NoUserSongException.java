@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class NoUserSongException extends RuntimeException{
     private final ExceptionCode exceptionCode;
-    private final String detailMessage;
     public NoUserSongException(ExceptionCode exceptionCode){
         super(exceptionCode.getMessage());
         this.exceptionCode = exceptionCode;
-        this.detailMessage = exceptionCode.getMessage();
     }
 }

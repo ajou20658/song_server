@@ -37,11 +37,22 @@ public class UserSong {
     public UserSongDto toUserSongDto(){
         return UserSongDto.builder()
                 .id(id)
-                .song(song)
+                .songId(song.getId())
                 .awsUrl(awsUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)
                 .status(status)
+                .user(user)
+                .build();
+    }
+    public  UserSong changeStatus(ProgressStatus progressStatus){
+        return UserSong.builder()
+                .id(id)
+                .song(song)
+                .awsUrl(awsUrl)
+                .originUrl(originUrl)
+                .spectr(spectr)
+                .status(progressStatus)
                 .user(user)
                 .build();
     }

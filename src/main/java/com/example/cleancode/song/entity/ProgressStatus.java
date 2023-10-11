@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Getter
 @RequiredArgsConstructor
 public enum ProgressStatus {
+    UPLOADED("uploaded"),
     PROGRESS("progress"),
     ERROR("stop"),
     COMPLETE("complete");

@@ -1,12 +1,13 @@
 package com.example.cleancode.utils.CustomException;
 
+import com.example.cleancode.song.entity.ProgressStatus;
+import com.example.cleancode.user.entity.UserSong;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,4 +52,11 @@ public class GlobalExceptionHandler {
         response.put("message",e.getExceptionCode().getMessage());
         return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
     }
+//    @ExceptionHandler(DjangoRequestException.class)
+//    public ResponseEntity<Object> DjangoBadRequest(DjangoRequestException e){
+//        //여기서는 usersong status바꾸기\
+//        //
+//        Map<String,Object> response = new HashMap<>();
+//        response
+//    }
 }
