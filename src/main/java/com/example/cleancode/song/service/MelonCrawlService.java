@@ -207,8 +207,11 @@ public class MelonCrawlService {
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
                             genreImgUrlParser(genreDoc,songDto);
+                            SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
+                            list.add(songDto1);
+                        }else{
+                            list.add(songDto);
                         }
-                        list.add(songDto);
                     }
                 }catch (Exception ex){
                     log.error("An error occured : ", ex);
