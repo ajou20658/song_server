@@ -127,7 +127,7 @@ public class UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,Object> body = new LinkedMultiValueMap<>();
-        body.add("file",userSong.getOriginUrl());
+        body.add("fileKey",userSong.getOriginUrl());
         body.add("isUser",true);
         body.add("uuid",uuid);
 
