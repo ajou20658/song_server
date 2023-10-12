@@ -109,12 +109,10 @@ public class UserService {
             throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
         UserSong userSong = optionalUserSong.get();
-        //----------------------원본 가져오기
-        Resource resource = s3UploadService.stream(userSong.getOriginUrl());
         //---------전처리 시작 UserSong Status변경
         try {
             //전처리 요청
-            djangoRequest(resource,userSong);
+            djangoRequest(userSong);
         } catch (Exception ex){
             userSong.changeStatus(ProgressStatus.ERROR);
             userSongRepository.save(userSong);
@@ -124,12 +122,12 @@ public class UserService {
     }
     @Async
     @Transactional
-    public void djangoRequest(Resource resource, UserSong userSong){
+    public void djangoRequest(UserSong userSong){
         String uuid = userSong.getOriginUrl().split("/")[1];
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,Object> body = new LinkedMultiValueMap<>();
-        body.add("file",resource);
+        body.add("file",userSong.getOriginUrl());
         body.add("isUser",true);
         body.add("uuid",uuid);
 
