@@ -118,7 +118,7 @@ public class SongController {
                     List<SongDto> songlist = melonService.search_artist(artist,"1");
 
                     List<Long> likeString=songlist.stream()
-                            .map(SongDto::getLikeId)
+                            .map(SongDto::getId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -142,7 +142,7 @@ public class SongController {
                             continue;
                         }
                         songDto.setTitle(songDto.getTitle().replace(","," "));
-                        Long likeId = songDto.getLikeId();
+                        Long likeId = songDto.getId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";

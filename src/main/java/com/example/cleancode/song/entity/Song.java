@@ -20,8 +20,6 @@ public class Song {
     private String imgUrl;
     @Column(name = "artist", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String artist;
-    @Column(name = "likeId", nullable = false)
-    private Long likeId;
     private boolean isTop;
     @ElementCollection
     private List<Float> spectr;
@@ -44,7 +42,6 @@ public class Song {
                 .artist(artist)
                 .genre(genre)
                 .encoded_genre(encoded_genre)
-                .likeId(likeId)
                 .isTop(isTop)
                 .originUrl(originUrl)
                 .spectr(spectr)

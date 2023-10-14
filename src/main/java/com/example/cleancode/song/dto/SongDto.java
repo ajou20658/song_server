@@ -13,7 +13,6 @@ public class SongDto {
     private String title;
     private String imgUrl;
     private String artist;
-    private Long likeId;
     private boolean isTop;
     private List<String> genre;
     private List<Long> encoded_genre;
@@ -27,7 +26,6 @@ public class SongDto {
                 .title(title)
                 .imgUrl(imgUrl)
                 .artist(artist)
-                .likeId(likeId)
                 .isTop(isTop)
                 .genre(genre)
                 .encoded_genre(encoded_genre)

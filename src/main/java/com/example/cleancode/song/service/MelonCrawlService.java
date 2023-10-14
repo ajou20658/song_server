@@ -179,25 +179,17 @@ public class MelonCrawlService {
                     Element td2 = tds.get(2);
                     String title = td2.select("div>div>a.fc_gray").first().text(); //title
                     title = title.replace(","," ");
-//                    log.info("title = {}",title);
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
-                        String likeId = td2.select("div>div>a.fc_gray").attr("href"); //likeId
-                        Matcher matcher = localpattern.matcher(likeId);
-                        String like = "";
-                        while(matcher.find()){
-                            like = matcher.group(1);
-//                            log.info("likeId = {}",like);
-                        }
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
+                        Long songId = Long.parseLong(parse[4]);
                         SongDto songDto = SongDto.builder()
                                 .title(title)
                                 .artist(singer)
-                                .id(Long.valueOf(parse[4]))
-                                .likeId(Long.valueOf(like))
+                                .id(songId)
                                 .build();
 //                        log.info("SongId : {}, likeId : {}",songDto.getId(),songDto.getLikeId());
                         Optional<Song> song = songRepository.findById(Long.valueOf(parse[4]));
@@ -286,7 +278,6 @@ public class MelonCrawlService {
     }
     private SongDto top100CrawlParser(Element songInfo){
         String songId = songInfo.attr("data-song-no");
-        String like = null;
 
         Optional<Song> tmp = songRepository.findById(Long.valueOf(songId));
         if(tmp.isPresent()){
@@ -297,15 +288,7 @@ public class MelonCrawlService {
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
         String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
-        String likeId = songInfo.select("div.ellipsis.rank01 a").attr("href");//좋아요 수 ID
-        Matcher matcher = pattern.matcher(likeId);
-        if(matcher.find()){
-            like = matcher.group();
-        }else {
-            like = "0";
-        }
         return SongDto.builder()
-                .likeId(Long.valueOf(like))
                 .artist(artist)
                 .title(title)
                 .id(Long.valueOf(songId))
