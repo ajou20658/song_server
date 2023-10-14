@@ -186,23 +186,24 @@ public class MelonCrawlService {
                         String href = td4.select("div>div>a").attr("href");
                         String[] parse = parser(href);
                         Long songId = Long.parseLong(parse[4]);
-                        SongDto songDto = SongDto.builder()
-                                .title(title)
-                                .artist(singer)
-                                .id(songId)
-                                .build();
+
 //                        log.info("SongId : {}, likeId : {}",songDto.getId(),songDto.getLikeId());
                         Optional<Song> song = songRepository.findById(Long.valueOf(parse[4]));
 
-                        if(song.isEmpty()){
+                        if(song.isEmpty()){ //Song정보가 없으면
                             log.info("search 없음");
+                            SongDto songDto = SongDto.builder()
+                                    .title(title)
+                                    .artist(singer)
+                                    .id(songId)
+                                    .build();
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
                             genreImgUrlParser(genreDoc,songDto);
                             SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
                             list.add(songDto1);
                         }else{
-                            list.add(songDto);
+                            list.add(song.get().toSongDto());
                         }
                     }
                 }catch (Exception ex){
