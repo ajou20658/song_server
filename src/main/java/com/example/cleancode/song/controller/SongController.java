@@ -14,7 +14,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +62,6 @@ public class SongController {
 
     @PostMapping("/upload")
     public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
-
         if(vocalPreProcessService.songUpload(multipartFile,songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
@@ -67,8 +69,22 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-
-
+    @GetMapping("/listen")
+    public ResponseEntity<Object> listenSong(@RequestParam String url){
+        log.info("url : {}",url);
+        Resource resource = s3UploadService.miniStream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/wav"));
+        headers.setContentDispositionFormData("inline","audio.wav");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
+    @PostMapping("/preprocess")
+    public ResponseEntity<Object> processSong(@RequestParam Long songId){
+        log.info("preprocess : {}",songId);
+        return ResponseEntity.ok().build();
+    }
 
     @Deprecated
     @GetMapping("/artist_list_crawl")
@@ -158,10 +174,5 @@ public class SongController {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
-    }
-    @PostMapping("/upload_song")
-    public ResponseEntity<Object> uploadSong(@RequestBody MultipartFile file){
-        String title = file.getOriginalFilename();
-        return ResponseEntity.ok().build();
     }
 }

@@ -74,12 +74,11 @@ public class UserService {
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
 
-        if(!type.contains("audio")){
+        if(!Objects.requireNonNull(type).contains("audio")){
             return false;
         }else {
-            if(!type.equals("audio/wav")){
-                //이곳에 파일형식 변경 로직 필요
-            }
+            //이곳에 파일형식 변경 로직 필요
+            log.info(type);
         }
         String filename = "origin/"+ uuid;
         ObjectMetadata metadata = new ObjectMetadata();
@@ -128,7 +127,7 @@ public class UserService {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,Object> body = new LinkedMultiValueMap<>();
         body.add("fileKey",userSong.getOriginUrl());
-        body.add("isUser",true);
+        body.add("isUser","true");
         body.add("uuid",uuid);
 
         HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
