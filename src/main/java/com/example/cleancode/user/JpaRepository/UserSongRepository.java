@@ -11,4 +11,5 @@ public interface UserSongRepository extends JpaRepository<UserSong,Long> {
     List<UserSong> findByUserId(Long userId);
     Optional<UserSong> findByUserIdAndSongId(Long userId,Long songId);
     Optional<UserSong> findByAwsUrl(String awsUrl);
+    Optional<UserSong> findByOriginUrl(String originUrl);
 }

@@ -84,7 +84,7 @@ public class UserService {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
-        Optional<UserSong> userSongOptional = userSongRepository.findByAwsUrl(filename);
+        Optional<UserSong> userSongOptional = userSongRepository.findByOriginUrl(filename);
         UserSong userSong = userSongOptional.orElseGet(() -> UserSong.builder()
                 .originUrl(filename)
                 .user(userOptional.get())
