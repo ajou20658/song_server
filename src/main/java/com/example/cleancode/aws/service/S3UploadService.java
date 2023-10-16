@@ -36,7 +36,7 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private final String url = "http://localhost:8000/songssam/post";
+    private final String url = "http://52.15.234.183:8000/songssam/post";
 
     public Resource stream(String url){
         try {

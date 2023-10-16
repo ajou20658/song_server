@@ -42,7 +42,7 @@ public class SongController {
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
     private final VocalPreProcessService vocalPreProcessService;
-    @GetMapping("/chartjson")
+    @GetMapping("/top_list")
     @ResponseBody
     public List<Song> giveJson(){
         return songRepository.findByIsTop(true);
@@ -68,6 +68,11 @@ public class SongController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         return ResponseEntity.badRequest().build();
+    }
+    @PostMapping("/available_list")
+    public List<Song> giveAvailalbleList(){
+        List<Song> song = songRepository.findByOriginUrlIsNotNull();
+        return song;
     }
     @GetMapping("/listen")
     public ResponseEntity<Object> listenSong(@RequestParam String url){

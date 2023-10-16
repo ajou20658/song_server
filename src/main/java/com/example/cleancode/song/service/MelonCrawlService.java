@@ -86,7 +86,7 @@ public class MelonCrawlService {
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
             SongDto songDto = top100CrawlParser(songInfo);
-            if(songDto!=null){
+            if(songDto!=null){  //존재하면
                 pList.add(songDto);
             }
         }
