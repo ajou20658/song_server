@@ -14,6 +14,7 @@ import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.CustomException.NoUserSongException;
 import com.example.cleancode.utils.CustomException.DjangoRequestException;
 import lombok.RequiredArgsConstructor;
@@ -64,39 +65,44 @@ public class UserService {
 
     //folder 이름 형식 : user/userId_songId
     @Transactional
-    public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){
-        UUID uuid = UUID.randomUUID();
+    public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){ //동일한 곡에 대해 여러값이 들어가는오류
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Song> songOptional = songRepository.findById(songId);
         if(userOptional.isEmpty()|songOptional.isEmpty()){
             throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
+
+        Optional<UserSong> userSongOptional = userSongRepository.findByUserIdAndSongId(userId,songId);
+        UUID uuid = null;
+        if(userSongOptional.isEmpty()){
+            uuid = UUID.randomUUID();
+        }
+
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
 
-        if(!Objects.requireNonNull(type).contains("audio")){
-            return false;
-        }else {
-            //이곳에 파일형식 변경 로직 필요
-            log.info(type);
+        if(!Objects.requireNonNull(type).contains("mpeg")){
+            throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
         String filename = "origin/"+ uuid;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
-        Optional<UserSong> userSongOptional = userSongRepository.findByOriginUrl(filename);
-        UserSong userSong = userSongOptional.orElseGet(() -> UserSong.builder()
+        UserSong userSong = UserSong.builder()
                 .originUrl(filename)
                 .user(userOptional.get())
                 .song(songOptional.get())
                 .status(ProgressStatus.UPLOADED)
-                .build());
+                .build();
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
-            userSongRepository.save(userSong);
         }catch (IOException | SdkClientException ex){
             throw new RuntimeException();
         }
+        if(userSongOptional.isPresent()){
+            return true;
+        }
+        userSongRepository.save(userSong);
         return true;
     }
 
@@ -112,6 +118,7 @@ public class UserService {
         try {
             //전처리 요청
             djangoRequest(userSong);
+            log.info("django 요청 ");
         } catch (Exception ex){
             userSong.changeStatus(ProgressStatus.ERROR);
             userSongRepository.save(userSong);
@@ -129,10 +136,10 @@ public class UserService {
         body.add("fileKey",userSong.getOriginUrl());
         body.add("isUser","true");
         body.add("uuid",uuid);
-
+        log.info(body.toString());
         HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
 
-        String url = "http://52.15.234.183:8000/songssam/post";
+        String url = "http://52.15.234.183:8000/songssam/post/";
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
