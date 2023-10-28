@@ -34,6 +34,7 @@ public class Song {
     public List<String> genre;
     @ElementCollection
     public List<Long> encoded_genre;
+    private ProgressStatus status;
     public SongDto toSongDto(){
         return SongDto.builder()
                 .id(id)
@@ -47,6 +48,7 @@ public class Song {
                 .spectr(spectr)
                 .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
+                .status(status)
                 .build();
     }
 }

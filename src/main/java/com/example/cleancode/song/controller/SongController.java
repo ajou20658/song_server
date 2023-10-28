@@ -42,7 +42,7 @@ public class SongController {
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
     private final VocalPreProcessService vocalPreProcessService;
-    @GetMapping("/top_list")
+    @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
         return songRepository.findByIsTop(true);

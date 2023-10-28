@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
         response.put("message",e.getExceptionCode().getMessage());
         return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
     }
+    @ExceptionHandler(NoSongException.class)
+    public ResponseEntity<Object> UserBadRequest(NoSongException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
 //    @ExceptionHandler(DjangoRequestException.class)
 //    public ResponseEntity<Object> DjangoBadRequest(DjangoRequestException e){
 //        //여기서는 usersong status바꾸기\

@@ -47,13 +47,12 @@ public class UserController {
      */
     @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        UserDto member = userService.findMember(userPrinciple.getId());
-        log.info("/member/info 유저 이름 : {}",member.getNickname());
+        UserDto user = userService.findMember(userPrinciple.getId());
+//        log.info("/member/info 유저 이름 : {}",user.getNickname());
         Map<String,Object> response = new HashMap<>();
-        response.put("response",member);
-        ResponseEntity<Object> result = new ResponseEntity<>(response,HttpStatus.OK);
-        log.info(result.getHeaders().toString());
-        return result;
+        response.put("response",user);
+        //        log.info(result.getHeaders().toString());
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @PostMapping("/user_list")
@@ -65,12 +64,9 @@ public class UserController {
     }
     @GetMapping("/user_list")
     public ResponseEntity<Object> user(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        Optional<User> userOptional = userRepository.findById(userPrinciple.getId());
-        if(userOptional.isEmpty()){
-            return ResponseEntity.badRequest().build();
-        }
+        List<Song> songList = userService.userLikeSongList(userPrinciple.getId());
         Map<String,Object> response = new HashMap<>();
-        response.put("response",userOptional.get().getSelected());
+        response.put("response",songList);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
@@ -86,7 +82,7 @@ public class UserController {
     }
     @PostMapping("/preprocess")
     public ResponseEntity<Object> djangoRequest(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException{
-        boolean result = userService.preprocessUpload(songId,userPrinciple.getId());
+        boolean result = userService.preprocessStart(songId,userPrinciple.getId());
         if(result){
             return ResponseEntity.ok().build();
         }

@@ -5,6 +5,8 @@ import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.service.oauth.KakaoInfoResponse;
 import com.example.cleancode.user.entity.User;
+import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.Role;
 import com.example.cleancode.utils.jwt.JwtService;
 import com.example.cleancode.user.service.oauth.KakaoLoginParam;
@@ -35,14 +37,14 @@ public class LoginService {
 
     //jwt 토큰이 없거나 만료된 유저들
     @Transactional
-    public JwtDto join(KakaoLoginParam kakaoLoginParam) throws Exception {
+    public JwtDto join(KakaoLoginParam kakaoLoginParam) {
         KakaoTokenResponse kakaoTokenResponse = kakaoTokenService.requestAccessToken(kakaoLoginParam);
         //1. authorizationCode 로 카카오톡 accesstoken과 refreshtoken받아오기
         //1-2 토큰 유효성 검사 + 회원번호 획득
         if(kakaoTokenResponse.getAccessToken()==null){
             log.info("받은 액세스 토큰 : {}",kakaoLoginParam.getAuthorizationCode());
             log.error("유효하지않은 카카오 accessToken");
-            throw new Exception();
+            throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
         KakaoValidateResponse kakaoValidateResponse = kakaoTokenService.tokenInfo(kakaoTokenResponse.getAccessToken());
         Long id = kakaoValidateResponse.getId();
@@ -68,7 +70,7 @@ public class LoginService {
         }
         return jwtService.generate(isExist.get().toMemberDto());
     }
-
+    @Deprecated
     public JwtDto login(KakaoLoginParam kakaoLoginParam, HttpServletResponse response) {
         try{
             KakaoTokenResponse KResponse = kakaoTokenService.requestAccessToken(kakaoLoginParam);

@@ -1,5 +1,6 @@
 package com.example.cleancode.song.dto;
 
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class SongDto {
     private String vocalUrl;
     private String instUrl;
     private String originUrl;
+    private ProgressStatus status;
     public Song toSongEntity(){
         return Song.builder()
                 .id(id)
@@ -33,6 +35,7 @@ public class SongDto {
                 .originUrl(originUrl)
                 .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
+                .status(status)
                 .build();
     }
 }

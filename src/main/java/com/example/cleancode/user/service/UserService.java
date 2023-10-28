@@ -3,7 +3,6 @@ package com.example.cleancode.user.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -13,14 +12,10 @@ import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.FormatException;
-import com.example.cleancode.utils.CustomException.NoUserSongException;
-import com.example.cleancode.utils.CustomException.DjangoRequestException;
+import com.example.cleancode.utils.CustomException.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,37 +35,30 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserSongRepository userSongRepository;
     private final SongRepository songRepository;
-    private final S3UploadService s3UploadService;
+    private final Validator validator;
     private final AmazonS3 amazonS3;
     private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    @Value("${spring.django-url}")
+    private String djangoUrl;
 
-    public UserDto findMember(Long id){
-        log.info(id.toString());
-        Optional<User> mem = userRepository.findById(id);
-        if(mem.isEmpty()) return null;
-        User member = mem.get();
+    public UserDto findMember(Long userId){
+        User member = validator.userValidator(userId);
         return member.toMemberDto();
     }
 
     @Transactional
     public ProgressStatus userUploadCheck(Long userId,Long songId){
-        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
-        if(optionalUserSong.isEmpty()){
-            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
-        }
-        return optionalUserSong.get().getStatus();
+        UserSong userSong = validator.userSongValidator(songId,userId);
+        return userSong.getStatus();
     }
 
     //folder 이름 형식 : user/userId_songId
     @Transactional
     public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){ //동일한 곡에 대해 여러값이 들어가는오류
-        Optional<User> userOptional = userRepository.findById(userId);
-        Optional<Song> songOptional = songRepository.findById(songId);
-        if(userOptional.isEmpty()|songOptional.isEmpty()){
-            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
-        }
+        User user = validator.userValidator(userId);
+        Song song = validator.songValidator(songId);
 
         Optional<UserSong> userSongOptional = userSongRepository.findByUserIdAndSongId(userId,songId);
         UUID uuid = null;
@@ -90,9 +78,9 @@ public class UserService {
         metadata.setContentType(multipartFile.getContentType());
         UserSong userSong = UserSong.builder()
                 .originUrl(filename)
-                .user(userOptional.get())
-                .song(songOptional.get())
-                .status(ProgressStatus.UPLOADED)
+                .user(user)
+                .song(song)
+                .status(ProgressStatus.COMPLETE)
                 .build();
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
@@ -108,12 +96,8 @@ public class UserService {
 
 
     @Transactional
-    public boolean preprocessUpload(Long songId, Long userId){
-        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
-        if(optionalUserSong.isEmpty()){
-            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
-        }
-        UserSong userSong = optionalUserSong.get();
+    public boolean preprocessStart(Long songId, Long userId){
+        UserSong userSong = validator.userSongValidator(songId,userId);
         //---------전처리 시작 UserSong Status변경
         try {
             //전처리 요청
@@ -139,7 +123,7 @@ public class UserService {
         log.info(body.toString());
         HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
 
-        String url = "http://52.15.234.183:8000/songssam/post/";
+        String url = djangoUrl + "/songssam/post/";
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
@@ -153,11 +137,9 @@ public class UserService {
 
 
     @Transactional
-    public boolean changeSelectList(List<Long> song,Long id){
-
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty())return false;
-        UserDto userDto = userOptional.get().toMemberDto();
+    public boolean changeSelectList(List<Long> song,Long userId){
+        User user = validator.userValidator(userId);
+        UserDto userDto = user.toMemberDto();
         userDto.setSelected(song);
         userRepository.save(userDto.makeMember());
         return true;
@@ -178,11 +160,7 @@ public class UserService {
     }
     @Transactional
     public void userFileDelete(Long songId,Long userId){
-        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
-        if(optionalUserSong.isEmpty()){
-            throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
-        }
-        UserSong userSong = optionalUserSong.get();
+        UserSong userSong = validator.userSongValidator(songId,userId);
         if(!userSong.getAwsUrl().isEmpty()){
             amazonS3.deleteObject(bucket,userSong.getAwsUrl());
         }
@@ -190,5 +168,14 @@ public class UserService {
             amazonS3.deleteObject(bucket,userSong.getOriginUrl());
         }
         userSongRepository.delete(userSong);
+    }
+    public List<Song> userLikeSongList(Long userId){
+        User user = validator.userValidator(userId);
+        List<Long> songNumList = user.getSelected();
+        List<Song> songList = new ArrayList<>();
+        for(Long i:songNumList){
+            songList.add(validator.songValidator(i));
+        }
+        return songList;
     }
 }
