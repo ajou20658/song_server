@@ -59,11 +59,32 @@ public class GlobalExceptionHandler {
         response.put("message",e.getExceptionCode().getMessage());
         return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
     }
-//    @ExceptionHandler(DjangoRequestException.class)
-//    public ResponseEntity<Object> DjangoBadRequest(DjangoRequestException e){
-//        //여기서는 usersong status바꾸기\
-//        //
-//        Map<String,Object> response = new HashMap<>();
-//        response
-//    }
+    @ExceptionHandler(FormatException.class)
+    public  ResponseEntity<Object> UserBadUpload(FormatException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
+    @ExceptionHandler(DjangoRequestException.class)
+    public ResponseEntity<Object> DjangoBadRequest(DjangoRequestException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
+    @ExceptionHandler(NoAwsSongException.class)
+    public ResponseEntity<Object> AwsBadRequest(NoAwsSongException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
+    @ExceptionHandler(SizeException.class)
+    public  ResponseEntity<Object> SizeNeedUpdate(SizeException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
 }
