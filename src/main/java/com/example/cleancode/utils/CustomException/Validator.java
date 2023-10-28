@@ -28,7 +28,7 @@ public class Validator {
     }
     public UserSong userSongValidator(Long songId, Long userId){
 
-        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(songId,userId);
+        Optional<UserSong> optionalUserSong = userSongRepository.findByUserIdAndSongId(userId,songId);
         if(optionalUserSong.isEmpty()){
             throw new NoUserSongException(ExceptionCode.USER_SONG_INVALID);
         }
