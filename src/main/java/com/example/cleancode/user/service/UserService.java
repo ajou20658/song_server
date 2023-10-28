@@ -144,19 +144,19 @@ public class UserService {
         userRepository.save(userDto.makeMember());
         return true;
     }
-    public List<UserSongDto> readUserSongList(Long userId){
+    public List<UserSong> readUserSongList(Long userId){
         List<UserSong> list = userSongRepository.findByUserId(userId);
-        List<UserSongDto> result = new ArrayList<>();
-        UserSongDto userSongDto = new UserSongDto();
-        for(UserSong song1: list){
-            userSongDto.setAwsUrl(song1.getAwsUrl());
-            userSongDto.setSpectr(song1.getSpectr());
-            userSongDto.setOriginUrl(song1.getOriginUrl());
-            userSongDto.setStatus(song1.getStatus());
-            userSongDto.setSongId(song1.getSong().getId());
-            result.add(userSongDto);
-        }
-        return result;
+//        List<UserSongDto> result = new ArrayList<>();
+//        UserSongDto userSongDto = new UserSongDto();
+//        for(UserSong song1: list){
+//            userSongDto.setAwsUrl(song1.getAwsUrl());
+//            userSongDto.setSpectr(song1.getSpectr());
+//            userSongDto.setOriginUrl(song1.getOriginUrl());
+//            userSongDto.setStatus(song1.getStatus());
+//            userSongDto.setSongId(song1.getSong().getId());
+//            result.add(userSongDto);
+//        }
+        return list;
     }
     @Transactional
     public void userFileDelete(Long songId,Long userId){
