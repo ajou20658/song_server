@@ -65,7 +65,7 @@ public class UserService {
         if(userSongOptional.isEmpty()){
             uuid = UUID.randomUUID();
         }
-
+        uuid = UUID.fromString(userSongOptional.get().getOriginUrl().split("/")[1]);
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
 
