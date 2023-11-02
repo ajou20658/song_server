@@ -31,13 +31,13 @@ public class GlobalExceptionHandler {
         response.put("message","재갱신이 필요합니다");
         return new ResponseEntity<>(response,HttpStatus.IM_USED);
     }
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> ioBadRequest(IOException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
-        response.put("message","IOException 발생");
-        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(IOException.class)
+//    public ResponseEntity<Object> ioBadRequest(IOException e){
+//        Map<String,Object> response = new HashMap<>();
+//        response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
+//        response.put("message","IOException 발생");
+//        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+//    }
     @ExceptionHandler(NoUserSongException.class)
     public ResponseEntity<Object> UserSongBadRequest(NoUserSongException e){
         Map<String,Object> response = new HashMap<>();

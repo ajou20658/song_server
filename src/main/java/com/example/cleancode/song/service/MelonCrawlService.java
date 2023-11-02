@@ -166,7 +166,9 @@ public class MelonCrawlService {
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
-        String url = "https://www.melon.com/search/song/index.htm?q="+EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+"&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
+        String url = "https://www.melon.com/search/song/index.htm?q="
+                +EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+
+                "&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
         Connection connection = Jsoup.connect(url);
         try{

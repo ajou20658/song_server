@@ -163,12 +163,17 @@ public class UserService {
     @Transactional
     public void userFileDelete(Long songId,Long userId){
         UserSong userSong = validator.userSongValidator(songId,userId);
-        if(!userSong.getAwsUrl().isEmpty()){
+        if(!userSong.getAwsUrl().isEmpty()){    //분리후 압축 된 것 저장
+            log.info("SongId,UserId AwsUrl제거 : {}", userSong.getAwsUrl());
             amazonS3.deleteObject(bucket,userSong.getAwsUrl());
         }
-        if(!userSong.getOriginUrl().isEmpty()){
+        if(!userSong.getOriginUrl().isEmpty()){ //원본 파일
+            log.info("SongId,UserId OriginUrl제거 : {}", userSong.getOriginUrl());
             amazonS3.deleteObject(bucket,userSong.getOriginUrl());
         }
+//        if(!userSong.getSpectr().isEmpty()){    //f0 추출값...은 로컬에 저장하기로 했지
+//
+//        }
         userSongRepository.delete(userSong);
     }
     public List<Song> userLikeSongList(Long userId){
