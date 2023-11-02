@@ -60,7 +60,7 @@ public class UserService {
         User user = validator.userValidator(userId);
         Song song = validator.songValidator(songId);
 
-        Optional<UserSong> userSongOptional = userSongRepository.findByUserIdAndSongId(userId,songId);
+        Optional<UserSong> userSongOptional = userSongRepository.findBySongIdAndUserId(userId,songId);
         UUID uuid = null;
         uuid = userSongOptional
                 .map(userSong -> UUID.fromString(userSong.getOriginUrl().split("/")[1]))
