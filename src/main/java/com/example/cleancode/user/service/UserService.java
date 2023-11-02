@@ -62,10 +62,9 @@ public class UserService {
 
         Optional<UserSong> userSongOptional = userSongRepository.findByUserIdAndSongId(userId,songId);
         UUID uuid = null;
-        if(userSongOptional.isEmpty()){
-            uuid = UUID.randomUUID();
-        }
-        uuid = UUID.fromString(userSongOptional.get().getOriginUrl().split("/")[1]);
+        uuid = userSongOptional
+                .map(userSong -> UUID.fromString(userSong.getOriginUrl().split("/")[1]))
+                .orElseGet(UUID::randomUUID);
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
 
