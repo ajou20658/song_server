@@ -150,7 +150,7 @@ public class UserService {
 
         for(UserSong song1: list){
             result.add(UserSongDto.builder()
-                            .songId(song1.getId())
+                            .songId(song1.getSong().getId())
                             .status(song1.getStatus())
                             .spectr(song1.getSpectr())
                             .awsUrl(song1.getAwsUrl())
