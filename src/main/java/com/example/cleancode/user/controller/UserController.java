@@ -106,16 +106,16 @@ public class UserController {
                 .headers(headers)
                 .body(resource);
     }
-    @PostMapping("/delete")
+    @PostMapping("/deleteVocalFile")
     @ResponseBody
-    public ResponseEntity<Object> vocalDelete(@RequestBody Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+    public ResponseEntity<Object> vocalDelete(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
         userService.userFileDelete(songId, userPrinciple.getId());
         return ResponseEntity.ok().build();
     }
     @GetMapping("/upload")
     @ResponseBody
-    public ResponseEntity<Object> uploadCheck(@RequestParam Long sondId, @AuthenticationPrincipal UserPrinciple userPrinciple){
-        ProgressStatus result = userService.userUploadCheck(userPrinciple.getId(),sondId);
+    public ResponseEntity<Object> uploadCheck(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        ProgressStatus result = userService.userUploadCheck(userPrinciple.getId(),songId);
         Map<String,String> response = new HashMap<>();
         response.put("response",result.toString());
         return  new ResponseEntity<>(response,HttpStatus.OK);

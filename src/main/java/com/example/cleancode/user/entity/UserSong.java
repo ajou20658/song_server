@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,11 +25,11 @@ public class UserSong {
     @JoinColumn(name = "song_id")
     private Song song;
     @Column(name = "awsUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private String awsUrl;
+    private String awsUrl = "";
     @Column(name = "originUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private String originUrl;
+    private String originUrl = "";
     @ElementCollection
-    private List<Float> spectr;
+    private List<Float> spectr = new ArrayList<>();
     private ProgressStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)

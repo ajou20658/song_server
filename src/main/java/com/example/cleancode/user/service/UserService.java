@@ -77,6 +77,7 @@ public class UserService {
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
         UserSong userSong = UserSong.builder()
+                .awsUrl("")
                 .originUrl(filename)
                 .user(user)
                 .song(song)
