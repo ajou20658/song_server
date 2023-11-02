@@ -60,7 +60,7 @@ public class UserService {
         User user = validator.userValidator(userId);
         Song song = validator.songValidator(songId);
 
-        Optional<UserSong> userSongOptional = userSongRepository.findBySongIdAndUserId(userId,songId);
+        Optional<UserSong> userSongOptional = userSongRepository.findBySongIdAndUserId(songId,userId);
 
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
