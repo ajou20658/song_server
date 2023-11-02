@@ -56,22 +56,26 @@ public class UserService {
 
     //folder 이름 형식 : user/userId_songId
     @Transactional
-    public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){ //동일한 곡에 대해 여러값이 들어가는오류
+    public boolean userFileUpload(MultipartFile multipartFile,Long userId,Long songId){ //동일한 곡에 대해 여러값이 들어가는 오류
         User user = validator.userValidator(userId);
         Song song = validator.songValidator(songId);
 
         Optional<UserSong> userSongOptional = userSongRepository.findBySongIdAndUserId(userId,songId);
-        UUID uuid = null;
-        uuid = userSongOptional
-                .map(userSong -> UUID.fromString(userSong.getOriginUrl().split("/")[1]))
-                .orElseGet(UUID::randomUUID);
+
         log.info("File type : {}",multipartFile.getContentType());
         String type = multipartFile.getContentType();
 
         if(!Objects.requireNonNull(type).contains("mpeg")){
             throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
-        String filename = "origin/"+ uuid;
+        String filename="";
+        if(userSongOptional.isPresent()){   //기존에 존재한경우
+            filename = "origin/"+userSongOptional.get().getOriginUrl().split("/")[1];
+
+        }else { //기존에 없었던 경우
+            filename = "origin/"+UUID.randomUUID();
+
+        }
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
