@@ -3,21 +3,11 @@ package com.example.cleancode.user.controller;
 import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
-import com.example.cleancode.song.repository.SongRepository;
-import com.example.cleancode.user.JpaRepository.UserRepository;
-import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
-import com.example.cleancode.user.dto.UserSongDto;
-import com.example.cleancode.user.entity.User;
-import com.example.cleancode.user.entity.UserSong;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.NoSongException;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.service.UserService;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -36,9 +26,6 @@ import java.util.*;
 @RequestMapping("/member")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserRepository userRepository;
-    private final SongRepository songRepository;
-    private final UserSongRepository userSongRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
 
@@ -51,7 +38,7 @@ public class UserController {
 //        log.info("/member/info 유저 이름 : {}",user.getNickname());
         Map<String,Object> response = new HashMap<>();
         response.put("response",user);
-        //        log.info(result.getHeaders().toString());
+//        log.info(result.getHeaders().toString());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
@@ -71,7 +58,8 @@ public class UserController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+    public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+        log.info("Voice Upload Req");
         if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);

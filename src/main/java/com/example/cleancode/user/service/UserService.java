@@ -71,10 +71,8 @@ public class UserService {
         String filename="";
         if(userSongOptional.isPresent()){   //기존에 존재한경우
             filename = "origin/"+userSongOptional.get().getOriginUrl().split("/")[1];
-
         }else { //기존에 없었던 경우
             filename = "origin/"+UUID.randomUUID();
-
         }
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
