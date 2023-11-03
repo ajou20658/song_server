@@ -1,10 +1,10 @@
 HELP.md
 .gradle
 build/
+src/main/resources/application.yml
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-src/main/resources/application.ymls
 ### STS ###
 .apt_generated
 .classpath
