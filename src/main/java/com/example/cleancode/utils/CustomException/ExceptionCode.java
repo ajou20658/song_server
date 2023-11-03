@@ -17,7 +17,9 @@ public enum ExceptionCode {
     WEB_CLIENT_ERROR(INTERNAL_SERVER_ERROR,"django 서버에러 발생"),
     FORMAT_ERROR(BAD_REQUEST,"upload format 에러"),
     SIZE_ERROR(BAD_REQUEST,"upload size 에러"),
-    AWS_ERROR(BAD_REQUEST,"aws에 데이터 없음");
+    AWS_ERROR(BAD_REQUEST,"aws에 데이터 없음"),
+    EXPIRED_JWT_ERROR(BAD_REQUEST,"만료된 JWT 토큰"),
+    JWT_ERROR(BAD_REQUEST,"JWT 발급 실패");
 
     private final HttpStatus status;
     private final String message;

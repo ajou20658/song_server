@@ -34,7 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/member/**").hasRole("USER")
                         .anyRequest().permitAll()
         );
-        http.cors(a -> a.configurationSource(corsConfigurationSource()));
+        http.cors(a ->
+                a.configurationSource(corsConfigurationSource()));
         http.sessionManagement(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();

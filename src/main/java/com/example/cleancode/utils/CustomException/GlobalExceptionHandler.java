@@ -31,13 +31,20 @@ public class GlobalExceptionHandler {
         response.put("message","재갱신이 필요합니다");
         return new ResponseEntity<>(response,HttpStatus.IM_USED);
     }
-//    @ExceptionHandler(IOException.class)
-//    public ResponseEntity<Object> ioBadRequest(IOException e){
-//        Map<String,Object> response = new HashMap<>();
-//        response.put("HttpStatus",HttpStatus.UNAUTHORIZED);
-//        response.put("message","IOException 발생");
-//        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(JwtIssueException.class)
+    public ResponseEntity<Object> JwtIssueResponse(JwtIssueException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
+    @ExceptionHandler(JwtExpireException.class)
+    public ResponseEntity<Object> JwtIssueResponse(JwtExpireException e){
+        Map<String,Object> response = new HashMap<>();
+        response.put("HttpStatus",e.getExceptionCode().getStatus());
+        response.put("message",e.getExceptionCode().getMessage());
+        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
+    }
     @ExceptionHandler(NoUserSongException.class)
     public ResponseEntity<Object> UserSongBadRequest(NoUserSongException e){
         Map<String,Object> response = new HashMap<>();
