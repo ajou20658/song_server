@@ -149,7 +149,6 @@ public class UserService {
                 UserSongDto userSongDto = userSong.toUserSongDto();
                 userSongDto.setSpectr(res);
                 userSongDto.setStatus(ProgressStatus.COMPLETE);
-                log.info(userSongDto.toString());
                 userSongRepository.save(userSongDto.toUserSong());
             });
         // userSong Status변경
@@ -165,6 +164,7 @@ public class UserService {
         result.add(rawJson.getF6());
         result.add(rawJson.getF7());
         result.add(rawJson.getF8());
+        log.info(result.toString());
         return result;
     }
 
