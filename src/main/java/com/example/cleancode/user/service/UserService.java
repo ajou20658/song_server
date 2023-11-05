@@ -125,7 +125,7 @@ public class UserService {
         log.info(body.toString());
         HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
 
-        String url = djangoUrl + "/songssam/post/";
+        String url = djangoUrl + "/songssam/splitter/";
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
