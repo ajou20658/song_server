@@ -29,10 +29,6 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class S3UploadService {
     private final AmazonS3 amazonS3;
-    private final SongRepository songRepository;
-    private final UserSongRepository userSongRepository;
-    private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
