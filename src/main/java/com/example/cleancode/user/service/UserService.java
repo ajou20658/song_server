@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.*;
@@ -145,15 +146,19 @@ public class UserService {
             .body(BodyInserters.fromFormData(body))
             .retrieve()
             .bodyToMono(JsonNode.class)
-            .map(JsonNode -> JsonNode.get("message").traverse())
-            .map(JsonParser -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    return objectMapper.readValue(JsonParser,Dataframe2Json.class);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
+                .flatMap(jsonNode -> {
+                    if (jsonNode.isArray()) {
+                        JsonNode firstElement = jsonNode.get(0);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        try {
+                            return Mono.just(objectMapper.readValue(firstElement.toString(), Dataframe2Json.class));
+                        } catch (IOException e) {
+                            return Mono.error(e);
+                        }
+                    } else {
+                        return Mono.error(new RuntimeException("Expected JSON array"));
+                    }
+                })
             .subscribe(response -> {
                 log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
