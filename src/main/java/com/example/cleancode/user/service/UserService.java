@@ -133,6 +133,7 @@ public class UserService {
                 String.class
         );
         log.info("status code = {}",response.getStatusCode());
+        log.info("status message = {}",response.getBody());
         // userSong Status변경
         userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
     }
