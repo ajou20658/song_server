@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 public class Dataframe2Json {
-    private String f0_1;
-    private String f0_2;
-    private String f0_3;
-    private String f0_4;
-    private String f0_5;
-    private String f0_6;
-    private String f0_7;
-    private String f0_8;
+    private Integer f0_1;
+    private Integer f0_2;
+    private Integer f0_3;
+    private Integer f0_4;
+    private Integer f0_5;
+    private Integer f0_6;
+    private Integer f0_7;
+    private Integer f0_8;
 }
