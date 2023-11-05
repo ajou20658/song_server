@@ -15,9 +15,8 @@ import java.util.List;
 @Getter
 @Setter
 public class UserSongDto {
-    private static SongRepository songRepository;
     private Long id;
-    private Long songId;
+    private Song song;
     private String awsUrl;
     private String originUrl;
     private List<Integer> spectr;
@@ -26,7 +25,6 @@ public class UserSongDto {
     private ProgressStatus status;
 
     public UserSong toUserSong(){
-        Song song = songRepository.findById(songId).get();
         return UserSong.builder()
                 .id(id)
                 .song(song)
@@ -35,6 +33,17 @@ public class UserSongDto {
                 .spectr(spectr)
                 .status(status)
                 .user(user)
+                .build();
+    }
+    public UserSongOutput outputFormat(){
+        return UserSongOutput.builder()
+                .userId(user.getId())
+                .songId(song.getId())
+                .createdAt(createdAt)
+                .awsUrl(awsUrl)
+                .originUrl(originUrl)
+                .spectr(spectr)
+                .status(status)
                 .build();
     }
 }

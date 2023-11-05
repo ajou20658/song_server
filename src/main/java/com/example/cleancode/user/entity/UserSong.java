@@ -38,7 +38,7 @@ public class UserSong {
     public UserSongDto toUserSongDto(){
         return UserSongDto.builder()
                 .id(id)
-                .songId(song.getId())
+                .song(song)
                 .awsUrl(awsUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)

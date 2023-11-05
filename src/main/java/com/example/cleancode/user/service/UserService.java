@@ -10,6 +10,7 @@ import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
+import com.example.cleancode.user.dto.UserSongOutput;
 import com.example.cleancode.user.entity.Dataframe2Json;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
@@ -175,19 +176,12 @@ public class UserService {
         userRepository.save(userDto.makeMember());
         return true;
     }
-    public List<UserSongDto> readUserSongList(Long userId){
+    public List<UserSongOutput> readUserSongList(Long userId){
         List<UserSong> list = userSongRepository.findByUserId(userId);
-        List<UserSongDto> result = new ArrayList<>();
+        List<UserSongOutput> result = new ArrayList<>();
 
         for(UserSong song1: list){
-            result.add(UserSongDto.builder()
-                            .songId(song1.getSong().getId())
-                            .status(song1.getStatus())
-                            .spectr(song1.getSpectr())
-                            .awsUrl(song1.getAwsUrl())
-                            .originUrl(song1.getOriginUrl())
-
-                    .build());
+            result.add(song1.toUserSongDto().outputFormat());
         }
         return result;
     }
