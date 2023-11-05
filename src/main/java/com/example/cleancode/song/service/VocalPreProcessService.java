@@ -11,6 +11,7 @@ import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.CustomException.Validator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpHead;
 import org.openqa.jetty.http.HttpHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,18 +23,19 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
 import java.util.Objects;
 import java.util.UUID;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VocalPreProcessService {
     private final SongRepository songRepository;
     private final Validator validator;
     private final AmazonS3 amazonS3;
-    private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     @Value("${spring.django-url}")
@@ -92,32 +94,58 @@ public class VocalPreProcessService {
         }
     }
     //이곳은 노래 전처리 요청
+    @Transactional
+    public boolean preprocessStart(Long songId){
+        Song song = validator.songValidator(songId);
+        try{
+            djangoRequest(song);
+            log.info("django 요청");
+        }catch (Exception ex){
+            song.changeStatus(ProgressStatus.ERROR);
+            songRepository.save(song);
+            return false;
+        }
+        return true;
+    }
     @Async
     @Transactional
-    public void preprocess(Long songId){
-        Song song = validator.songValidator(songId);
+    public void djangoRequest(Song song){
         String uuid = song.getOriginUrl().split("/")[1];
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String,Object> body = new LinkedMultiValueMap<>();
+        WebClient webClient = WebClient.create();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",song.getOriginUrl());
         body.add("isUser","true");
         body.add("uuid",uuid);
-        HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
+
         String url = djangoUrl + "/songssam/splitter/";
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
+
+        webClient.post()
+            .uri(url)
+            .body(BodyInserters.fromFormData(body))
+            .retrieve()
+            .bodyToMono(String.class)
+            .subscribe(res -> {
+                log.info("status message = {}", res);
+                SongDto songDto = song.toSongDto();
+                songDto.setVocalUrl("vocal/"+uuid);
+                songDto.setInstUrl("inst/"+uuid);
+                songDto.setStatus(ProgressStatus.COMPLETE);
+                songDto.toSongEntity();
+                songRepository.save(songDto.toSongEntity());
+//                songRepository.save(song.changeStatus(ProgressStatus.COMPLETE));
+            });
+//        ResponseEntity<String> response = restTemplate.exchange(
+//                url,
+//                HttpMethod.POST,
+//                requestEntity,
+//                String.class
+//        );
+
+
         // userSong Status변경
-        SongDto songDto = song.toSongDto();
-        songDto.setVocalUrl("vocal/"+uuid);
-        songDto.setInstUrl("inst/"+uuid);
-        songDto.setStatus(ProgressStatus.COMPLETE);
-        song = songDto.toSongEntity();
-        songRepository.save(song);
+
     }
     private static byte[] getBytesFromFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);

@@ -39,7 +39,6 @@ public class UserService {
     private final SongRepository songRepository;
     private final Validator validator;
     private final AmazonS3 amazonS3;
-    private final RestTemplate restTemplate;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     @Value("${spring.django-url}")
@@ -146,7 +145,7 @@ public class UserService {
                 userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
             });
         // userSong Status변경
-        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
+//        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
     }
 
 

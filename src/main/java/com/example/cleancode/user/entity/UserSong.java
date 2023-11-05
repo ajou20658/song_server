@@ -46,7 +46,7 @@ public class UserSong {
                 .user(user)
                 .build();
     }
-    public  UserSong changeStatus(ProgressStatus progressStatus){
+    public UserSong changeStatus(ProgressStatus progressStatus){
         return UserSong.builder()
                 .id(id)
                 .song(song)

@@ -51,4 +51,21 @@ public class Song {
                 .status(status)
                 .build();
     }
+    public Song changeStatus(ProgressStatus progressStatus){
+//        this.status = progressStatus;
+        return Song.builder()
+                .id(id)
+                .title(title)
+                .imgUrl(imgUrl)
+                .artist(artist)
+                .genre(genre)
+                .encoded_genre(encoded_genre)
+                .isTop(isTop)
+                .originUrl(originUrl)
+                .spectr(spectr)
+                .vocalUrl(vocalUrl)
+                .instUrl(instUrl)
+                .status(progressStatus)
+                .build();
+    }
 }
