@@ -15,6 +15,7 @@ import com.example.cleancode.user.entity.Dataframe2Json;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.CustomException.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -145,16 +146,26 @@ public class UserService {
             .body(BodyInserters.fromFormData(body))
             .retrieve()
             .bodyToMono(JsonNode.class)
-            .map(JsonNode -> JsonNode.get("message").traverse())
-            .map(JsonParser -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    Dataframe2Json[] result = objectMapper.readValue(JsonParser,Dataframe2Json[].class);
+            .map(JsonNode -> {
+                try{
+                    String message = JsonNode.get("message").asText();
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
                     return result[0];
-                } catch (IOException e) {
+                }catch (JsonProcessingException e){
+                    log.error("파싱 에러");
                     throw new RuntimeException(e);
                 }
             })
+//            .map(JsonParser -> {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                try {
+//                    Dataframe2Json[] result = objectMapper.readValue(JsonParser,Dataframe2Json[].class);
+//                    return result[0];
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            })
             .subscribe(response -> {
                 log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
