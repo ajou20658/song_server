@@ -2,12 +2,10 @@ package com.example.cleancode.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.GeneratedValue;
 import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 public class Dataframe2Json {
     private Integer f0_1;
     private Integer f0_2;
