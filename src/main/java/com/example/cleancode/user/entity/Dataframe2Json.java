@@ -1,9 +1,15 @@
 package com.example.cleancode.user.entity;
 
 import jakarta.persistence.GeneratedValue;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Dataframe2Json {
     private Integer f0_1;
     private Integer f0_2;

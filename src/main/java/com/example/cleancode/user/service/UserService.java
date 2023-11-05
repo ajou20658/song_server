@@ -15,6 +15,8 @@ import com.example.cleancode.user.entity.Dataframe2Json;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.CustomException.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -142,7 +144,16 @@ public class UserService {
             .uri(url)
             .body(BodyInserters.fromFormData(body))
             .retrieve()
-            .bodyToMono(Dataframe2Json.class)
+            .bodyToMono(JsonNode.class)
+            .map(JsonNode -> JsonNode.get("message").traverse())
+            .map(JsonParser -> {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    return objectMapper.readValue(JsonParser,Dataframe2Json.class);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .subscribe(response -> {
                 log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
