@@ -149,7 +149,7 @@ public class UserService {
                 userSongDto.setSpectr(res);
                 userSongDto.setStatus(ProgressStatus.COMPLETE);
                 log.info(userSongDto.toString());
-                userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
+                userSongRepository.save(userSongDto.toUserSong());
             });
         // userSong Status변경
 //        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
