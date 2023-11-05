@@ -141,15 +141,12 @@ public class UserService {
             .uri(url)
             .body(BodyInserters.fromFormData(body))
             .retrieve()
-            .bodyToMono(List.class)
+            .bodyToMono(Dataframe2Json.class)
             .subscribe(response -> {
                 log.info("status message = {}",response);
-                List<Integer> res = new ArrayList<>();
-                for (Object i : response){
-                    res.add(Integer.parseInt((String) i));
-                }
+                List<Integer> res = json2List(response);
                 UserSongDto userSongDto = userSong.toUserSongDto();
-                userSongDto.setSpectr(response);
+                userSongDto.setSpectr(res);
                 userSongDto.setStatus(ProgressStatus.COMPLETE);
                 log.info(userSongDto.toString());
                 userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
@@ -157,7 +154,18 @@ public class UserService {
         // userSong Status변경
 //        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
     }
-
+    private List<Integer> json2List(Dataframe2Json rawJson){
+        List<Integer> result = new ArrayList<>();
+        result.add(rawJson.getF1());
+        result.add(rawJson.getF2());
+        result.add(rawJson.getF3());
+        result.add(rawJson.getF4());
+        result.add(rawJson.getF5());
+        result.add(rawJson.getF6());
+        result.add(rawJson.getF7());
+        result.add(rawJson.getF8());
+        return result;
+    }
 
     @Transactional
     public boolean changeSelectList(List<Long> song,Long userId){
