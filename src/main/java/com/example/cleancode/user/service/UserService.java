@@ -144,7 +144,7 @@ public class UserService {
             .retrieve()
             .bodyToMono(Dataframe2Json.class)
             .subscribe(response -> {
-                log.info("status message = {}",response.getF1());
+                log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
                 UserSongDto userSongDto = userSong.toUserSongDto();
                 userSongDto.setSpectr(res);
@@ -156,14 +156,14 @@ public class UserService {
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
         List<Integer> result = new ArrayList<>();
-        result.add(Integer.valueOf(rawJson.getF1()));
-        result.add(Integer.valueOf(rawJson.getF2()));
-        result.add(Integer.valueOf(rawJson.getF3()));
-        result.add(Integer.valueOf(rawJson.getF4()));
-        result.add(Integer.valueOf(rawJson.getF5()));
-        result.add(Integer.valueOf(rawJson.getF6()));
-        result.add(Integer.valueOf(rawJson.getF7()));
-        result.add(Integer.valueOf(rawJson.getF8()));
+        result.add(Integer.valueOf(rawJson.getF0_1()));
+        result.add(Integer.valueOf(rawJson.getF0_2()));
+        result.add(Integer.valueOf(rawJson.getF0_3()));
+        result.add(Integer.valueOf(rawJson.getF0_4()));
+        result.add(Integer.valueOf(rawJson.getF0_5()));
+        result.add(Integer.valueOf(rawJson.getF0_6()));
+        result.add(Integer.valueOf(rawJson.getF0_7()));
+        result.add(Integer.valueOf(rawJson.getF0_8()));
         log.info(result.toString());
         return result;
     }
