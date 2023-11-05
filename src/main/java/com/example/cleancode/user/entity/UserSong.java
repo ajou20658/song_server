@@ -29,7 +29,7 @@ public class UserSong {
     @Column(name = "originUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String originUrl;
     @ElementCollection
-    private List<Float> spectr;
+    private List<Integer> spectr;
     private ProgressStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)

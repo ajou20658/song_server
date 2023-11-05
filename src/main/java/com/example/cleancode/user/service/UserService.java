@@ -10,6 +10,7 @@ import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
+import com.example.cleancode.user.entity.Dataframe2Json;
 import com.example.cleancode.user.entity.User;
 import com.example.cleancode.user.entity.UserSong;
 import com.example.cleancode.utils.CustomException.*;
@@ -135,13 +136,22 @@ public class UserService {
 //                requestEntity,
 //                String.class
 //        );
+
         webClient.post()
             .uri(url)
             .body(BodyInserters.fromFormData(body))
             .retrieve()
-            .bodyToMono(String.class)
+            .bodyToMono(List.class)
             .subscribe(response -> {
                 log.info("status message = {}",response);
+                List<Integer> res = new ArrayList<>();
+                for (Object i : response){
+                    res.add(Integer.parseInt((String) i));
+                }
+                UserSongDto userSongDto = userSong.toUserSongDto();
+                userSongDto.setSpectr(response);
+                userSongDto.setStatus(ProgressStatus.COMPLETE);
+                log.info(userSongDto.toString());
                 userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
             });
         // userSong Status변경
