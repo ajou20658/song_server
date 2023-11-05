@@ -144,7 +144,7 @@ public class UserService {
             .retrieve()
             .bodyToMono(Dataframe2Json.class)
             .subscribe(response -> {
-                log.info("status message = {}",response);
+                log.info("status message = {}",response.getF1());
                 List<Integer> res = json2List(response);
                 UserSongDto userSongDto = userSong.toUserSongDto();
                 userSongDto.setSpectr(res);
