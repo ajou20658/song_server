@@ -156,14 +156,14 @@ public class UserService {
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
         List<Integer> result = new ArrayList<>();
-        result.add(rawJson.getF1());
-        result.add(rawJson.getF2());
-        result.add(rawJson.getF3());
-        result.add(rawJson.getF4());
-        result.add(rawJson.getF5());
-        result.add(rawJson.getF6());
-        result.add(rawJson.getF7());
-        result.add(rawJson.getF8());
+        result.add(Integer.valueOf(rawJson.getF1()));
+        result.add(Integer.valueOf(rawJson.getF2()));
+        result.add(Integer.valueOf(rawJson.getF3()));
+        result.add(Integer.valueOf(rawJson.getF4()));
+        result.add(Integer.valueOf(rawJson.getF5()));
+        result.add(Integer.valueOf(rawJson.getF6()));
+        result.add(Integer.valueOf(rawJson.getF7()));
+        result.add(Integer.valueOf(rawJson.getF8()));
         log.info(result.toString());
         return result;
     }
