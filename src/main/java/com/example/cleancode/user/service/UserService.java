@@ -24,6 +24,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.*;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.util.*;
@@ -116,24 +118,33 @@ public class UserService {
     @Transactional
     public void djangoRequest(UserSong userSong){
         String uuid = userSong.getOriginUrl().split("/")[1];
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String,Object> body = new LinkedMultiValueMap<>();
+        WebClient webClient = WebClient.create();
+
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",userSong.getOriginUrl());
         body.add("isUser","true");
         body.add("uuid",uuid);
+
         log.info(body.toString());
-        HttpEntity<MultiValueMap<String,Object>> requestEntity = new HttpEntity<>(body,headers);
 
         String url = djangoUrl + "/songssam/splitter/";
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-        log.info("status code = {}",response.getStatusCode());
-        log.info("status message = {}",response.getBody());
+//        ResponseEntity<String> response = restTemplate.exchange(
+//                url,
+//                HttpMethod.POST,
+//                requestEntity,
+//                String.class
+//        );
+        webClient.post()
+            .uri(url)
+            .body(BodyInserters.fromFormData(body))
+            .retrieve()
+            .bodyToMono(String.class)
+            .subscribe(response -> {
+                log.info("status message = {}",response);
+                userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
+            });
         // userSong Status변경
         userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
     }
