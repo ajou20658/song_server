@@ -84,7 +84,7 @@ public class UserService {
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
         UserSong userSong = UserSong.builder()
-                .awsUrl("")
+                .vocalUrl("")
                 .originUrl(filename)
                 .user(user)
                 .song(song)
@@ -157,19 +157,11 @@ public class UserService {
                     throw new RuntimeException(e);
                 }
             })
-//            .map(JsonParser -> {
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                try {
-//                    Dataframe2Json[] result = objectMapper.readValue(JsonParser,Dataframe2Json[].class);
-//                    return result[0];
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            })
             .subscribe(response -> {
                 log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
                 UserSongDto userSongDto = userSong.toUserSongDto();
+                userSongDto.setVocalUrl("vocal/"+uuid);
                 userSongDto.setSpectr(res);
                 userSongDto.setStatus(ProgressStatus.COMPLETE);
                 userSongRepository.save(userSongDto.toUserSong());
@@ -211,9 +203,9 @@ public class UserService {
     @Transactional
     public void userFileDelete(Long songId,Long userId){
         UserSong userSong = validator.userSongValidator(songId,userId);
-        if(!userSong.getAwsUrl().isEmpty()){    //분리후 압축 된 것 저장
-            log.info("SongId,UserId AwsUrl제거 : {}", userSong.getAwsUrl());
-            amazonS3.deleteObject(bucket,userSong.getAwsUrl());
+        if(!userSong.getVocalUrl().isEmpty()){    //분리후 압축 된 것 저장
+            log.info("SongId,UserId AwsUrl제거 : {}", userSong.getVocalUrl());
+            amazonS3.deleteObject(bucket,userSong.getVocalUrl());
         }
         if(!userSong.getOriginUrl().isEmpty()){ //원본 파일
             log.info("SongId,UserId OriginUrl제거 : {}", userSong.getOriginUrl());

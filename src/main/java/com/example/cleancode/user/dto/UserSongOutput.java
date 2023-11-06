@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 public class UserSongOutput {
     private Long songId;
-    private String awsUrl;
+    private String vocalUrl;
     private String originUrl;
     private List<Integer> spectr;
     private LocalDateTime createdAt;

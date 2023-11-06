@@ -7,9 +7,13 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
+import com.example.cleancode.user.entity.Dataframe2Json;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.CustomException.Validator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpHead;
@@ -27,6 +31,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 @Slf4j
@@ -125,9 +131,21 @@ public class VocalPreProcessService {
             .uri(url)
             .body(BodyInserters.fromFormData(body))
             .retrieve()
-            .bodyToMono(String.class)
-            .subscribe(res -> {
-                log.info("status message = {}", res);
+                .bodyToMono(JsonNode.class)
+                .map(JsonNode -> {
+                    try{
+                        String message = JsonNode.get("message").asText();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                        return result[0];
+                    }catch (JsonProcessingException e){
+                        log.error("파싱 에러");
+                        throw new RuntimeException(e);
+                    }
+                })
+            .subscribe(response -> {
+//                log.info("status message = {}", res);
+                List<Integer> res = json2List(response);
                 SongDto songDto = song.toSongDto();
                 songDto.setVocalUrl("vocal/"+uuid);
                 songDto.setInstUrl("inst/"+uuid);
@@ -136,16 +154,20 @@ public class VocalPreProcessService {
                 songRepository.save(songDto.toSongEntity());
 //                songRepository.save(song.changeStatus(ProgressStatus.COMPLETE));
             });
-//        ResponseEntity<String> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.POST,
-//                requestEntity,
-//                String.class
-//        );
-
-
         // userSong Status변경
-
+    }
+    private List<Integer> json2List(Dataframe2Json rawJson){
+        List<Integer> result = new ArrayList<>();
+        result.add(rawJson.getF0_1());
+        result.add(rawJson.getF0_2());
+        result.add(rawJson.getF0_3());
+        result.add(rawJson.getF0_4());
+        result.add(rawJson.getF0_5());
+        result.add(rawJson.getF0_6());
+        result.add(rawJson.getF0_7());
+        result.add(rawJson.getF0_8());
+        log.info(result.toString());
+        return result;
     }
     private static byte[] getBytesFromFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);

@@ -22,7 +22,7 @@ public class Song {
     private String artist;
     private boolean isTop;
     @ElementCollection
-    private List<Float> spectr;
+    private List<Integer> spectr;
     @Column(name = "vocalUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String vocalUrl;
     @Column(name = "instrUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
