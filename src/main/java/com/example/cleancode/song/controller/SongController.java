@@ -68,7 +68,7 @@ public class SongController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
+    public ResponseEntity<Object> uploadSong(@RequestPart("file") MultipartFile multipartFile, @RequestParam Long songId){
         if(vocalPreProcessService.songUpload(multipartFile,songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
