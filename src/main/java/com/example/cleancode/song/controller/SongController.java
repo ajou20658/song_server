@@ -187,7 +187,7 @@ public class SongController {
     }
 
     @GetMapping("/download/csv")
-    public void downloadCSV(HttpServletResponse response) throws Exception {
+    public ResponseEntity<byte[]> downloadCSV() throws Exception {
 
         List<SongFormat> data = songRepository.findPartialData();
 
@@ -235,13 +235,20 @@ public class SongController {
                     i.getEncodedGenre()+","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
                     +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
         }
+        byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
 
-        response.setContentType("text/csv");
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
-        response.setContentLength(csvData.length());
-
-        PrintWriter writer = response.getWriter();
-        writer.write(csvData.toString());
-//        return ResponseEntity.ok().build();
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
+//        response.setContentLength(csvData.length());
+//
+//        PrintWriter writer = response.getWriter();
+//        writer.write(csvData.toString());
+////        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentLength(csvBytes.length)
+                .body(csvBytes);
     }
 }
