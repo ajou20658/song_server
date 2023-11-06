@@ -1,9 +1,9 @@
 package com.example.cleancode.user.controller;
 
-import com.example.cleancode.song.service.S3UploadService;
-import com.example.cleancode.user.JpaRepository.UserRepository;
+import com.example.cleancode.aws.service.S3UploadService;
+import com.example.cleancode.song.entity.ProgressStatus;
+import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.dto.UserDto;
-import com.example.cleancode.user.entity.User;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,22 +26,20 @@ import java.util.*;
 @RequestMapping("/member")
 @RequiredArgsConstructor
 public class UserController {
-
-    private final UserRepository userRepository;
     private final UserService userService;
     private final S3UploadService s3UploadService;
+
     /**
      * 쿠키값에 저장된 jwt 토큰을 기반으로 유저 반환
      */
     @GetMapping("/info")
     public ResponseEntity<Object> memberinfo(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        UserDto member = userService.findMember(userPrinciple.getId());
-        log.info("/member/info 유저 이름 : {}",member.getNickname());
+        UserDto user = userService.findMember(userPrinciple.getId());
+//        log.info("/member/info 유저 이름 : {}",user.getNickname());
         Map<String,Object> response = new HashMap<>();
-        response.put("response",member);
-        ResponseEntity<Object> result = new ResponseEntity<>(response,HttpStatus.OK);
-        log.info(result.getHeaders().toString());
-        return result;
+        response.put("response",user);
+//        log.info(result.getHeaders().toString());
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @PostMapping("/user_list")
@@ -53,29 +51,31 @@ public class UserController {
     }
     @GetMapping("/user_list")
     public ResponseEntity<Object> user(@AuthenticationPrincipal UserPrinciple userPrinciple){
-        Optional<User> userOptional = userRepository.findById(userPrinciple.getId());
-        if(userOptional.isEmpty()){
-            return ResponseEntity.badRequest().build();
-        }
+        List<Song> songList = userService.userLikeSongList(userPrinciple.getId());
         Map<String,Object> response = new HashMap<>();
-        response.put("response",userOptional.get().getSelected());
-        return  new ResponseEntity<>(response,HttpStatus.OK);
+        response.put("response",songList);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
+
     @PostMapping("/upload")
-    public ResponseEntity<Object> saveFileV1(@RequestBody MultipartFile file, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
-        //file이용해서 file의 음역대 분석 -> min,max 음역대 추출 min,max는 파일 이름으로 사용할 예정
-        log.info("file : {}",file);
-        if(userService.userFileUpload("user",file,userPrinciple.getId())){
+    public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
+        log.info("Voice Upload Req");
+        if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",songId);
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        }
+        return ResponseEntity.badRequest().build();
+        //----------------------------------------------------------------------------------------
+    }
+    @PostMapping("/preprocess")
+    public ResponseEntity<Object> djangoRequest(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException{
+        boolean result = userService.preprocessStart(songId,userPrinciple.getId());
+        if(result){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/split")
-    public ResponseEntity<Object> splitFile(@RequestBody MultipartFile file) throws IOException {
-        s3UploadService.split(file);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/vocal_list")
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();
@@ -85,25 +85,27 @@ public class UserController {
     @GetMapping("/download")
     @ResponseBody
     public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
-        try{
-            log.info("String : {}",url);
-            Resource resource = s3UploadService.stream(url);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType("audio/wav"));
-            headers.setContentDispositionFormData("inline","audio.wav");
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        }catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+        log.info("String : {}",url);
+        Resource resource = s3UploadService.stream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/wav"));
+        headers.setContentDispositionFormData("inline","audio.wav");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
     }
-    @PostMapping("/delete")
+    @PostMapping("/deleteVocalFile")
     @ResponseBody
-    public ResponseEntity<Object> vocalDelete(@RequestBody Long SongId,@AuthenticationPrincipal UserPrinciple userPrinciple){
-        if(userService.userFileDelete("user",SongId, userPrinciple.getId())){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
+    public ResponseEntity<Object> vocalDelete(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        userService.userFileDelete(songId, userPrinciple.getId());
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/upload")
+    @ResponseBody
+    public ResponseEntity<Object> uploadCheck(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple){
+        ProgressStatus result = userService.userUploadCheck(userPrinciple.getId(),songId);
+        Map<String,String> response = new HashMap<>();
+        response.put("response",result.toString());
+        return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

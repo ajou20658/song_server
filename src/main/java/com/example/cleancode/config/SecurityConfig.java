@@ -34,7 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/member/**").hasRole("USER")
                         .anyRequest().permitAll()
         );
-        http.cors(a -> a.configurationSource(corsConfigurationSource()));
+        http.cors(a ->
+                a.configurationSource(corsConfigurationSource()));
         http.sessionManagement(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
@@ -55,9 +56,9 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-    @Bean
-    public RestTemplate getRestTemplate(){
-        return new RestTemplate();
-    }
+//    @Bean
+//    public RestTemplate getRestTemplate(){
+//        return new RestTemplate();
+//    }
 
 }

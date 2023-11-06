@@ -20,21 +20,22 @@ public class Song {
     private String imgUrl;
     @Column(name = "artist", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String artist;
-    @Column(name = "likeId", nullable = false)
-    private Long likeId;
+    private boolean isTop;
     @ElementCollection
     private List<Float> spectr;
     @Column(name = "vocalUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String vocalUrl;
-    @Column(name = "instruUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "instrUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String instUrl;
-
+    @Column(name = "originUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String originUrl;
     @Column(name = "genre", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     @ElementCollection
     public List<String> genre;
     @ElementCollection
     public List<Long> encoded_genre;
-    public SongDto toChartDto(){
+    private ProgressStatus status;
+    public SongDto toSongDto(){
         return SongDto.builder()
                 .id(id)
                 .title(title)
@@ -42,10 +43,29 @@ public class Song {
                 .artist(artist)
                 .genre(genre)
                 .encoded_genre(encoded_genre)
-                .likeId(likeId)
+                .isTop(isTop)
+                .originUrl(originUrl)
                 .spectr(spectr)
                 .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
+                .status(status)
+                .build();
+    }
+    public Song changeStatus(ProgressStatus progressStatus){
+//        this.status = progressStatus;
+        return Song.builder()
+                .id(id)
+                .title(title)
+                .imgUrl(imgUrl)
+                .artist(artist)
+                .genre(genre)
+                .encoded_genre(encoded_genre)
+                .isTop(isTop)
+                .originUrl(originUrl)
+                .spectr(spectr)
+                .vocalUrl(vocalUrl)
+                .instUrl(instUrl)
+                .status(progressStatus)
                 .build();
     }
 }

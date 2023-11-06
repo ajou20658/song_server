@@ -1,5 +1,6 @@
 package com.example.cleancode.user.entity;
 
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.dto.UserSongDto;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,13 +23,14 @@ public class UserSong {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id")
-    private Song sondId;
-    @Column(name = "awsUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private Song song;
+    @Column(name = "awsUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String awsUrl;
+    @Column(name = "originUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String originUrl;
     @ElementCollection
-    private List<Float> spectr;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    private List<Integer> spectr;
+    private ProgressStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -35,9 +38,23 @@ public class UserSong {
     public UserSongDto toUserSongDto(){
         return UserSongDto.builder()
                 .id(id)
+                .song(song)
                 .awsUrl(awsUrl)
+                .originUrl(originUrl)
                 .spectr(spectr)
-                .createdAt(createdAt)
+                .status(status)
+                .user(user)
+                .build();
+    }
+    public UserSong changeStatus(ProgressStatus progressStatus){
+        return UserSong.builder()
+                .id(id)
+                .song(song)
+                .awsUrl(awsUrl)
+                .originUrl(originUrl)
+                .spectr(spectr)
+                .status(progressStatus)
+                .user(user)
                 .build();
     }
 }

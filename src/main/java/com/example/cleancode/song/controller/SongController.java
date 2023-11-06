@@ -4,22 +4,26 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
-import com.example.cleancode.song.service.S3UploadService;
+import com.example.cleancode.aws.service.S3UploadService;
+import com.example.cleancode.song.service.VocalPreProcessService;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,26 +41,56 @@ public class SongController {
     private final MelonCrawlService melonService;
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
-
+    private final VocalPreProcessService vocalPreProcessService;
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
-        List<Song> list = songRepository.findAll();
-        return list;
+        return songRepository.findByIsTop(true);
     }
 
     @GetMapping("/search")
     @ResponseBody
-    public List<SongDto> getList2(@RequestParam @Nullable String target, @RequestParam String mode){
-
+    public List<SongDto> getList2(@RequestParam String target, @RequestParam @Nullable String mode){
         try{
             log.info("아티스트명에서");
-            return melonService.search_artist(target,mode);
+            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"));
         }catch(Exception ex){
             log.info("decode err: "+ex.toString());
         }
         return null;
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
+        if(vocalPreProcessService.songUpload(multipartFile,songId)){
+            Map<String,Object> response = new HashMap<>();
+            response.put("response",songId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    @PostMapping("/available_list")
+    public List<Song> giveAvailalbleList(){
+        List<Song> song = songRepository.findByOriginUrlIsNotNull();
+        return song;
+    }
+    @GetMapping("/listen")
+    public ResponseEntity<Object> listenSong(@RequestParam String url){
+        log.info("url : {}",url);
+        Resource resource = s3UploadService.miniStream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/wav"));
+        headers.setContentDispositionFormData("inline","audio.wav");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
+    @PostMapping("/preprocess")
+    public ResponseEntity<Object> processSong(@RequestParam Long songId){
+        log.info("preprocess : {}",songId);
+        return ResponseEntity.ok().build();
+    }
+
     @Deprecated
     @GetMapping("/artist_list_crawl")
     @ResponseBody
@@ -67,6 +101,7 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
+    @Deprecated
     @GetMapping("/artist_50Song")
     @ResponseBody
     public void get50SongPerArtist(){
@@ -88,7 +123,7 @@ public class SongController {
                     List<SongDto> songlist = melonService.search_artist(artist,"1");
 
                     List<Long> likeString=songlist.stream()
-                            .map(SongDto::getLikeId)
+                            .map(SongDto::getId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -112,7 +147,7 @@ public class SongController {
                             continue;
                         }
                         songDto.setTitle(songDto.getTitle().replace(","," "));
-                        Long likeId = songDto.getLikeId();
+                        Long likeId = songDto.getId();
                         Integer sumCnt = likeIDSumCntMap.get(likeId);
                         if(sumCnt!=null){
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
@@ -145,10 +180,4 @@ public class SongController {
             throw new RuntimeException(e);
         }
     }
-    @PostMapping("/upload_song")
-    public ResponseEntity<Object> uploadSong(@RequestBody MultipartFile file){
-        String title = file.getOriginalFilename();
-        return ResponseEntity.ok().build();
-    }
-
 }
