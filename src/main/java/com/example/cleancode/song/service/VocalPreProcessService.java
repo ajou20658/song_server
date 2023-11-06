@@ -46,6 +46,7 @@ public class VocalPreProcessService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
+    @Transactional
     public boolean songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
 
@@ -54,7 +55,7 @@ public class VocalPreProcessService {
         }
         Song song = validator.songValidator(songId);
         String filename="";
-        if(song.getOriginUrl().isBlank()){
+        if(song.getOriginUrl()!=null){
             filename = "origin/"+song.getOriginUrl().split("/")[1];
         }else{
             filename = "origin/"+UUID.randomUUID();
@@ -62,6 +63,8 @@ public class VocalPreProcessService {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
+
+
         SongDto songDto = validator.songValidator(songId).toSongDto();
         songDto.setOriginUrl(filename);
         songDto.setStatus(ProgressStatus.UPLOADED);
