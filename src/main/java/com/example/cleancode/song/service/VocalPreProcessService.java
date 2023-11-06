@@ -49,11 +49,16 @@ public class VocalPreProcessService {
     public boolean songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
 
-        if((!Objects.requireNonNull(type).contains("audio"))){
+        if((!Objects.requireNonNull(type).contains("mpeg"))){
             throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
-        UUID uuid = UUID.randomUUID();
-        String filename = "song/"+uuid;
+        Song song = validator.songValidator(songId);
+        String filename="";
+        if(song.getOriginUrl().isEmpty()){
+            filename = "origin/"+song.getOriginUrl().split("/")[1];
+        }else{
+            filename = "origin/"+UUID.randomUUID();
+        }
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
 
