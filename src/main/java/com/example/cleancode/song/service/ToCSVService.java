@@ -71,11 +71,12 @@ public class ToCSVService {
         for (SongOutput i : result){
             csvData.append(i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
                     i.getEncodedGenre()+","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
-            +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8());
+            +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
         }
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
+        response.setContentLength(csvData.length());
 
         PrintWriter writer = response.getWriter();
         writer.write(csvData.toString());
