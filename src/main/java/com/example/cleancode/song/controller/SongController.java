@@ -204,11 +204,19 @@ public class SongController {
         for(int i=0;i<contsLikeArray.length();i++){
             JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
             System.out.println("contsLikeObject = " + contsLikeObject.toString());
-
-            Integer likeId = contsLikeObject.getInt("CONTSID");
-
-            Integer sumCnt = contsLikeObject.getInt("SUMMCNT");
-            likeMap.put(likeId,sumCnt);
+            int likeId = 0;
+            if(contsLikeObject.has("CONTSID")&&!contsLikeObject.isNull("CONTSID")){
+                if(contsLikeObject.get("CONTSID") instanceof Integer){
+                    likeId = contsLikeObject.getInt("CONTSID");
+                }
+            }
+            int sumcnt = 0;
+            if(contsLikeObject.has("SUMMCNT")&&!contsLikeObject.isNull("SUMMCNT")){
+                if(contsLikeObject.get("SUMMCNT") instanceof Integer){
+                    sumcnt = contsLikeObject.getInt("SUMMCNT");
+                }
+            }
+            likeMap.put(likeId,sumcnt);
         }
         List<SongOutput> result = new ArrayList<>();
         for (SongFormat i: data){
