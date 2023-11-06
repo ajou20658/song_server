@@ -8,6 +8,7 @@ import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.service.VocalPreProcessService;
+import com.example.cleancode.utils.UserPrinciple;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -93,9 +95,13 @@ public class SongController {
     @PostMapping("/preprocess")
     public ResponseEntity<Object> processSong(@RequestParam Long songId){
         log.info("preprocess : {}",songId);
-        return ResponseEntity.ok().build();
+        boolean result = vocalPreProcessService.preprocessStart(songId);
+        if(result){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
-
+    @PostMapping
     @Deprecated
     @GetMapping("/artist_list_crawl")
     @ResponseBody
@@ -198,7 +204,7 @@ public class SongController {
             likeList.add(i.getId());
         }
         Map<Integer,Integer> likeMap = new HashMap<>();
-
+        log.info(likeList.toString());
         JSONObject jsonObject = melonService.getLikeNum(likeList);
         JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
         for(int i=0;i<contsLikeArray.length();i++){
@@ -260,4 +266,5 @@ public class SongController {
                 .contentLength(csvBytes.length)
                 .body(csvBytes);
     }
+
 }
