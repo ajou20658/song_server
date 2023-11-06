@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class MelonCrawlService {
     private final SongRepository songRepository;
     private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
+    public static final String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
     private final Map<String,Long> dictionary = new HashMap<String,Long>(){
         {
             put("랩/힙합",0L);
@@ -102,7 +103,9 @@ public class MelonCrawlService {
         for(SongDto song: pList){
             if(song.getGenre()==null){
                 String getGenreParam = String.valueOf(song.getId());
-                Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
+                Document genreDoc = Jsoup.connect(genreUrl+getGenreParam)
+                        .userAgent(userAgent)
+                        .get();
                 Thread.sleep(500);
                 genreImgUrlParser(genreDoc,song);
             }else{
@@ -170,7 +173,7 @@ public class MelonCrawlService {
                 +EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+
                 "&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
-        Connection connection = Jsoup.connect(url);
+        Connection connection = Jsoup.connect(url).userAgent(userAgent);
         try{
             Thread.sleep(3000);
             Document doc = connection.get();
@@ -200,7 +203,9 @@ public class MelonCrawlService {
                                     .id(songId)
                                     .build();
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
-                            Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
+                            Document genreDoc = Jsoup.connect(genreUrl+parse[4])
+                                    .userAgent(userAgent)
+                                    .get();
                             genreImgUrlParser(genreDoc,songDto);
                             SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
                             list.add(songDto1);
@@ -314,7 +319,8 @@ public class MelonCrawlService {
         List<String> mode = new ArrayList<String>(Arrays.asList("100","200","300","400","500","600","700","800"));
         for(String i :mode){
             String url = "https://www.melon.com/chart/month/index.htm?classCd=GN0"+i;
-            Connection connect = Jsoup.connect(url);
+            Connection connect = Jsoup.connect(url)
+                    .userAgent(userAgent);
             Document doc=null;
             try{
                 Thread.sleep(10000);
