@@ -54,7 +54,7 @@ public class VocalPreProcessService {
         }
         Song song = validator.songValidator(songId);
         String filename="";
-        if(song.getOriginUrl()!=null){
+        if(song.getOriginUrl().isBlank()){
             filename = "origin/"+song.getOriginUrl().split("/")[1];
         }else{
             filename = "origin/"+UUID.randomUUID();
