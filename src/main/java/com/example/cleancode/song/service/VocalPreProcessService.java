@@ -54,14 +54,14 @@ public class VocalPreProcessService {
         }
         Song song = validator.songValidator(songId);
         String filename="";
-        if(song.getOriginUrl().isEmpty()){
+        if(song.getOriginUrl()!=null){
             filename = "origin/"+song.getOriginUrl().split("/")[1];
         }else{
             filename = "origin/"+UUID.randomUUID();
         }
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
-
+        metadata.setContentType(multipartFile.getContentType());
         SongDto songDto = validator.songValidator(songId).toSongDto();
         songDto.setOriginUrl(filename);
         songDto.setStatus(ProgressStatus.UPLOADED);
