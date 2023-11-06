@@ -162,7 +162,7 @@ public class MelonCrawlService {
         }
         String EncodingArtist="";
         try {
-            EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
+            EncodingArtist = artist.replace(" ","+");
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
