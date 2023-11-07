@@ -227,7 +227,7 @@ public class SongController {
         for (Song i: data){
             result.add(SongOutput.builder()
                     .id(Math.toIntExact(i.getId()))
-                    .like(likeMap.get(i.getId()))
+                    .like(likeMap.get(String.valueOf(i.getId())))
                     .artist(i.getArtist())
                     .title(i.getTitle())
                     .genre(StringUtils.collectionToDelimitedString(i.getGenre()," "))
