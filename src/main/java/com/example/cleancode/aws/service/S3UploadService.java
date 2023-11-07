@@ -47,7 +47,7 @@ public class S3UploadService {
             S3Object s3Object = amazonS3.getObject(bucket,url);
             InputStream inputStream = s3Object.getObjectContent();
             byte[] audioData = readAudioDate(inputStream,60);
-            return createWavFile(audioData);
+            return new InputStreamResource(new ByteArrayInputStream(audioData));
         }catch (SdkClientException e){
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
