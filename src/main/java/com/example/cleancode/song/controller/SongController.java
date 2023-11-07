@@ -211,26 +211,17 @@ public class SongController {
         for (Song i: data){
             likeList.add(i.getId());
         }
-        Map<Integer,Integer> likeMap = new HashMap<>();
+        Map<String,Integer> likeMap = new HashMap<>();
         log.info(likeList.toString());
         JSONObject jsonObject = melonService.getLikeNum(likeList);
         JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
         for(int i=0;i<contsLikeArray.length();i++){
             JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
-            System.out.println("contsLikeObject = " + contsLikeObject.toString());
-            int likeId = 0;
-            if(contsLikeObject.has("CONTSID")&&!contsLikeObject.isNull("CONTSID")){
-                if(contsLikeObject.get("CONTSID") instanceof Integer){
-                    likeId = contsLikeObject.getInt("CONTSID");
-                }
-            }
-            int sumcnt = 0;
-            if(contsLikeObject.has("SUMMCNT")&&!contsLikeObject.isNull("SUMMCNT")){
-                if(contsLikeObject.get("SUMMCNT") instanceof Integer){
-                    sumcnt = contsLikeObject.getInt("SUMMCNT");
-                }
-            }
-            likeMap.put(likeId,sumcnt);
+            System.out.println("contsLikeObject = " + contsLikeObject);
+            String likeId = String.valueOf(contsLikeObject.getInt("CONTSID"));
+
+            int sumCnt = contsLikeObject.getInt("SUMMCNT");
+            likeMap.put(likeId,sumCnt);
         }
         List<SongOutput> result = new ArrayList<>();
         for (Song i: data){
