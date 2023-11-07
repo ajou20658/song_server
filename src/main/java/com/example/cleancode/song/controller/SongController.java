@@ -1,16 +1,14 @@
 package com.example.cleancode.song.controller;
 
+import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.dto.SongFormat;
 import com.example.cleancode.song.dto.SongOutput;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
-import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.service.VocalPreProcessService;
-import com.example.cleancode.utils.UserPrinciple;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -22,13 +20,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -68,6 +64,7 @@ public class SongController {
     }
 
     @PostMapping("/upload")
+    @ResponseBody
     public ResponseEntity<Object> uploadSong(@RequestPart("file") MultipartFile multipartFile, @RequestParam Long songId){
         if(vocalPreProcessService.songUpload(multipartFile,songId)){
             Map<String,Object> response = new HashMap<>();
@@ -76,22 +73,24 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/available_list")
+    @GetMapping("/available_list")
+    @ResponseBody
     public List<Song> giveAvailalbleList(){
         List<Song> song = songRepository.findByOriginUrlIsNotNull();
         return song;
     }
-    @GetMapping("/listen")
-    public ResponseEntity<Object> listenSong(@RequestParam String url){
-        log.info("url : {}",url);
-        Resource resource = s3UploadService.miniStream2(url,60);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
-        headers.setContentDispositionFormData("inline","audio.mp3");
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(resource);
-    }
+//    @GetMapping("/listen")
+//    public ResponseEntity<Object> listenSong(@RequestParam String url) throws IOException {
+//        log.info("url : {}",url);
+//        Resource resource = s3UploadService.miniStream2(url,60);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+//        headers.setContentDispositionFormData("inline","audio.mp3");
+//        headers.setContentLength(resource.contentLength());
+//        return ResponseEntity.ok()
+//                .headers(headers)
+//                .body(resource);
+//    }
     @GetMapping("/download")
     @ResponseBody
     public ResponseEntity<Resource> streamWavFile(@RequestParam String url){

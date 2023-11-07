@@ -19,6 +19,6 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByOriginUrlIsNotNull();
     @Query("select s.id, s.title, s.artist, s.spectr,s.genre,s.encoded_genre from Song s where size(s.spectr) > 0")
     List<SongFormat> findPartialDataWithCond();
-    @Query("select s.id, s.title, s.artist, s.spectr,s.genre,s.encoded_genre from Song s")
+    @Query("select s.id, s.title, s.artist, s.spectr,s.genre,s.encoded_genre from Song s where s.originUrl is not null")
     List<SongFormat> findPartialData();
 }
