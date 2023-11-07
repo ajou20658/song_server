@@ -56,11 +56,11 @@ public class S3UploadService {
         byte[] buffer = new byte[1024];
         int bytesRead;
         int totalBytesRead = 0;
-        int maxBytesToRead = durationInSecond * 44100 * 2;
+        int maxBytesToRead = durationInSecond * 1024;
         ByteArrayOutputStream audioBuffer = new ByteArrayOutputStream();
         try{
-            while((bytesRead = inputStream.read(buffer))!=-1&&totalBytesRead<maxBytesToRead){
-                audioBuffer.write(buffer,0,bytesRead);
+            while (totalBytesRead < maxBytesToRead && (bytesRead = inputStream.read(buffer)) != -1) {
+                audioBuffer.write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
             }
         }catch (IOException e){
