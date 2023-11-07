@@ -84,7 +84,7 @@ public class SongController {
     @GetMapping("/listen")
     public ResponseEntity<Object> listenSong(@RequestParam String url){
         log.info("url : {}",url);
-        Resource resource = s3UploadService.miniStream(url);
+        Resource resource = s3UploadService.miniStream2(url,60);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
         headers.setContentDispositionFormData("inline","audio.mp3");
