@@ -207,7 +207,7 @@ public class SongController {
     public ResponseEntity<byte[]> downloadCSV() throws Exception {
 
 //        List<SongFormat> data = songRepository.findPartialData();
-        List<Song> data = songRepository.findAllByOriginUrlIsNotEmpty();
+        List<Song> data = songRepository.findByOriginUrlIsNotNull();
         //Header
 //        ResultSet resultSet = 쿼리로 가져오기
         List<Long> likeList = new ArrayList<>();
