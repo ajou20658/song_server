@@ -88,8 +88,8 @@ public class UserController {
         log.info("String : {}",url);
         Resource resource = s3UploadService.stream(url);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("audio/wav"));
-        headers.setContentDispositionFormData("inline","audio.wav");
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+        headers.setContentDispositionFormData("inline","audio.mp3");
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(resource);

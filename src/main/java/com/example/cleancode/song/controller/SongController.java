@@ -86,8 +86,20 @@ public class SongController {
         log.info("url : {}",url);
         Resource resource = s3UploadService.miniStream(url);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("audio/wav"));
-        headers.setContentDispositionFormData("inline","audio.wav");
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+        headers.setContentDispositionFormData("inline","audio.mp3");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
+    @GetMapping("/download")
+    @ResponseBody
+    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
+        log.info("String : {}",url);
+        Resource resource = s3UploadService.stream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+        headers.setContentDispositionFormData("inline","audio.mp3");
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(resource);
