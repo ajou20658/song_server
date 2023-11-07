@@ -24,7 +24,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(ExpiredJwtException.class)
-//    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<Object> expiredJwt(ExpiredJwtException e){
         Map<String,Object> response = new HashMap<>();
         response.put("HttpStatus",HttpStatus.FORBIDDEN);

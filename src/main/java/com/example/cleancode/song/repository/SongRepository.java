@@ -16,6 +16,7 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByTitleContaining(String title);
     List<Song> findByArtistContainingOrTitleContaining(String artist,String title);
     List<Song> findByIsTop(boolean isTop);
+    @Query("SELECT s FROM Song s WHERE s.originUrl <> ''")
     List<Song> findByOriginUrlIsNotNull();
 //    @Query("select s.id, s.title, s.artist, s.spectr,s.genre,s.encoded_genre from Song s where size(s.spectr) > 0")
 //    List<SongFormat> findPartialDataWithCond();
