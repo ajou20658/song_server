@@ -10,7 +10,7 @@ public class SongFormat {
     private Long id;
     private String title;
     private String artist;
-    private List<Integer> spectr;
+//    private List<Integer> spectr;
     private List<String> genre;
     private List<Long> encoded_genre;
 }
