@@ -253,9 +253,9 @@ public class SongController {
         // Data
         for (SongOutput i : result){
             csvData.append(i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
-                    i.getEncodedGenre()+"\n");
-            //+","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
-            //                    +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()
+                    i.getEncodedGenre()+"\n"
+            +","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
+                                +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8());
         }
         byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
