@@ -4,6 +4,7 @@ import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.dto.SongFormat;
 import com.example.cleancode.song.dto.SongOutput;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
@@ -73,10 +74,16 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @GetMapping("/available_list")
+    @GetMapping("/uploaded_list")
     @ResponseBody
     public List<Song> giveAvailalbleList(){
-        List<Song> song = songRepository.findByOriginUrlIsNotNull();
+        List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
+        return song;
+    }
+    @GetMapping("/completed_list")
+    @ResponseBody
+    public List<Song> giveCompleteList(){
+        List<Song> song = songRepository.findByStatus(ProgressStatus.COMPLETE);
         return song;
     }
 //    @GetMapping("/listen")
@@ -205,7 +212,7 @@ public class SongController {
 
     @GetMapping("/download/csv")
     public ResponseEntity<byte[]> downloadCSV() throws Exception {
-        List<Song> data = songRepository.findByOriginUrlIsNotNull();
+        List<Song> data = songRepository.findByStatus(ProgressStatus.COMPLETE);
         //Header
         List<Long> likeList = new ArrayList<>();
         for (Song i: data){
