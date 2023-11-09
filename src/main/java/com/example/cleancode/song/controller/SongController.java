@@ -252,7 +252,7 @@ public class SongController {
         StringBuilder csvData = new StringBuilder();
         // Data
         for (SongOutput i : result){
-            csvData.append(i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
+            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
                     i.getEncodedGenre()
             +","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
                                 +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
