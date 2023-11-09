@@ -153,6 +153,7 @@ public class VocalPreProcessService {
                 SongDto songDto = song.toSongDto();
                 songDto.setVocalUrl("vocal/"+uuid);
                 songDto.setInstUrl("inst/"+uuid);
+                songDto.setSpectr(res);
                 songDto.setStatus(ProgressStatus.COMPLETE);
                 songDto.toSongEntity();
                 songRepository.save(songDto.toSongEntity());

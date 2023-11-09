@@ -232,14 +232,14 @@ public class SongController {
                     .title(i.getTitle())
                     .genre(StringUtils.collectionToDelimitedString(i.getGenre()," "))
                     .encodedGenre(StringUtils.collectionToDelimitedString(i.getEncoded_genre()," "))
-//                    .f0_1(i.getSpectr().get(0))
-//                    .f0_2(i.getSpectr().get(1))
-//                    .f0_3(i.getSpectr().get(2))
-//                    .f0_4(i.getSpectr().get(3))
-//                    .f0_5(i.getSpectr().get(4))
-//                    .f0_6(i.getSpectr().get(5))
-//                    .f0_7(i.getSpectr().get(6))
-//                    .f0_8(i.getSpectr().get(7))
+                    .f0_1(i.getSpectr().get(0))
+                    .f0_2(i.getSpectr().get(1))
+                    .f0_3(i.getSpectr().get(2))
+                    .f0_4(i.getSpectr().get(3))
+                    .f0_5(i.getSpectr().get(4))
+                    .f0_6(i.getSpectr().get(5))
+                    .f0_7(i.getSpectr().get(6))
+                    .f0_8(i.getSpectr().get(7))
                     .build());
         }
         StringBuilder csvData = new StringBuilder();
