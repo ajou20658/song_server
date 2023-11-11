@@ -212,6 +212,54 @@ public class SongController {
 
     @GetMapping("/download/csv")
     public ResponseEntity<byte[]> downloadCSV() throws Exception {
+        List<Song> data = songRepository.findByStatus(ProgressStatus.UPLOADED);
+        //Header
+        List<Long> likeList = new ArrayList<>();
+        for (Song i: data){
+            likeList.add(i.getId());
+        }
+        Map<String,Integer> likeMap = new HashMap<>();
+        log.info(likeList.toString());
+        JSONObject jsonObject = melonService.getLikeNum(likeList);
+        JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
+        for(int i=0;i<contsLikeArray.length();i++){
+            JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
+            System.out.println("contsLikeObject = " + contsLikeObject);
+            String likeId = String.valueOf(contsLikeObject.getInt("CONTSID"));
+
+            int sumCnt = contsLikeObject.getInt("SUMMCNT");
+            likeMap.put(likeId,sumCnt);
+        }
+        List<SongOutput> result = new ArrayList<>();
+        for (Song i: data){
+            result.add(SongOutput.builder()
+                    .id(Math.toIntExact(i.getId()))
+                    .like(likeMap.get(String.valueOf(i.getId())))
+                    .artist(i.getArtist())
+                    .title(i.getTitle())
+                    .genre(StringUtils.collectionToDelimitedString(i.getGenre()," "))
+                    .encodedGenre(StringUtils.collectionToDelimitedString(i.getEncoded_genre()," "))
+                    .build());
+        }
+        StringBuilder csvData = new StringBuilder();
+        // Data
+        for (SongOutput i : result){
+            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
+                    i.getEncodedGenre()+"\n");
+        }
+        byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentLength(csvBytes.length)
+                .body(csvBytes);
+    }
+    @GetMapping("/download/csv2")
+    public ResponseEntity<byte[]> downloadCSV2() throws Exception {
         List<Song> data = songRepository.findByStatus(ProgressStatus.COMPLETE);
         //Header
         List<Long> likeList = new ArrayList<>();
@@ -254,8 +302,8 @@ public class SongController {
         for (SongOutput i : result){
             csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
                     i.getEncodedGenre()
-            +","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
-                                +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
+                    +","+i.getF0_1()+","+i.getF0_2()+i.getF0_3()+","+i.getF0_4()
+                    +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
         }
         byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
