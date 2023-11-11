@@ -316,5 +316,14 @@ public class SongController {
                 .contentLength(csvBytes.length)
                 .body(csvBytes);
     }
-
+    @GetMapping("/remove/dup")
+    public ResponseEntity<Object> removeDup(){
+        melonService.dupRemove();
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/remove/comma")
+    public ResponseEntity<Object> removeComma(){
+        melonService.replaceComma();
+        return ResponseEntity.ok().build();
+    }
 }

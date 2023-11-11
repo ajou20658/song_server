@@ -183,6 +183,10 @@ public class MelonCrawlService {
                     title = title.replace(","," ");
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
+                    singer = singer.replace(","," ");
+                    if(!songRepository.findByArtistAndTitle(singer, title).isEmpty()){
+                        continue;
+                    }
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
                         String href = td4.select("div>div>a").attr("href");
@@ -204,6 +208,7 @@ public class MelonCrawlService {
                                     .userAgent(userAgent)
                                     .get();
                             genreImgUrlParser(genreDoc,songDto);
+
                             SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
                             list.add(songDto1);
                         }else{
@@ -292,7 +297,12 @@ public class MelonCrawlService {
             return tmp2;
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
+        title = title.replace(","," ");
         String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+        artist = artist.replace(","," ");
+        if(!songRepository.findByArtistAndTitle(artist,title).isEmpty()){
+            return null;
+        }
         return SongDto.builder()
                 .artist(artist)
                 .title(title)
@@ -346,5 +356,24 @@ public class MelonCrawlService {
             log.info(artistList.toString());
         }
         writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
+    }
+
+    public void dupRemove() {
+        List<Song> allList = songRepository.findAll();
+        List<Song> uniqueSongs = new HashSet<>(allList)
+                .stream().toList();
+        for(Song i: uniqueSongs){
+            allList.remove(i);
+        }
+        songRepository.deleteAll(allList);
+    }
+    public void replaceComma(){
+        List<Song> allList = songRepository.findByArtistContainingOrTitleContaining(",",",");
+        for(Song i: allList){
+            SongDto songDto = i.toSongDto();
+            songDto.setTitle(i.getTitle().replace(","," "));
+            songDto.setArtist(i.getArtist().replace(","," "));
+            songRepository.save(songDto.toSongEntity());
+        }
     }
 }
