@@ -126,7 +126,7 @@ public class VocalPreProcessService {
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",song.getOriginUrl());
-        body.add("isUser","true");
+        body.add("isUser","false");
         body.add("uuid",uuid);
 
         String url = djangoUrl + "/songssam/splitter/";
