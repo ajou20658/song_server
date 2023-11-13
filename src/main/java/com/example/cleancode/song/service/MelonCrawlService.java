@@ -381,7 +381,7 @@ public class MelonCrawlService {
         }
     }
     public void replaceStatus(){
-        List<Song> allList = songRepository.findByStatusEmpty();
+        List<Song> allList = songRepository.findByStatusIsEmpty();
         for(Song i: allList){
             SongDto songDto = i.toSongDto();
             songDto.setStatus(ProgressStatus.NONE);
