@@ -131,7 +131,7 @@ public class MelonCrawlService {
             case "0":
                 m="all";
                 List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
-                if(!result3.isEmpty()){
+                if(result3.size()>=10){
                     log.info("any exists");
                     return result3.stream()
                             .map(Song::toSongDto)
