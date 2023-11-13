@@ -225,7 +225,11 @@ public class MelonCrawlService {
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
-        return list;
+        List<SongDto> result = songRepository.findByArtistContainingOrTitleContaining(artist,artist)
+                .stream()
+                .map(Song::toSongDto)
+                .toList();
+        return result;
     }
 
     public JSONObject getLikeNum(List<Long> likeList)throws Exception{
