@@ -8,6 +8,7 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.entity.Dataframe2Json;
+import com.example.cleancode.utils.CustomException.DjangoRequestException;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.CustomException.Validator;
@@ -130,33 +131,36 @@ public class VocalPreProcessService {
         body.add("uuid",uuid);
 
         String url = djangoUrl + "/songssam/splitter/";
-
-        webClient.post()
-            .uri(url)
-            .body(BodyInserters.fromFormData(body))
-            .retrieve()
-                .bodyToMono(JsonNode.class)
-                .map(JsonNode -> {
-                    try{
-                        String message = JsonNode.get("message").asText();
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
-                        return result[0];
-                    }catch (JsonProcessingException e){
-                        log.error("파싱 에러");
-                        throw new RuntimeException(e);
-                    }
-                })
-            .subscribe(response -> {
-//                log.info("status message = {}", res);
-                List<Integer> res = json2List(response);
-                SongDto songDto = song.toSongDto();
-                songDto.setVocalUrl("vocal/"+uuid);
-                songDto.setInstUrl("inst/"+uuid);
-                songDto.setSpectr(res);
-                songDto.setStatus(ProgressStatus.COMPLETE);
-                songRepository.save(songDto.toSongEntity());
-            });
+        try{
+            webClient.post()
+                .uri(url)
+                .body(BodyInserters.fromFormData(body))
+                .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .map(JsonNode -> {
+                        try{
+                            String message = JsonNode.get("message").asText();
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                            return result[0];
+                        }catch (JsonProcessingException e){
+                            log.error("파싱 에러");
+                            throw new RuntimeException(e);
+                        }
+                    })
+                .subscribe(response -> {
+                    log.info("status message = {}", response);
+                    List<Integer> res = json2List(response);
+                    SongDto songDto = song.toSongDto();
+                    songDto.setVocalUrl("vocal/"+uuid);
+                    songDto.setInstUrl("inst/"+uuid);
+                    songDto.setSpectr(res);
+                    songDto.setStatus(ProgressStatus.COMPLETE);
+                    songRepository.save(songDto.toSongEntity());
+                });
+        }catch (Exception e){
+            throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
+        }
         // userSong Status변경
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
