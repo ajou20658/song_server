@@ -1,6 +1,7 @@
 package com.example.cleancode.song.service;
 
 import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,9 @@ public class MelonCrawlService {
         TopReset();
         String url = "https://www.melon.com/chart/index.htm";
 
-        Document doc = Jsoup.connect(url).get();
+        Document doc = Jsoup.connect(url)
+                .userAgent(userAgent)
+                .get();
 
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
@@ -284,6 +287,7 @@ public class MelonCrawlService {
         songDto.setImgUrl(imgUrl);
         songDto.setEncoded_genre(encodedGenre);
         songDto.setGenre(genreArray);
+        songDto.setStatus(ProgressStatus.NONE);
         songRepository.save(songDto.toSongEntity());
     }
     private SongDto top100CrawlParser(Element songInfo){
@@ -373,6 +377,14 @@ public class MelonCrawlService {
             SongDto songDto = i.toSongDto();
             songDto.setTitle(i.getTitle().replace(","," "));
             songDto.setArtist(i.getArtist().replace(","," "));
+            songRepository.save(songDto.toSongEntity());
+        }
+    }
+    public void replaceStatus(){
+        List<Song> allList = songRepository.findByStatusEmpty();
+        for(Song i: allList){
+            SongDto songDto = i.toSongDto();
+            songDto.setStatus(ProgressStatus.NONE);
             songRepository.save(songDto.toSongEntity());
         }
     }

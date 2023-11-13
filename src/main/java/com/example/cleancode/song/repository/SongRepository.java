@@ -21,4 +21,5 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByOriginUrlIsNotNull();
     List<Song> findByStatus(ProgressStatus progressStatus);
     List<Song> findByArtistAndTitle(String artist,String title);
+    List<Song> findByStatusEmpty();
 }

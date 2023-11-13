@@ -326,4 +326,9 @@ public class SongController {
         melonService.replaceComma();
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/remove/null")
+    public ResponseEntity<Object> removeNull(){
+        melonService.replaceStatus();
+        return ResponseEntity.ok().build();
+    }
 }
