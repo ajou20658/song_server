@@ -155,9 +155,7 @@ public class VocalPreProcessService {
                 songDto.setInstUrl("inst/"+uuid);
                 songDto.setSpectr(res);
                 songDto.setStatus(ProgressStatus.COMPLETE);
-                songDto.toSongEntity();
                 songRepository.save(songDto.toSongEntity());
-//                songRepository.save(song.changeStatus(ProgressStatus.COMPLETE));
             });
         // userSong Status변경
     }
