@@ -173,8 +173,9 @@ public class MelonCrawlService {
                 +EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+
                 "&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
-        Connection connection = Jsoup.connect(url).userAgent(userAgent);
+
         try{
+            Connection connection = Jsoup.connect(url).userAgent(userAgent);
             Thread.sleep(3000);
             Document doc = connection.get();
             Elements rows = doc.select("#frm_defaultList > div > table > tbody>tr");
