@@ -31,10 +31,11 @@ public class S3UploadService {
 
 
     public Resource stream(String url){
-        try {
-            S3Object s3Object = amazonS3.getObject(bucket, url);
-            return new InputStreamResource(s3Object.getObjectContent());
-        }catch (SdkClientException e){
+        try (S3Object s3Object = amazonS3.getObject(bucket, url);
+             InputStream inputStream = s3Object.getObjectContent()
+        ){
+            return new InputStreamResource(inputStream);
+        }catch (SdkClientException | IOException e){
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
     }
