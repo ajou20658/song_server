@@ -122,7 +122,10 @@ public class VocalPreProcessService {
     @Transactional
     public void djangoRequest(Song song){
         String uuid = song.getOriginUrl().split("/")[1];
-        WebClient webClient = WebClient.create();
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl(djangoUrl)
+                .build();
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
