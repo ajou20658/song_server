@@ -119,7 +119,7 @@ public class VocalPreProcessService {
         String uuid = song.getOriginUrl().split("/")[1];
         WebClient webClient = WebClient
                 .builder()
-                .baseUrl(djangoUrl)
+                .baseUrl("http://"+djangoUrl)
                 .build();
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
