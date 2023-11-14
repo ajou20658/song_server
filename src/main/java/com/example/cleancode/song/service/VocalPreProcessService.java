@@ -8,10 +8,7 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.entity.Dataframe2Json;
-import com.example.cleancode.utils.CustomException.DjangoRequestException;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.FormatException;
-import com.example.cleancode.utils.CustomException.Validator;
+import com.example.cleancode.utils.CustomException.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +25,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -152,19 +147,37 @@ public class VocalPreProcessService {
                         }
                     })
                 .subscribe(response -> {
+                    //여기 수정이 필요함
                     log.info("status message = {}", response);
-                    List<Integer> res = json2List(response);
-                    SongDto songDto = song.toSongDto();
-                    songDto.setVocalUrl("vocal/"+uuid);
-                    songDto.setInstUrl("inst/"+uuid);
-                    songDto.setSpectr(res);
-                    songDto.setStatus(ProgressStatus.COMPLETE);
-                    songRepository.save(songDto.toSongEntity());
                 });
         }catch (Exception e){
             throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
         }
         // userSong Status변경
+    }
+
+    @Transactional
+    public void djangoResponse(List<Integer> spetr, String uuid,Long Status){
+        if(Status.equals("200")){
+            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
+            if(songOptional.isEmpty()){
+                throw new NoSongException(ExceptionCode.SONG_INVALID);
+            }
+            SongDto songDto = songOptional.get().toSongDto();
+            songDto.setVocalUrl("vocal/"+uuid);
+            songDto.setInstUrl("inst/"+uuid);
+            songDto.setSpectr(spetr);
+            songDto.setStatus(ProgressStatus.COMPLETE);
+            songRepository.save(songDto.toSongEntity());
+        }else{
+            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
+            if(songOptional.isEmpty()){
+                return;
+            }
+            SongDto songDto = songOptional.get().toSongDto();
+            songDto.setStatus(ProgressStatus.ERROR);
+            songRepository.save(songDto.toSongEntity());
+        }
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
         List<Integer> result = new ArrayList<>();
