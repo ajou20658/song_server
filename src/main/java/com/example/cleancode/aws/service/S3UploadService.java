@@ -8,9 +8,11 @@ import com.example.cleancode.utils.CustomException.NoAwsSongException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -34,10 +36,9 @@ public class S3UploadService {
         try {
             S3Object s3Object = amazonS3.getObject(bucket, url);
             try (InputStream inputStream = s3Object.getObjectContent()) {
-                // 필요한 작업 수행 (예: 데이터를 읽거나 복사)
-
-                // 스트림을 소비한 후에 InputStreamResource로 감싸서 반환
-                return new InputStreamResource(inputStream);
+                // InputStream을 ByteArrayResource로 복사
+                byte[] byteArray = StreamUtils.copyToByteArray(inputStream);
+                return new ByteArrayResource(byteArray);
             }
         } catch (SdkClientException | IOException e) {
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
