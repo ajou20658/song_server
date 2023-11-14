@@ -133,7 +133,7 @@ public class VocalPreProcessService {
         body.add("isUser","false");
         body.add("uuid",uuid);
 
-        String url = djangoUrl + "/songssam/splitter/";
+        String url = "/songssam/splitter/";
         try{
             webClient.post()
                 .uri(url)
