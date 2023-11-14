@@ -30,12 +30,16 @@ public class S3UploadService {
     private String bucket;
 
 
-    public Resource stream(String url){
-        try (S3Object s3Object = amazonS3.getObject(bucket, url);
-             InputStream inputStream = s3Object.getObjectContent()
-        ){
-            return new InputStreamResource(inputStream);
-        }catch (SdkClientException | IOException e){
+    public Resource stream(String url) {
+        try {
+            S3Object s3Object = amazonS3.getObject(bucket, url);
+            try (InputStream inputStream = s3Object.getObjectContent()) {
+                // 필요한 작업 수행 (예: 데이터를 읽거나 복사)
+
+                // 스트림을 소비한 후에 InputStreamResource로 감싸서 반환
+                return new InputStreamResource(inputStream);
+            }
+        } catch (SdkClientException | IOException e) {
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
     }
