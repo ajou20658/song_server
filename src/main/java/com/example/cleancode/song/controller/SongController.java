@@ -119,7 +119,18 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping
+    @PostMapping("/response")
+    public void djangoResponse(
+            @RequestBody List<Integer> f0,
+            @RequestBody Long status,
+            @RequestBody String uuid){
+        if(status==200){
+            vocalPreProcessService.djangoResponse(f0,uuid,status);
+            return;
+        }
+        vocalPreProcessService.djangoResponse(null,uuid,status);
+    }
+
     @Deprecated
     @GetMapping("/artist_list_crawl")
     @ResponseBody
