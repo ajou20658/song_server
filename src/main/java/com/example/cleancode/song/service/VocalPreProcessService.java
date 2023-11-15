@@ -153,6 +153,7 @@ public class VocalPreProcessService {
                     songDto.setVocalUrl("vocal/"+uuid);
                     songDto.setInstUrl("inst/"+uuid);
                     songDto.setStatus(ProgressStatus.COMPLETE);
+                    songDto.setSpectr(json2List(response));
                     songDto.toSongEntity();
                     songRepository.save(songDto.toSongEntity());
                 });
@@ -174,6 +175,7 @@ public class VocalPreProcessService {
             songDto.setInstUrl("inst/"+uuid);
             songDto.setSpectr(spetr);
             songDto.setStatus(ProgressStatus.COMPLETE);
+
             songRepository.save(songDto.toSongEntity());
         }else{
             Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
