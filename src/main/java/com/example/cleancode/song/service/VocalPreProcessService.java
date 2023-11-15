@@ -103,6 +103,7 @@ public class VocalPreProcessService {
     @Transactional
     public boolean preprocessStart(Long songId){
         Song song = validator.songValidator(songId);
+        songRepository.save(song.changeStatus(ProgressStatus.PROGRESS));
         try{
             djangoRequest(song);
             log.info("django 요청");
