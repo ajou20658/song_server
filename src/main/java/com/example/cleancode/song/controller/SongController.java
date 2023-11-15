@@ -117,6 +117,18 @@ public class SongController {
                 .headers(headers)
                 .body(resource);
     }
+    @GetMapping("/download_inst")
+    @ResponseBody
+    public ResponseEntity<Resource> streamWavFile2(@RequestParam String url){
+        log.info("String : {}",url);
+        Resource resource = s3UploadService.stream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/wav"));
+        headers.setContentDispositionFormData("inline","audio.wav");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
     @PostMapping("/preprocess")
     public ResponseEntity<Object> processSong(@RequestParam Long songId){
         log.info("preprocess : {}",songId);

@@ -149,7 +149,7 @@ public class VocalPreProcessService {
                     })
                 .subscribe(response -> {
                     //여기 수정이 필요함
-                    log.info("status message = {}", response);
+//                    log.info("status message = {}", response);
                     SongDto songDto = song.toSongDto();
                     songDto.setVocalUrl("vocal/"+uuid);
                     songDto.setInstUrl("inst/"+uuid);
