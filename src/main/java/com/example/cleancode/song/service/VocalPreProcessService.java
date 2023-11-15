@@ -149,6 +149,12 @@ public class VocalPreProcessService {
                 .subscribe(response -> {
                     //여기 수정이 필요함
                     log.info("status message = {}", response);
+                    SongDto songDto = song.toSongDto();
+                    songDto.setVocalUrl("vocal/"+uuid);
+                    songDto.setInstUrl("inst/"+uuid);
+                    songDto.setStatus(ProgressStatus.COMPLETE);
+                    songDto.toSongEntity();
+                    songRepository.save(songDto.toSongEntity());
                 });
         }catch (Exception e){
             throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
