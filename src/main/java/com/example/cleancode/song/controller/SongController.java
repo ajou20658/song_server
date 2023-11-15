@@ -78,6 +78,13 @@ public class SongController {
     @ResponseBody
     public List<Song> giveAvailalbleList(){
         List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
+        song.addAll(songRepository.findByStatus(ProgressStatus.ERROR));
+        return song;
+    }
+    @GetMapping("/process_list")
+    @ResponseBody
+    public List<Song> giveProcessList(){
+        List<Song> song = songRepository.findByStatus(ProgressStatus.PROGRESS);
         return song;
     }
     @GetMapping("/completed_list")
