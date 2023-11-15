@@ -22,4 +22,5 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByStatus(ProgressStatus progressStatus);
     List<Song> findByArtistAndTitle(String artist,String title);
     List<Song> findByStatusIsNull();
+    Optional<Song> findByOriginUrl(String uuid);
 }

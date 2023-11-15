@@ -8,10 +8,7 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.entity.Dataframe2Json;
-import com.example.cleancode.utils.CustomException.DjangoRequestException;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.FormatException;
-import com.example.cleancode.utils.CustomException.Validator;
+import com.example.cleancode.utils.CustomException.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,7 +121,7 @@ public class VocalPreProcessService {
         String uuid = song.getOriginUrl().split("/")[1];
         WebClient webClient = WebClient
                 .builder()
-                .baseUrl(djangoUrl)
+                .baseUrl("http://"+djangoUrl)
                 .build();
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
