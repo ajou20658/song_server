@@ -69,7 +69,8 @@ public class InferenceService {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://"+flaskUrl)
                 .build();
-        String url = "/voiceChangeModel?wav_path={param1}&fPtrPath={param2}&uuid={param3}";
+        String url = "/voiceChangeModel?wav_path={param1}&fPtrPath={param2}&uuid={param3}" +
+                "&fSafePrefixPadLength=&fPitchChange=&sSpeakId=&sampleRate=";
         String param1=songKey;
         String param2=ptrKey;
         String param3=uuid;
