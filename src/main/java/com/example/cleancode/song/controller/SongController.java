@@ -80,6 +80,7 @@ public class SongController {
     public List<Song> giveAvailalbleList(){
         List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
         song.addAll(songRepository.findByStatus(ProgressStatus.ERROR));
+        song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50)));
         return song;
     }
     @GetMapping("/process_list")

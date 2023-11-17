@@ -1,5 +1,9 @@
 package com.example.cleancode.utils.CustomException;
 
+import com.example.cleancode.ddsp.entity.PtrData;
+import com.example.cleancode.ddsp.entity.ResultSong;
+import com.example.cleancode.ddsp.repository.PtrDataRepository;
+import com.example.cleancode.ddsp.repository.ResultSongRepository;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
@@ -19,6 +23,9 @@ public class Validator {
     private final UserRepository userRepository;
     private final SongRepository songRepository;
     private final UserSongRepository userSongRepository;
+    private final PtrDataRepository ptrDataRepository;
+    private final ResultSongRepository resultSongRepository;
+
     public User userValidator(Long userId){
         Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isEmpty()){
@@ -40,5 +47,19 @@ public class Validator {
             throw new NoSongException(ExceptionCode.SONG_INVALID);
         }
         return optionalSong.get();
+    }
+    public PtrData ptrDataValidator(Long ptrDataId){
+        Optional<PtrData> optionalPtrData = ptrDataRepository.findById(ptrDataId);
+        if(optionalPtrData.isEmpty()){
+            throw new NoPtrException(ExceptionCode.PTR_ERROR);
+        }
+        return optionalPtrData.get();
+    }
+    public ResultSong resultSongValidator(Integer resultSongId){
+        Optional<ResultSong> optionalResultSong = resultSongRepository.findById(resultSongId);
+        if(optionalResultSong.isEmpty()){
+            throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
+        }
+        return optionalResultSong.get();
     }
 }

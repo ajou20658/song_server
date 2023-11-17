@@ -63,7 +63,7 @@ public class VocalPreProcessService {
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
         }catch (IOException | SdkClientException ex){
-            throw new RuntimeException("aws 업로드 에러");
+            throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
         songRepository.save(songDto.toSongEntity());
         return true;

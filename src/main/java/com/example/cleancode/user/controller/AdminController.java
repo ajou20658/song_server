@@ -1,5 +1,8 @@
 package com.example.cleancode.user.controller;
 
+import com.amazonaws.Response;
+import com.example.cleancode.ddsp.repository.PtrDataRepository;
+import com.example.cleancode.ddsp.service.TrainService;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.user.JpaRepository.UserRepository;
@@ -10,9 +13,11 @@ import com.example.cleancode.utils.Role;
 import com.example.cleancode.utils.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,6 +28,7 @@ import java.util.List;
 public class AdminController {
     private final UserRepository memberRepository;
     private final SongRepository songRepository;
+    private final TrainService trainService;
     private final JwtService jwtService;
     @GetMapping("/generate")
     @ResponseBody
@@ -64,5 +70,11 @@ public class AdminController {
         model.addAttribute("charts",charts);
         return "chart-list";
     }
-
+    @PostMapping("/upload_ptr")
+    public ResponseEntity<Object> uploadPtr(
+            @RequestPart("file")MultipartFile file,
+            @RequestParam String name){
+        trainService.ptrFileUplaod(file,name);
+        return ResponseEntity.ok().build();
+    }
 }
