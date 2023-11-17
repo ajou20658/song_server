@@ -1,5 +1,6 @@
 package com.example.cleancode.ddsp.controller;
 
+import com.example.cleancode.ddsp.entity.InferenceRequest;
 import com.example.cleancode.ddsp.entity.PtrData;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.ddsp.service.InferenceService;
@@ -28,9 +29,10 @@ public class ddspController {
     }
     @PostMapping("/makesong")
     public ResponseEntity<Object> ddspInferenceRequest(
-            @RequestBody Long targetVoiceId,
-            @RequestBody Long targetSongId){
-        Integer generatedSongId = inferenceService.inferenceStart(targetVoiceId,targetSongId);
+            @RequestBody InferenceRequest inferenceRequest){
+        Integer generatedSongId = inferenceService.inferenceStart(
+                inferenceRequest.getTargetVoiceId(),
+                inferenceRequest.getTargetSongId());
         Map<String,Object> body = new HashMap<>();
         body.put("generatedId",generatedSongId);
         return ResponseEntity.ok().body(body);
