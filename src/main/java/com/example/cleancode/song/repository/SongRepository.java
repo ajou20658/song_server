@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +24,6 @@ public interface SongRepository extends JpaRepository<Song,Long> {
     List<Song> findByArtistAndTitle(String artist,String title);
     List<Song> findByStatusIsNull();
     Optional<Song> findByOriginUrl(String uuid);
+    @Query("SELECT s FROM Song s WHERE s.status = :status ORDER BY RAND()")
+    List<Song> findByStatusOOrderByRand(@Param("status")ProgressStatus progressStatus,Pageable pageable);
 }

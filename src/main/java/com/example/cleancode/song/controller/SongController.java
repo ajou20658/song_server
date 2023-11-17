@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -84,14 +85,17 @@ public class SongController {
     @GetMapping("/process_list")
     @ResponseBody
     public List<Song> giveProcessList(){
-        List<Song> song = songRepository.findByStatus(ProgressStatus.PROGRESS);
-        return song;
+        return songRepository.findByStatus(ProgressStatus.PROGRESS);
     }
     @GetMapping("/completed_list")
     @ResponseBody
     public List<Song> giveCompleteList(){
-        List<Song> song = songRepository.findByStatus(ProgressStatus.COMPLETE);
-        return song;
+        return songRepository.findByStatus(ProgressStatus.COMPLETE);
+    }
+    @GetMapping("/completed_random_list")
+    @ResponseBody
+    public List<Song> giveRCompleteList(){
+        return songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50));
     }
 //    @GetMapping("/listen")
 //    public ResponseEntity<Object> listenSong(@RequestParam String url) throws IOException {
@@ -274,8 +278,8 @@ public class SongController {
         StringBuilder csvData = new StringBuilder();
         // Data
         for (SongOutput i : result){
-            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
-                    i.getEncodedGenre()+"\n");
+            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","
+                    +i.getGenre()+","+i.getEncodedGenre()+"\n");
         }
         byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
         HttpHeaders headers = new HttpHeaders();
