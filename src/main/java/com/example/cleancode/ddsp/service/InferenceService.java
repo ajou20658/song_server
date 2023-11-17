@@ -74,16 +74,14 @@ public class InferenceService {
         String param2=ptrKey;
         String param3=uuid;
         Mono<byte[]> response = webClient.get()
-                .uri(url,param1,param2,param3)
+                .uri(uriBuilder -> uriBuilder
+                        .path(url)
+                        .build(param1, param2, param3))
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
-                .exchangeToMono(clientResponse -> {
-                    if(clientResponse.statusCode().is2xxSuccessful()){
-                        return clientResponse.bodyToMono(byte[].class);
-                    }else{
-                        log.error("Flask Req/Res Error"+clientResponse.statusCode());
-                        throw new FlaskRequestException(ExceptionCode.WEB_CLIENT_ERROR);
-                    }
-                });
+                .retrieve()
+                .bodyToMono(byte[].class);
+
+        // response를 block하지 않고 직접 반환
         return response.block();
     }
     public void songDelete(Integer generatedSongId){
