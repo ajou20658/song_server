@@ -132,7 +132,7 @@ public class UserService {
 
         log.info(body.toString());
 
-        String url = djangoUrl + "/songssam/splitter/";
+        String url = "http://"+djangoUrl + "/songssam/splitter/";
 //        ResponseEntity<String> response = restTemplate.exchange(
 //                url,
 //                HttpMethod.POST,
