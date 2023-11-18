@@ -285,7 +285,7 @@ public class UserService {
                 .block();
     }
     private GenreCountFrame genreCount(List<Song> songList){
-        GenreCountFrame genreCountFrame = new GenreCountFrame();
+        GenreCountFrame genreCountFrame = GenreCountFrame.builder().build();
         for (Song i : songList){
             List<String> genre = i.genre;
             for(String g:genre){
