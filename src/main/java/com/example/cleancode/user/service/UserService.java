@@ -250,6 +250,8 @@ public class UserService {
         //여기서 장르 추출
         GenreCountFrame user_genre = genreCount(songList);
         Spectr2DataFrame user_f0 = f02Df(userId);
+        log.info(user_genre.toString());
+        log.info(user_f0.toString());
         RecommandRequestDataFrame user_info_json =
                 new RecommandRequestDataFrame(user_f0,user_genre);
         ObjectMapper objectMapper =new ObjectMapper();

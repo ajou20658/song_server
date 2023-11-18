@@ -1,8 +1,14 @@
 package com.example.cleancode.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+@ToString
+@Getter
+@Setter
+@Builder
 public class Spectr2DataFrame {
     private Integer f0_1;
     private Integer f0_2;
