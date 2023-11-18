@@ -80,6 +80,7 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
     @GetMapping("/vocal_list")
+    @ResponseBody
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();
         response.put("response",userService.readUserSongList(userPrinciple.getId()));
