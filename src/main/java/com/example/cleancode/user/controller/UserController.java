@@ -57,6 +57,7 @@ public class UserController {
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
     @GetMapping("/user_recommand_list")
+    @ResponseBody
     public List<Song> userRecommandList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         return userService.userLikeSongWithRecommand(userPrinciple.getId());
     }
