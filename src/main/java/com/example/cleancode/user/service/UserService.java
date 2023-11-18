@@ -186,7 +186,7 @@ public class UserService {
     @Transactional
     public boolean reIssueRecommandList(List<Long> song,Long userId){
         User user = validator.userValidator(userId);
-        if(changeSelectList(song,user)){
+        if(!changeSelectList(song,user)){
             return false;
         }
         List<Long> recommendList = requestRecommandSongId(userId);
