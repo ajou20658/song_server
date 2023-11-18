@@ -225,12 +225,12 @@ public class UserService {
         }
         return songList;
     }
-    public List<Song> requestRecommandSongId(Long userId){
-        User user = validator.userValidator(userId);
-        List<Long> selectedSongIdList = user.getSelected();
-        for(Long i : selectedSongIdList){
-
-        }
-
-    }
+//    public List<Song> requestRecommandSongId(Long userId){
+//        User user = validator.userValidator(userId);
+//        List<Long> selectedSongIdList = user.getSelected();
+//        for(Long i : selectedSongIdList){
+//
+//        }
+//
+//    }
 }
