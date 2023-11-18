@@ -257,7 +257,7 @@ public class UserService {
         ObjectMapper objectMapper =new ObjectMapper();
         String json="";
         try {
-             json = objectMapper.writeValueAsString(user_info_json);
+             json = objectMapper.writeValueAsString(Collections.singletonMap("user_info_json",user_info_json));
              log.info(json);
         }catch (Exception e){
             log.error("json 변환 오륲");
