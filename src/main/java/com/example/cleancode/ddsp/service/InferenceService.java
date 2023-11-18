@@ -35,8 +35,8 @@ public class InferenceService {
     private final WebClient webClient;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${spring.flask-url}")
-    private String flaskUrl;
+    @Value("${spring.django-url}")
+    private String djangoUrl;
     @Transactional
     public Integer inferenceStart(Long ptrId,Long songId){
         PtrData ptrData = validator.ptrDataValidator(ptrId);
@@ -69,7 +69,7 @@ public class InferenceService {
         //ptrKey는 ptr/uuid
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
-        String url = "http://"+flaskUrl+"/voiceChangeModel?wav_path="+songKey+
+        String url = "http://"+ djangoUrl +"songssam/voiceChangeModel?wav_path="+songKey+
                 "&fPtrPath="+ptrKey+
                 "&uuid="+uuid;
         Mono<byte[]> response = webClient.get()

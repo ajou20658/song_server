@@ -11,9 +11,8 @@ import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.dto.UserSongOutput;
-import com.example.cleancode.user.entity.Dataframe2Json;
-import com.example.cleancode.user.entity.User;
-import com.example.cleancode.user.entity.UserSong;
+import com.example.cleancode.user.entity.*;
+import com.example.cleancode.utils.CustomException.BadRequestException;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.FormatException;
 import com.example.cleancode.utils.CustomException.Validator;
@@ -23,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.*;
@@ -48,7 +49,7 @@ public class UserService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
-
+    private final WebClient webClient;
     public UserDto findMember(Long userId){
         User member = validator.userValidator(userId);
         return member.toMemberDto();
@@ -122,8 +123,6 @@ public class UserService {
     @Transactional
     public void djangoRequest(UserSong userSong){
         String uuid = userSong.getOriginUrl().split("/")[1];
-        WebClient webClient = WebClient.create();
-
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
@@ -140,7 +139,6 @@ public class UserService {
 //                requestEntity,
 //                String.class
 //        );
-
         webClient.post()
             .uri(url)
             .body(BodyInserters.fromFormData(body))
@@ -160,11 +158,14 @@ public class UserService {
             .subscribe(response -> {
                 log.info("status message = {}",response.getF0_1());
                 List<Integer> res = json2List(response);
+                UserDto userDto = userSong.getUser().toMemberDto();
+                userDto.setSpectr(res);
                 UserSongDto userSongDto = userSong.toUserSongDto();
                 userSongDto.setVocalUrl("vocal/"+uuid);
                 userSongDto.setSpectr(res);
                 userSongDto.setStatus(ProgressStatus.COMPLETE);
                 userSongRepository.save(userSongDto.toUserSong());
+                userRepository.save(userDto.makeMember());
             });
         // userSong Status변경
 //        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
@@ -182,10 +183,23 @@ public class UserService {
         log.info(result.toString());
         return result;
     }
-
     @Transactional
-    public boolean changeSelectList(List<Long> song,Long userId){
+    public boolean reIssueRecommandList(List<Long> song,Long userId){
         User user = validator.userValidator(userId);
+        if(changeSelectList(song,user)){
+            return false;
+        }
+        List<Long> recommendList = requestRecommandSongId(userId);
+        //사용자가 선택한 곡도 추가
+        recommendList.addAll(song);
+
+        UserDto userDto = user.toMemberDto();
+        userDto.setRecommandSongIds(recommendList);
+        userRepository.save(userDto.makeMember());
+        return true;
+    }
+    @Transactional
+    public boolean changeSelectList(List<Long> song, User user){
         UserDto userDto = user.toMemberDto();
         userDto.setSelected(song);
         userRepository.save(userDto.makeMember());
@@ -211,9 +225,6 @@ public class UserService {
             log.info("SongId,UserId OriginUrl제거 : {}", userSong.getOriginUrl());
             amazonS3.deleteObject(bucket,userSong.getOriginUrl());
         }
-//        if(!userSong.getSpectr().isEmpty()){    //f0 추출값...은 로컬에 저장하기로 했지
-//
-//        }
         userSongRepository.delete(userSong);
     }
     public List<Song> userLikeSongList(Long userId){
@@ -225,12 +236,121 @@ public class UserService {
         }
         return songList;
     }
-//    public List<Song> requestRecommandSongId(Long userId){
-//        User user = validator.userValidator(userId);
-//        List<Long> selectedSongIdList = user.getSelected();
-//        for(Long i : selectedSongIdList){
-//
-//        }
-//
-//    }
+    public List<Song> userLikeSongWithRecommand(Long userId){
+        User user = validator.userValidator(userId);
+        List<Long> songRecommandList = user.getRecommandSongIds();
+        List<Song> songList = new ArrayList<>();
+        for(Long i:songRecommandList){
+            songList.add(validator.songValidator(i));
+        }
+        return songList;
+    }
+    private List<Long> requestRecommandSongId(Long userId){
+        List<Song> songList = userLikeSongList(userId);
+        //여기서 장르 추출
+        GenreCountFrame user_genre = genreCount(songList);
+        Spectr2DataFrame user_f0 = f02Df(userId);
+        RecommandRequestDataFrame user_info_json =
+                new RecommandRequestDataFrame(user_f0,user_genre);
+        ObjectMapper objectMapper =new ObjectMapper();
+        String json="";
+        try {
+             json = objectMapper.writeValueAsString(user_info_json);
+        }catch (Exception e){
+            log.error("json 변환 오륲");
+        }
+
+        return webClient.post()
+                .uri("localhost:8000/SongRecommend")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(json))
+                .retrieve()
+                .bodyToMono(String.class)
+                .flatMap(responseBody->{
+                    try{
+                        JsonNode jsonNode = objectMapper.readTree(responseBody);
+                        JsonNode songIdNode = jsonNode.get("song_id");
+                        List<Long> ids = new ArrayList<>();
+                        if(songIdNode!=null&&songIdNode.isArray()){
+                            for(JsonNode iNode:songIdNode){
+                                ids.add(iNode.asLong());
+                            }
+                        }
+                        return Mono.just(ids);
+                    }catch (Exception e){
+                        log.error(e.getMessage());
+                        return Mono.error(e);
+                    }
+                })
+                .block();
+    }
+    private GenreCountFrame genreCount(List<Song> songList){
+        GenreCountFrame genreCountFrame = new GenreCountFrame();
+        for (Song i : songList){
+            List<String> genre = i.genre;
+            for(String g:genre){
+                switch (g){
+                    case "J-POP":
+                        genreCountFrame.setA(genreCountFrame.getA()+1);
+                        break;
+                    case "POP":
+                        genreCountFrame.setB(genreCountFrame.getB()+1);
+                        break;
+                    case "R&B/Soul":
+                        genreCountFrame.setC(genreCountFrame.getC()+1);
+                        break;
+                    case "국내드라마":
+                        genreCountFrame.setD(genreCountFrame.getD()+1);
+                        break;
+                    case "댄스":
+                        genreCountFrame.setE(genreCountFrame.getE()+1);
+                        break;
+                    case "랩/힙합":
+                        genreCountFrame.setF(genreCountFrame.getF()+1);
+                        break;
+                    case "록/메탈":
+                        genreCountFrame.setG(genreCountFrame.getG()+1);
+                        break;
+                    case "발라드":
+                        genreCountFrame.setH(genreCountFrame.getH()+1);
+                        break;
+                    case "성인가요/트로트":
+                        genreCountFrame.setI(genreCountFrame.getI()+1);
+                        break;
+                    case "애니메이션/웹툰":
+                        genreCountFrame.setJ(genreCountFrame.getJ()+1);
+                        break;
+                    case "인디음악":
+                        genreCountFrame.setK(genreCountFrame.getK()+1);
+                        break;
+                    case "일렉트로니카":
+                        genreCountFrame.setL(genreCountFrame.getL()+1);
+                        break;
+                    case "포크/블루스":
+                        genreCountFrame.setM(genreCountFrame.getM()+1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return genreCountFrame;
+    }
+    private Spectr2DataFrame f02Df(Long userId){
+        User user  = validator.userValidator(userId);
+        List<Integer> spectrum = user.getSpectr();
+        if(spectrum.isEmpty()){
+            throw new BadRequestException(ExceptionCode.NO_F0_DATA);
+        }
+        return new Spectr2DataFrame(
+                spectrum.get(0),
+                spectrum.get(1),
+                spectrum.get(2),
+                spectrum.get(3),
+                spectrum.get(4),
+                spectrum.get(5),
+                spectrum.get(6),
+                spectrum.get(7)
+                );
+    }
 }

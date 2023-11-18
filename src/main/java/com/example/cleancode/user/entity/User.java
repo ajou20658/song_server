@@ -1,8 +1,10 @@
 package com.example.cleancode.user.entity;
 
+import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.utils.Role;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 import java.util.List;
@@ -24,9 +26,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     @ElementCollection
+    private List<Integer> spectr;
+    @ElementCollection
     private List<Long> selected;
     @ElementCollection
-    private List<Long> recommand;
+    private List<Long> recommandSongIds;
 
     public UserDto toMemberDto(){
         return UserDto.builder()
@@ -35,8 +39,9 @@ public class User {
                 .nickname(nickname)
                 .profileUrl(profileUrl)
                 .role(role)
+                .spectr(spectr)
                 .selected(selected)
-                .recommand(recommand)
+                .recommandSongIds(recommandSongIds)
                 .build();
     }
 }

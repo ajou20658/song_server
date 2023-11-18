@@ -44,7 +44,7 @@ public class UserController {
 
     @PostMapping("/user_list")
     public ResponseEntity<Object> userUpdate(@RequestBody List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
-        if(userService.changeSelectList(songList, userPrinciple.getId())){
+        if(userService.reIssueRecommandList(songList, userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
@@ -56,7 +56,10 @@ public class UserController {
         response.put("response",songList);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-
+    @GetMapping("/user_recommand_list")
+    public List<Song> userRecommandList(@AuthenticationPrincipal UserPrinciple userPrinciple){
+        return userService.userLikeSongWithRecommand(userPrinciple.getId());
+    }
     @PostMapping("/upload")
     public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         log.info("Voice Upload Req");
