@@ -261,7 +261,7 @@ public class UserService {
         }
 
         return webClient.post()
-                .uri("localhost:8000/SongRecommend")
+                .uri("http://localhost:8000/SongRecommend")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(json))
                 .retrieve()
