@@ -240,7 +240,14 @@ public class UserService {
         User user = validator.userValidator(userId);
         List<Long> songRecommandList = user.getRecommandSongIds();
         List<Song> songList = new ArrayList<>();
-        for(Long i:songRecommandList){
+        Collections.shuffle(songRecommandList);
+        if(songRecommandList.size()<4){
+            for(Long i:songRecommandList){
+                songList.add(validator.songValidator(i));
+            }
+            return songList;
+        }
+        for(Long i:songRecommandList.subList(0,4)){
             songList.add(validator.songValidator(i));
         }
         return songList;
