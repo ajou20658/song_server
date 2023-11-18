@@ -18,6 +18,7 @@ public class UserDto {
     private String profileUrl;
     private Role role;
     private List<Long> selected;
+    private List<Long> recommand;
     public User makeMember(){
         return User.builder()
                 .role(role)
@@ -26,6 +27,7 @@ public class UserDto {
                 .nickname(nickname)
                 .profileUrl(profileUrl)
                 .selected(selected)
+                .recommand(recommand)
                 .build();
     }
 }

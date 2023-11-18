@@ -77,4 +77,10 @@ public class AdminController {
         trainService.ptrFileUplaod(file,name);
         return ResponseEntity.ok().build();
     }
+//    @DeleteMapping("/delete_song")
+//    public Response<Object> deleteSong(
+//            @RequestParam Integer songId
+//    ){
+//        songRepository.de
+//    }
 }

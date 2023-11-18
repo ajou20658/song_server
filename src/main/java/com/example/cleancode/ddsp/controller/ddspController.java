@@ -2,6 +2,7 @@ package com.example.cleancode.ddsp.controller;
 
 import com.example.cleancode.ddsp.entity.InferenceRequest;
 import com.example.cleancode.ddsp.entity.PtrData;
+import com.example.cleancode.ddsp.entity.ResultSong;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.ddsp.service.InferenceService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,10 @@ public class ddspController {
         List<PtrData> ptrDataList = ptrDataRepository.findAll();
         body.put("list",ptrDataList);
         return ResponseEntity.ok().body(ptrDataList);
+    }
+    @GetMapping("/generatedSongList")
+    public List<ResultSong> resultSongList(@RequestParam Long ptrId){
+        return inferenceService.allResult(ptrId);
     }
     @PostMapping("/makesong")
     public ResponseEntity<Object> ddspInferenceRequest(

@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -80,6 +81,10 @@ public class InferenceService {
 
         // response를 block하지 않고 직접 반환
         return response.block();
+    }
+    public List<ResultSong> allResult(Long ptrId){
+        PtrData ptrData = validator.ptrDataValidator(ptrId);
+        return resultSongRepository.findResultSongsByPtrData(ptrData);
     }
     public void songDelete(Integer generatedSongId){
         ResultSong resultSong=validator.resultSongValidator(generatedSongId);

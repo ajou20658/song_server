@@ -25,6 +25,8 @@ public class User {
     private Role role;
     @ElementCollection
     private List<Long> selected;
+    @ElementCollection
+    private List<Long> recommand;
 
     public UserDto toMemberDto(){
         return UserDto.builder()
@@ -34,6 +36,7 @@ public class User {
                 .profileUrl(profileUrl)
                 .role(role)
                 .selected(selected)
+                .recommand(recommand)
                 .build();
     }
 }
