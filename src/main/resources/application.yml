@@ -28,7 +28,9 @@ cloud:
     stack:
       auto: false
 spring:
-  django-url: http://18.218.72.27:8000
+#  django-url: http://18.218.72.27:8000
+  django-url: internal-preprocess-73917218.us-east-2.elb.amazonaws.com:8000
+  flask-url: internal-preprocess-73917218.us-east-2.elb.amazonaws.com:6844
   autoconfigure:
     exclude : org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 

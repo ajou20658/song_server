@@ -1,13 +1,15 @@
 package com.example.cleancode.song.controller;
 
+import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.dto.SongFormat;
+import com.example.cleancode.song.dto.SongOutput;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
-import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.service.VocalPreProcessService;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.security.DeclareRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -15,11 +17,13 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +46,7 @@ public class SongController {
     private final SongRepository songRepository;
     private final S3UploadService s3UploadService;
     private final VocalPreProcessService vocalPreProcessService;
+
     @GetMapping("/chartjson")
     @ResponseBody
     public List<Song> giveJson(){
@@ -61,7 +66,8 @@ public class SongController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Object> uploadSong(@RequestParam("file") MultipartFile multipartFile, @RequestParam Long songId){
+    @ResponseBody
+    public ResponseEntity<Object> uploadSong(@RequestPart("file") MultipartFile multipartFile, @RequestParam Long songId){
         if(vocalPreProcessService.songUpload(multipartFile,songId)){
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
@@ -69,15 +75,58 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/available_list")
+    @GetMapping("/uploaded_list")
+    @ResponseBody
     public List<Song> giveAvailalbleList(){
-        List<Song> song = songRepository.findByOriginUrlIsNotNull();
+        List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
+        song.addAll(songRepository.findByStatus(ProgressStatus.ERROR));
+        song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50)));
         return song;
     }
-    @GetMapping("/listen")
-    public ResponseEntity<Object> listenSong(@RequestParam String url){
-        log.info("url : {}",url);
-        Resource resource = s3UploadService.miniStream(url);
+    @GetMapping("/process_list")
+    @ResponseBody
+    public List<Song> giveProcessList(){
+        return songRepository.findByStatus(ProgressStatus.PROGRESS);
+    }
+    @GetMapping("/completed_list")
+    @ResponseBody
+    public List<Song> giveCompleteList(){
+        return songRepository.findByStatus(ProgressStatus.COMPLETE);
+    }
+    @GetMapping("/completed_random_list")
+    @ResponseBody
+    public List<Song> giveRCompleteList(){
+        return songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50));
+    }
+//    @GetMapping("/listen")
+//    public ResponseEntity<Object> listenSong(@RequestParam String url) throws IOException {
+//        log.info("url : {}",url);
+//        Resource resource = s3UploadService.miniStream2(url,60);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+//        headers.setContentDispositionFormData("inline","audio.mp3");
+//        headers.setContentLength(resource.contentLength());
+//        return ResponseEntity.ok()
+//                .headers(headers)
+//                .body(resource);
+//    }
+    @GetMapping("/download")
+    @ResponseBody
+    public ResponseEntity<Resource> streamWavFile(@RequestParam String url){
+        log.info("String : {}",url);
+        Resource resource = s3UploadService.stream(url);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+        headers.setContentDispositionFormData("inline","audio.mp3");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
+    @GetMapping("/download_inst")
+    @ResponseBody
+    public ResponseEntity<Resource> streamWavFile2(@RequestParam String url){
+        log.info("String : {}",url);
+        Resource resource = s3UploadService.stream(url);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("audio/wav"));
         headers.setContentDispositionFormData("inline","audio.wav");
@@ -88,7 +137,22 @@ public class SongController {
     @PostMapping("/preprocess")
     public ResponseEntity<Object> processSong(@RequestParam Long songId){
         log.info("preprocess : {}",songId);
-        return ResponseEntity.ok().build();
+        boolean result = vocalPreProcessService.preprocessStart(songId);
+        if(result){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    @PostMapping("/response")
+    public void djangoResponse(
+            @RequestBody List<Integer> f0,
+            @RequestBody Long status,
+            @RequestBody String uuid){
+        if(status==200){
+            vocalPreProcessService.djangoResponse(f0,uuid,status);
+            return;
+        }
+        vocalPreProcessService.djangoResponse(null,uuid,status);
     }
 
     @Deprecated
@@ -179,5 +243,127 @@ public class SongController {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/download/csv")
+    public ResponseEntity<byte[]> downloadCSV() throws Exception {
+        List<Song> data = songRepository.findByStatus(ProgressStatus.UPLOADED);
+        //Header
+        List<Long> likeList = new ArrayList<>();
+        for (Song i: data){
+            likeList.add(i.getId());
+        }
+        Map<String,Integer> likeMap = new HashMap<>();
+        log.info(likeList.toString());
+        JSONObject jsonObject = melonService.getLikeNum(likeList);
+        JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
+        for(int i=0;i<contsLikeArray.length();i++){
+            JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
+            System.out.println("contsLikeObject = " + contsLikeObject);
+            String likeId = String.valueOf(contsLikeObject.getInt("CONTSID"));
+
+            int sumCnt = contsLikeObject.getInt("SUMMCNT");
+            likeMap.put(likeId,sumCnt);
+        }
+        List<SongOutput> result = new ArrayList<>();
+        for (Song i: data){
+            result.add(SongOutput.builder()
+                    .id(Math.toIntExact(i.getId()))
+                    .like(likeMap.get(String.valueOf(i.getId())))
+                    .artist(i.getArtist())
+                    .title(i.getTitle())
+                    .genre(StringUtils.collectionToDelimitedString(i.getGenre()," "))
+                    .encodedGenre(StringUtils.collectionToDelimitedString(i.getEncoded_genre()," "))
+                    .build());
+        }
+        StringBuilder csvData = new StringBuilder();
+        // Data
+        for (SongOutput i : result){
+            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","
+                    +i.getGenre()+","+i.getEncodedGenre()+"\n");
+        }
+        byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentLength(csvBytes.length)
+                .body(csvBytes);
+    }
+    @GetMapping("/download/csv2")
+    public ResponseEntity<byte[]> downloadCSV2() throws Exception {
+        List<Song> data = songRepository.findByStatus(ProgressStatus.COMPLETE);
+        //Header
+        List<Long> likeList = new ArrayList<>();
+        for (Song i: data){
+            likeList.add(i.getId());
+        }
+        Map<String,Integer> likeMap = new HashMap<>();
+        log.info(likeList.toString());
+        JSONObject jsonObject = melonService.getLikeNum(likeList);
+        JSONArray contsLikeArray = jsonObject.getJSONArray("contsLike");
+        for(int i=0;i<contsLikeArray.length();i++){
+            JSONObject contsLikeObject = contsLikeArray.getJSONObject(i);
+            System.out.println("contsLikeObject = " + contsLikeObject);
+            String likeId = String.valueOf(contsLikeObject.getInt("CONTSID"));
+
+            int sumCnt = contsLikeObject.getInt("SUMMCNT");
+            likeMap.put(likeId,sumCnt);
+        }
+        List<SongOutput> result = new ArrayList<>();
+        for (Song i: data){
+            result.add(SongOutput.builder()
+                    .id(Math.toIntExact(i.getId()))
+                    .like(likeMap.get(String.valueOf(i.getId())))
+                    .artist(i.getArtist())
+                    .title(i.getTitle())
+                    .genre(StringUtils.collectionToDelimitedString(i.getGenre()," "))
+                    .encodedGenre(StringUtils.collectionToDelimitedString(i.getEncoded_genre()," "))
+                    .f0_1(i.getSpectr().get(0))
+                    .f0_2(i.getSpectr().get(1))
+                    .f0_3(i.getSpectr().get(2))
+                    .f0_4(i.getSpectr().get(3))
+                    .f0_5(i.getSpectr().get(4))
+                    .f0_6(i.getSpectr().get(5))
+                    .f0_7(i.getSpectr().get(6))
+                    .f0_8(i.getSpectr().get(7))
+                    .build());
+        }
+        StringBuilder csvData = new StringBuilder();
+        // Data
+        for (SongOutput i : result){
+            csvData.append(i.getId()+","+i.getTitle()+","+i.getArtist()+","+i.getLike()+","+i.getGenre()+","+
+                    i.getEncodedGenre()
+                    +","+i.getF0_1()+","+i.getF0_2()+","+i.getF0_3()+","+i.getF0_4()
+                    +","+i.getF0_5()+","+i.getF0_6()+","+i.getF0_7()+","+i.getF0_8()+"\n");
+        }
+        byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mydata.csv");
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentLength(csvBytes.length)
+                .body(csvBytes);
+    }
+    @GetMapping("/remove/dup")
+    public ResponseEntity<Object> removeDup(){
+        melonService.dupRemove();
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/remove/comma")
+    public ResponseEntity<Object> removeComma(){
+        melonService.replaceComma();
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/remove/null")
+    public ResponseEntity<Object> removeNull(){
+        melonService.replaceStatus();
+        return ResponseEntity.ok().build();
     }
 }

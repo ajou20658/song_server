@@ -24,71 +24,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(ExpiredJwtException.class)
-//    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<Object> expiredJwt(ExpiredJwtException e){
         Map<String,Object> response = new HashMap<>();
         response.put("HttpStatus",HttpStatus.FORBIDDEN);
         response.put("message","재갱신이 필요합니다");
         return new ResponseEntity<>(response,HttpStatus.IM_USED);
     }
-    @ExceptionHandler(JwtIssueException.class)
-    public ResponseEntity<Object> JwtIssueResponse(JwtIssueException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(JwtExpireException.class)
-    public ResponseEntity<Object> JwtIssueResponse(JwtExpireException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(NoUserSongException.class)
-    public ResponseEntity<Object> UserSongBadRequest(NoUserSongException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(NoUserException.class)
-    public ResponseEntity<Object> UserBadRequest(NoUserException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(NoSongException.class)
-    public ResponseEntity<Object> UserBadRequest(NoSongException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(FormatException.class)
-    public  ResponseEntity<Object> UserBadUpload(FormatException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(DjangoRequestException.class)
-    public ResponseEntity<Object> DjangoBadRequest(DjangoRequestException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(NoAwsSongException.class)
-    public ResponseEntity<Object> AwsBadRequest(NoAwsSongException e){
-        Map<String,Object> response = new HashMap<>();
-        response.put("HttpStatus",e.getExceptionCode().getStatus());
-        response.put("message",e.getExceptionCode().getMessage());
-        return new ResponseEntity<>(response,e.getExceptionCode().getStatus());
-    }
-    @ExceptionHandler(SizeException.class)
-    public  ResponseEntity<Object> SizeNeedUpdate(SizeException e){
+    @ExceptionHandler({JwtIssueException.class,
+        JwtExpireException.class,
+        NoUserSongException.class,
+        NoUserException.class,
+        NoSongException.class,
+        FormatException.class,
+        DjangoRequestException.class,
+        NoAwsSongException.class,
+        SizeException.class,
+        FormatException.class,
+        NoPtrException.class,
+        AwsUploadException.class
+    })
+    public ResponseEntity<Object> customExceptionHandler(JwtIssueException e){
         Map<String,Object> response = new HashMap<>();
         response.put("HttpStatus",e.getExceptionCode().getStatus());
         response.put("message",e.getExceptionCode().getMessage());

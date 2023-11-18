@@ -24,8 +24,8 @@ public class UserSong {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id")
     private Song song;
-    @Column(name = "awsUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private String awsUrl;
+    @Column(name = "vocalUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String vocalUrl;
     @Column(name = "originUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String originUrl;
     @ElementCollection
@@ -39,7 +39,7 @@ public class UserSong {
         return UserSongDto.builder()
                 .id(id)
                 .song(song)
-                .awsUrl(awsUrl)
+                .vocalUrl(vocalUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)
                 .status(status)
@@ -50,7 +50,7 @@ public class UserSong {
         return UserSong.builder()
                 .id(id)
                 .song(song)
-                .awsUrl(awsUrl)
+                .vocalUrl(vocalUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)
                 .status(progressStatus)

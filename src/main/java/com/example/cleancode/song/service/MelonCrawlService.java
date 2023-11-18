@@ -1,11 +1,11 @@
 package com.example.cleancode.song.service;
 
 import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +30,7 @@ import java.util.stream.Collectors;
 public class MelonCrawlService {
     private final SongRepository songRepository;
     private final Pattern pattern = Pattern.compile("(\\d+)(?=\\);)");
+    public static final String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
     private final Map<String,Long> dictionary = new HashMap<String,Long>(){
         {
             put("랩/힙합",0L);
@@ -81,7 +80,9 @@ public class MelonCrawlService {
         TopReset();
         String url = "https://www.melon.com/chart/index.htm";
 
-        Document doc = Jsoup.connect(url).get();
+        Document doc = Jsoup.connect(url)
+                .userAgent(userAgent)
+                .get();
 
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
@@ -102,7 +103,9 @@ public class MelonCrawlService {
         for(SongDto song: pList){
             if(song.getGenre()==null){
                 String getGenreParam = String.valueOf(song.getId());
-                Document genreDoc = Jsoup.connect(genreUrl+getGenreParam).get();
+                Document genreDoc = Jsoup.connect(genreUrl+getGenreParam)
+                        .userAgent(userAgent)
+                        .get();
                 Thread.sleep(500);
                 genreImgUrlParser(genreDoc,song);
             }else{
@@ -162,7 +165,7 @@ public class MelonCrawlService {
         }
         String EncodingArtist="";
         try {
-            EncodingArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
+            EncodingArtist = artist.replace(" ","+");
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
@@ -170,8 +173,9 @@ public class MelonCrawlService {
                 +EncodingArtist+"&section="+m+"&searchGnbYn=Y&kkoSpl=N&kkoDpType=%22%22#params%5Bq%5D="+EncodingArtist+
                 "&params%5Bsort%5D=hit&params%5Bsection%5D=artist&params%5BsectionId%5D=&params%5BgenreDir%5D=&po=pageObj&startIndex=";
         log.info(url);
-        Connection connection = Jsoup.connect(url);
+
         try{
+            Connection connection = Jsoup.connect(url).userAgent(userAgent);
             Thread.sleep(3000);
             Document doc = connection.get();
             Elements rows = doc.select("#frm_defaultList > div > table > tbody>tr");
@@ -183,6 +187,10 @@ public class MelonCrawlService {
                     title = title.replace(","," ");
                     Element td3 = tds.get(3);
                     String singer = td3.select("div>div>a").first().text(); //artist
+                    singer = singer.replace(","," ");
+                    if(!songRepository.findByArtistAndTitle(singer, title).isEmpty()){
+                        continue;
+                    }
                     if(!singer.contains(",")){
                         Element td4 = tds.get(4);
                         String href = td4.select("div>div>a").attr("href");
@@ -200,8 +208,11 @@ public class MelonCrawlService {
                                     .id(songId)
                                     .build();
                             String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
-                            Document genreDoc = Jsoup.connect(genreUrl+parse[4]).get();
+                            Document genreDoc = Jsoup.connect(genreUrl+parse[4])
+                                    .userAgent(userAgent)
+                                    .get();
                             genreImgUrlParser(genreDoc,songDto);
+
                             SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
                             list.add(songDto1);
                         }else{
@@ -215,7 +226,11 @@ public class MelonCrawlService {
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
-        return list;
+        List<SongDto> result = songRepository.findByArtistContainingOrTitleContaining(artist,artist)
+                .stream()
+                .map(Song::toSongDto)
+                .toList();
+        return result;
     }
 
     public JSONObject getLikeNum(List<Long> likeList)throws Exception{
@@ -277,6 +292,7 @@ public class MelonCrawlService {
         songDto.setImgUrl(imgUrl);
         songDto.setEncoded_genre(encodedGenre);
         songDto.setGenre(genreArray);
+        songDto.setStatus(ProgressStatus.NONE);
         songRepository.save(songDto.toSongEntity());
     }
     private SongDto top100CrawlParser(Element songInfo){
@@ -290,7 +306,12 @@ public class MelonCrawlService {
             return tmp2;
         }
         String title = songInfo.select("div.ellipsis.rank01 a").text(); //제목
+        title = title.replace(","," ");
         String artist = songInfo.select("div.ellipsis.rank02 a").eq(0).text(); //가수
+        artist = artist.replace(","," ");
+        if(!songRepository.findByArtistAndTitle(artist,title).isEmpty()){
+            return null;
+        }
         return SongDto.builder()
                 .artist(artist)
                 .title(title)
@@ -314,7 +335,8 @@ public class MelonCrawlService {
         List<String> mode = new ArrayList<String>(Arrays.asList("100","200","300","400","500","600","700","800"));
         for(String i :mode){
             String url = "https://www.melon.com/chart/month/index.htm?classCd=GN0"+i;
-            Connection connect = Jsoup.connect(url);
+            Connection connect = Jsoup.connect(url)
+                    .userAgent(userAgent);
             Document doc=null;
             try{
                 Thread.sleep(10000);
@@ -343,5 +365,32 @@ public class MelonCrawlService {
             log.info(artistList.toString());
         }
         writeListToFile(artistList,"C:\\Users\\kwy\\Documents\\2023하계\\cleancode\\src\\main\\resources\\static\\artist.txt");
+    }
+
+    public void dupRemove() {
+        List<Song> allList = songRepository.findAll();
+        List<Song> uniqueSongs = new HashSet<>(allList)
+                .stream().toList();
+        for(Song i: uniqueSongs){
+            allList.remove(i);
+        }
+        songRepository.deleteAll(allList);
+    }
+    public void replaceComma(){
+        List<Song> allList = songRepository.findByArtistContainingOrTitleContaining(",",",");
+        for(Song i: allList){
+            SongDto songDto = i.toSongDto();
+            songDto.setTitle(i.getTitle().replace(","," "));
+            songDto.setArtist(i.getArtist().replace(","," "));
+            songRepository.save(songDto.toSongEntity());
+        }
+    }
+    public void replaceStatus(){
+        List<Song> allList = songRepository.findByStatusIsNull();
+        for(Song i: allList){
+            SongDto songDto = i.toSongDto();
+            songDto.setStatus(ProgressStatus.NONE);
+            songRepository.save(songDto.toSongEntity());
+        }
     }
 }

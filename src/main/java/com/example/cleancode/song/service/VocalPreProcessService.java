@@ -7,28 +7,26 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.FormatException;
-import com.example.cleancode.utils.CustomException.Validator;
+import com.example.cleancode.user.entity.Dataframe2Json;
+import com.example.cleancode.utils.CustomException.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.methods.HttpHead;
-import org.openqa.jetty.http.HttpHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,16 +38,24 @@ public class VocalPreProcessService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
+    @Transactional
     public boolean songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
 
-        if((!Objects.requireNonNull(type).contains("audio"))){
+        if((!Objects.requireNonNull(type).contains("mpeg"))){
             throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
-        UUID uuid = UUID.randomUUID();
-        String filename = "song/"+uuid;
+        Song song = validator.songValidator(songId);
+        String filename="";
+        if(song.getOriginUrl()!=null){
+            filename = "origin/"+song.getOriginUrl().split("/")[1];
+        }else{
+            filename = "origin/"+UUID.randomUUID();
+        }
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
+        metadata.setContentType(multipartFile.getContentType());
+
 
         SongDto songDto = validator.songValidator(songId).toSongDto();
         songDto.setOriginUrl(filename);
@@ -57,7 +63,7 @@ public class VocalPreProcessService {
         try{
             amazonS3.putObject(bucket,filename,multipartFile.getInputStream(),metadata);
         }catch (IOException | SdkClientException ex){
-            throw new RuntimeException("aws 업로드 에러");
+            throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
         songRepository.save(songDto.toSongEntity());
         return true;
@@ -97,6 +103,7 @@ public class VocalPreProcessService {
     @Transactional
     public boolean preprocessStart(Long songId){
         Song song = validator.songValidator(songId);
+        songRepository.save(song.changeStatus(ProgressStatus.PROGRESS));
         try{
             djangoRequest(song);
             log.info("django 요청");
@@ -111,41 +118,88 @@ public class VocalPreProcessService {
     @Transactional
     public void djangoRequest(Song song){
         String uuid = song.getOriginUrl().split("/")[1];
-        WebClient webClient = WebClient.create();
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("http://"+djangoUrl)
+                .build();
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",song.getOriginUrl());
-        body.add("isUser","true");
+        body.add("isUser","false");
         body.add("uuid",uuid);
 
-        String url = djangoUrl + "/songssam/splitter/";
-
-        webClient.post()
-            .uri(url)
-            .body(BodyInserters.fromFormData(body))
-            .retrieve()
-            .bodyToMono(String.class)
-            .subscribe(res -> {
-                log.info("status message = {}", res);
-                SongDto songDto = song.toSongDto();
-                songDto.setVocalUrl("vocal/"+uuid);
-                songDto.setInstUrl("inst/"+uuid);
-                songDto.setStatus(ProgressStatus.COMPLETE);
-                songDto.toSongEntity();
-                songRepository.save(songDto.toSongEntity());
-//                songRepository.save(song.changeStatus(ProgressStatus.COMPLETE));
-            });
-//        ResponseEntity<String> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.POST,
-//                requestEntity,
-//                String.class
-//        );
-
-
+        String url = "/songssam/splitter/";
+        try{
+            webClient.post()
+                .uri(url)
+                .body(BodyInserters.fromFormData(body))
+                .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .map(JsonNode -> {
+                        try{
+                            String message = JsonNode.get("message").asText();
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                            return result[0];
+                        }catch (JsonProcessingException e){
+                            log.error("파싱 에러");
+                            throw new RuntimeException(e);
+                        }
+                    })
+                .subscribe(response -> {
+                    //여기 수정이 필요함
+//                    log.info("status message = {}", response);
+                    SongDto songDto = song.toSongDto();
+                    songDto.setVocalUrl("vocal/"+uuid);
+                    songDto.setInstUrl("inst/"+uuid);
+                    songDto.setStatus(ProgressStatus.COMPLETE);
+                    songDto.setSpectr(json2List(response));
+                    songDto.toSongEntity();
+                    songRepository.save(songDto.toSongEntity());
+                });
+        }catch (Exception e){
+            throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
+        }
         // userSong Status변경
+    }
 
+    @Transactional
+    public void djangoResponse(List<Integer> spetr, String uuid,Long Status){
+        if(Status.equals("200")){
+            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
+            if(songOptional.isEmpty()){
+                throw new NoSongException(ExceptionCode.SONG_INVALID);
+            }
+            SongDto songDto = songOptional.get().toSongDto();
+            songDto.setVocalUrl("vocal/"+uuid);
+            songDto.setInstUrl("inst/"+uuid);
+            songDto.setSpectr(spetr);
+            songDto.setStatus(ProgressStatus.COMPLETE);
+
+            songRepository.save(songDto.toSongEntity());
+        }else{
+            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
+            if(songOptional.isEmpty()){
+                return;
+            }
+            SongDto songDto = songOptional.get().toSongDto();
+            songDto.setStatus(ProgressStatus.ERROR);
+            songRepository.save(songDto.toSongEntity());
+        }
+    }
+    private List<Integer> json2List(Dataframe2Json rawJson){
+        List<Integer> result = new ArrayList<>();
+        result.add(rawJson.getF0_1());
+        result.add(rawJson.getF0_2());
+        result.add(rawJson.getF0_3());
+        result.add(rawJson.getF0_4());
+        result.add(rawJson.getF0_5());
+        result.add(rawJson.getF0_6());
+        result.add(rawJson.getF0_7());
+        result.add(rawJson.getF0_8());
+        log.info(result.toString());
+        return result;
     }
     private static byte[] getBytesFromFile(File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);

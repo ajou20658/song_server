@@ -17,7 +17,7 @@ public class SongDto {
     private boolean isTop;
     private List<String> genre;
     private List<Long> encoded_genre;
-    private List<Float> spectr;
+    private List<Integer> spectr;
     private String vocalUrl;
     private String instUrl;
     private String originUrl;

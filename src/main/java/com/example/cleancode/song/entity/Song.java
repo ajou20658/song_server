@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -22,7 +23,7 @@ public class Song {
     private String artist;
     private boolean isTop;
     @ElementCollection
-    private List<Float> spectr;
+    private List<Integer> spectr;
     @Column(name = "vocalUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String vocalUrl;
     @Column(name = "instrUrl", nullable = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
@@ -67,5 +68,17 @@ public class Song {
                 .instUrl(instUrl)
                 .status(progressStatus)
                 .build();
+    }
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Song song = (Song) o;
+        return Objects.equals(title, song.title) &&
+                Objects.equals(artist, song.artist);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, artist);
     }
 }

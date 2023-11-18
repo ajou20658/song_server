@@ -44,7 +44,7 @@ public class UserController {
 
     @PostMapping("/user_list")
     public ResponseEntity<Object> userUpdate(@RequestBody List<Long> songList, @AuthenticationPrincipal UserPrinciple userPrinciple){
-        if(userService.changeSelectList(songList, userPrinciple.getId())){
+        if(userService.reIssueRecommandList(songList, userPrinciple.getId())){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
@@ -56,7 +56,11 @@ public class UserController {
         response.put("response",songList);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-
+    @GetMapping("/user_recommand_list")
+    @ResponseBody
+    public List<Song> userRecommandList(@AuthenticationPrincipal UserPrinciple userPrinciple){
+        return userService.userLikeSongWithRecommand(userPrinciple.getId());
+    }
     @PostMapping("/upload")
     public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         log.info("Voice Upload Req");
@@ -77,6 +81,7 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
     @GetMapping("/vocal_list")
+    @ResponseBody
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
         Map<String,Object> response = new HashMap<>();
         response.put("response",userService.readUserSongList(userPrinciple.getId()));
@@ -88,8 +93,8 @@ public class UserController {
         log.info("String : {}",url);
         Resource resource = s3UploadService.stream(url);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("audio/wav"));
-        headers.setContentDispositionFormData("inline","audio.wav");
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
+        headers.setContentDispositionFormData("inline","audio.mp3");
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(resource);

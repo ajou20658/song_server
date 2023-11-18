@@ -1,24 +1,23 @@
 package com.example.cleancode.aws.service;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.S3Object;
-import com.example.cleancode.song.repository.SongRepository;
-import com.example.cleancode.user.JpaRepository.UserRepository;
-import com.example.cleancode.user.JpaRepository.UserSongRepository;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.NoAwsSongException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.StreamUtils;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,11 +32,15 @@ public class S3UploadService {
     private String bucket;
 
 
-    public Resource stream(String url){
+    public Resource stream(String url) {
         try {
             S3Object s3Object = amazonS3.getObject(bucket, url);
-            return new InputStreamResource(s3Object.getObjectContent());
-        }catch (SdkClientException e){
+            try (InputStream inputStream = s3Object.getObjectContent()) {
+                // InputStream을 ByteArrayResource로 복사
+                byte[] byteArray = StreamUtils.copyToByteArray(inputStream);
+                return new ByteArrayResource(byteArray);
+            }
+        } catch (SdkClientException | IOException e) {
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
     }
@@ -47,20 +50,21 @@ public class S3UploadService {
             S3Object s3Object = amazonS3.getObject(bucket,url);
             InputStream inputStream = s3Object.getObjectContent();
             byte[] audioData = readAudioDate(inputStream,60);
-            return createWavFile(audioData);
+            return new InputStreamResource(new ByteArrayInputStream(audioData));
         }catch (SdkClientException e){
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
     }
+
     private byte[] readAudioDate(InputStream inputStream,int durationInSecond){
         byte[] buffer = new byte[1024];
         int bytesRead;
         int totalBytesRead = 0;
-        int maxBytesToRead = durationInSecond * 44100 * 2;
+        int maxBytesToRead = durationInSecond * 1024;
         ByteArrayOutputStream audioBuffer = new ByteArrayOutputStream();
         try{
-            while((bytesRead = inputStream.read(buffer))!=-1&&totalBytesRead<maxBytesToRead){
-                audioBuffer.write(buffer,0,bytesRead);
+            while (totalBytesRead < maxBytesToRead && (bytesRead = inputStream.read(buffer)) != -1) {
+                audioBuffer.write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
             }
         }catch (IOException e){

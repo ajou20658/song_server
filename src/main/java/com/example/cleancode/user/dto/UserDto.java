@@ -17,7 +17,9 @@ public class UserDto {
     private String nickname;
     private String profileUrl;
     private Role role;
+    private List<Integer> spectr;
     private List<Long> selected;
+    private List<Long> recommandSongIds;
     public User makeMember(){
         return User.builder()
                 .role(role)
@@ -25,7 +27,9 @@ public class UserDto {
                 .id(id)
                 .nickname(nickname)
                 .profileUrl(profileUrl)
+                .spectr(spectr)
                 .selected(selected)
+                .recommandSongIds(recommandSongIds)
                 .build();
     }
 }

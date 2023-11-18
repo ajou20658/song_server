@@ -17,7 +17,7 @@ import java.util.List;
 public class UserSongDto {
     private Long id;
     private Song song;
-    private String awsUrl;
+    private String vocalUrl;
     private String originUrl;
     private List<Integer> spectr;
     private LocalDateTime createdAt;
@@ -28,7 +28,7 @@ public class UserSongDto {
         return UserSong.builder()
                 .id(id)
                 .song(song)
-                .awsUrl(awsUrl)
+                .vocalUrl(vocalUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)
                 .status(status)
@@ -40,7 +40,7 @@ public class UserSongDto {
                 .userId(user.getId())
                 .songId(song.getId())
                 .createdAt(createdAt)
-                .awsUrl(awsUrl)
+                .vocalUrl(vocalUrl)
                 .originUrl(originUrl)
                 .spectr(spectr)
                 .status(status)
