@@ -258,6 +258,7 @@ public class UserService {
         String json="";
         try {
              json = objectMapper.writeValueAsString(user_info_json);
+             log.info(json);
         }catch (Exception e){
             log.error("json 변환 오륲");
         }
