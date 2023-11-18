@@ -52,6 +52,7 @@ public class InferenceService {
         try {
             amazonS3.putObject(bucket, filename, inputStream, metadata);
         }catch (Exception e){
+            log.error("응답 에러",e.getMessage());
             throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
         ResultSong resultSong = ResultSong.builder()
