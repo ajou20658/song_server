@@ -69,7 +69,7 @@ public class InferenceService {
         //ptrKey는 ptr/uuid
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
-        String url = "http://"+ djangoUrl +"songssam/voiceChangeModel?wav_path="+songKey+
+        String url = "http://"+ djangoUrl +"/songssam/voiceChangeModel?wav_path="+songKey+
                 "&fPtrPath="+ptrKey+
                 "&uuid="+uuid;
         Mono<byte[]> response = webClient.get()
