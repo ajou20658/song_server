@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,17 +70,23 @@ public class InferenceService {
         //ptrKey는 ptr/uuid
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
-        String url = "http://"+ djangoUrl +"/songssam/voiceChangeModel/?wav_path="+songKey+
-                "&fPtrPath="+ptrKey+
-                "&uuid="+uuid;
-        Mono<byte[]> response = webClient.get()
-                .uri(url)
-                .accept(MediaType.valueOf("audio/mpeg"))
-                .retrieve()
-                .bodyToMono(byte[].class);
-
-        // response를 block하지 않고 직접 반환
-        return response.block();
+        try {
+            String encodedSongKey = URLEncoder.encode(songKey, "UTF-8");
+            String encodedPtrKey = URLEncoder.encode(ptrKey,"UTF-8");
+            String url = "http://" + djangoUrl + "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
+                    "&fPtrPath=" + encodedPtrKey +
+                    "&uuid=" + uuid;
+            Mono<byte[]> response = webClient.get()
+                    .uri(url)
+                    .accept(MediaType.valueOf("audio/mpeg"))
+                    .retrieve()
+                    .bodyToMono(byte[].class);
+            return response.block();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+            // response를 block하지 않고 직접 반환
+        return null;
     }
     public List<ResultSong> allResult(Long ptrId){
         PtrData ptrData = validator.ptrDataValidator(ptrId);
