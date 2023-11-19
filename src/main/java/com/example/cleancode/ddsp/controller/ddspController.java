@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +34,16 @@ public class ddspController {
         return inferenceService.allResult(ptrId);
     }
     @PostMapping("/makesong")
-    public ResponseEntity<Object> ddspInferenceRequest(
-            @RequestBody InferenceRequest inferenceRequest){
-        Integer generatedSongId = inferenceService.inferenceStart(
-                inferenceRequest.getTargetVoiceId(),
-                inferenceRequest.getTargetSongId());
-        Map<String,Object> body = new HashMap<>();
-        body.put("generatedId",generatedSongId);
-        return ResponseEntity.ok().body(body);
+    public Mono<ResponseEntity<Object>> ddspInferenceRequest(
+            @RequestBody InferenceRequest inferenceRequest) {
+        return inferenceService.inferenceStart(
+                        inferenceRequest.getTargetVoiceId(),
+                        inferenceRequest.getTargetSongId())
+                .map(generatedSongId -> {
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("generatedId", generatedSongId);
+                    return ResponseEntity.ok().body(body);
+                });
     }
     @PostMapping("/deleteSong")
     public ResponseEntity<Object> ddspResultDelete(@RequestBody Integer deleteId){

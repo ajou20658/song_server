@@ -39,34 +39,44 @@ public class InferenceService {
     @Value("${spring.django-url}")
     private String djangoUrl;
     @Transactional
-    public Integer inferenceStart(Long ptrId,Long songId){
+    public Mono<Integer> inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
         String ptrKey = ptrData.getPtrUrl();
         String songKey = song.getOriginUrl();
-        byte[] response = flaskRequest(ptrKey,songKey);
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(response.length);
-        metadata.setContentType("audio/mpeg");
 
-        String filename = "generate/"+ UUID.randomUUID();
-        InputStream inputStream = new ByteArrayInputStream(response);
-        try {
-            amazonS3.putObject(bucket, filename, inputStream, metadata);
-        }catch (Exception e){
-            log.error("응답 에러",e.getMessage());
-            throw new AwsUploadException(ExceptionCode.AWS_ERROR);
-        }
-        ResultSong resultSong = ResultSong.builder()
-                .generatedUrl(filename)
-                .song(song)
-                .ptrData(ptrData)
-                .build();
-        ResultSong result = resultSongRepository.save(resultSong);
-        return result.getId();
+        return flaskRequest(ptrKey, songKey)
+                .flatMap(response -> {
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentLength(response.length);
+                    metadata.setContentType("audio/mpeg");
+
+                    String filename = "generate/" + UUID.randomUUID();
+                    InputStream inputStream = new ByteArrayInputStream(response);
+
+                    try {
+                        amazonS3.putObject(bucket, filename, inputStream, metadata);
+                    } catch (Exception e) {
+                        log.error("응답 에러", e.getMessage());
+                        return Mono.error(new AwsUploadException(ExceptionCode.AWS_ERROR));
+                    }
+
+                    ResultSong resultSong = ResultSong.builder()
+                            .generatedUrl(filename)
+                            .song(song)
+                            .ptrData(ptrData)
+                            .build();
+
+                    ResultSong result = resultSongRepository.save(resultSong);
+                    return Mono.just(result.getId());
+                })
+                .onErrorResume(throwable -> {
+                    // 에러 처리 로직
+                    return Mono.error(throwable);
+                });
     }
     @Transactional
-    public byte[] flaskRequest(String ptrKey, String songKey){
+    public Mono<byte[]> flaskRequest(String ptrKey, String songKey){
         //ptrKey는 ptr/uuid
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
@@ -76,17 +86,15 @@ public class InferenceService {
             String url = "http://" + djangoUrl + "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
                     "&fPtrPath=" + encodedPtrKey +
                     "&uuid=" + uuid;
-            Mono<byte[]> response = webClient.get()
+            return webClient.get()
                     .uri(url)
                     .accept(MediaType.valueOf("audio/mpeg"))
                     .retrieve()
                     .bodyToMono(byte[].class);
-            return response.block();
         }catch (Exception e){
             e.printStackTrace();
+            return Mono.error(e);
         }
-            // response를 block하지 않고 직접 반환
-        return null;
     }
     public List<ResultSong> allResult(Long ptrId){
         PtrData ptrData = validator.ptrDataValidator(ptrId);
