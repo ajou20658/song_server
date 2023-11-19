@@ -74,7 +74,7 @@ public class InferenceService {
                 "&uuid="+uuid;
         Mono<byte[]> response = webClient.get()
                 .uri(url)
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .accept(MediaType.valueOf("audio/mpeg"))
                 .retrieve()
                 .bodyToMono(byte[].class);
 
