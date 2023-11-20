@@ -34,16 +34,12 @@ public class ddspController {
         return inferenceService.allResult(ptrId);
     }
     @PostMapping("/makesong")
-    public Mono<ResponseEntity<Object>> ddspInferenceRequest(
+    public ResponseEntity<Object> ddspInferenceRequest(
             @RequestBody InferenceRequest inferenceRequest) {
-        return inferenceService.inferenceStart(
+        inferenceService.inferenceStart(
                         inferenceRequest.getTargetVoiceId(),
-                        inferenceRequest.getTargetSongId())
-                .map(generatedSongId -> {
-                    Map<String, Object> body = new HashMap<>();
-                    body.put("generatedId", generatedSongId);
-                    return ResponseEntity.ok().body(body);
-                });
+                        inferenceRequest.getTargetSongId());
+        return ResponseEntity.ok().build();
     }
     @PostMapping("/deleteSong")
     public ResponseEntity<Object> ddspResultDelete(@RequestBody Integer deleteId){

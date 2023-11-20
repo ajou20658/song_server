@@ -135,18 +135,18 @@ public class VocalPreProcessService {
                 .uri(url)
                 .body(BodyInserters.fromFormData(body))
                 .retrieve()
-                    .bodyToMono(JsonNode.class)
-                    .map(JsonNode -> {
-                        try{
-                            String message = JsonNode.get("message").asText();
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
-                            return result[0];
-                        }catch (JsonProcessingException e){
-                            log.error("파싱 에러");
-                            throw new RuntimeException(e);
-                        }
-                    })
+                .bodyToMono(JsonNode.class)
+                .map(JsonNode -> {
+                    try{
+                        String message = JsonNode.get("message").asText();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                        return result[0];
+                    }catch (JsonProcessingException e){
+                        log.error("파싱 에러");
+                        throw new RuntimeException(e);
+                    }
+                })
                 .subscribe(response -> {
                     //여기 수정이 필요함
 //                    log.info("status message = {}", response);

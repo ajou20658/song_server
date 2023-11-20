@@ -40,45 +40,41 @@ public class InferenceService {
     @Value("${spring.django-url}")
     private String djangoUrl;
     @Transactional
-    public Mono<Integer> inferenceStart(Long ptrId, Long songId) {
+    public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
         String ptrKey = ptrData.getPtrUrl();
         String songKey = song.getOriginUrl();
 
-        return flaskRequest(ptrKey, songKey)
-                .flatMap(response -> {
-                    ObjectMetadata metadata = new ObjectMetadata();
-                    metadata.setContentLength(response.length);
-                    metadata.setContentType("audio/mpeg");
+        byte[] response = flaskRequest(ptrKey, songKey);
+        if(response==null){
+            throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
+        }
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(response.length);
+        metadata.setContentType("audio/mpeg");
 
-                    String filename = "generate/" + UUID.randomUUID();
-                    InputStream inputStream = new ByteArrayInputStream(response);
+        String filename = "generate/" + UUID.randomUUID();
+        InputStream inputStream = new ByteArrayInputStream(response);
 
-                    try {
-                        amazonS3.putObject(bucket, filename, inputStream, metadata);
-                    } catch (Exception e) {
-                        log.error("응답 에러", e.getMessage());
-                        return Mono.error(new AwsUploadException(ExceptionCode.AWS_ERROR));
-                    }
+        try {
+            amazonS3.putObject(bucket, filename, inputStream, metadata);
+        } catch (Exception e) {
+            log.error("응답 에러", e.getMessage());
+            throw new AwsUploadException(ExceptionCode.AWS_ERROR);
+        }
 
-                    ResultSong resultSong = ResultSong.builder()
-                            .generatedUrl(filename)
-                            .song(song)
-                            .ptrData(ptrData)
-                            .build();
+        ResultSong resultSong = ResultSong.builder()
+                .generatedUrl(filename)
+                .song(song)
+                .ptrData(ptrData)
+                .build();
 
-                    ResultSong result = resultSongRepository.save(resultSong);
-                    return Mono.just(result.getId());
-                })
-                .onErrorResume(throwable -> {
-                    // 에러 처리 로직
-                    return Mono.error(throwable);
-                });
+        resultSongRepository.save(resultSong);
     }
     @Async
     @Transactional
-    public Mono<byte[]> flaskRequest(String ptrKey, String songKey){
+    public byte[] flaskRequest(String ptrKey, String songKey){
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://" + djangoUrl)
                 .build();
@@ -91,10 +87,11 @@ public class InferenceService {
                     .uri(url)
                     .accept(MediaType.ALL)
                     .retrieve()
-                    .bodyToMono(byte[].class);
+                    .bodyToMono(byte[].class)
+                    .block();
         }catch (Exception e){
             e.printStackTrace();
-            return Mono.error(e);
+            return null;
         }
     }
     public List<ResultSong> allResult(Long ptrId){
