@@ -43,38 +43,14 @@ public class InferenceService {
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
-        String ptrKey = ptrData.getPtrUrl();
-        String songKey = song.getOriginUrl();
+        flaskRequest(ptrData, song);
 
-        byte[] response = flaskRequest(ptrKey, songKey);
-        if(response==null){
-            throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
-        }
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(response.length);
-        metadata.setContentType("audio/mpeg");
-
-        String filename = "generate/" + UUID.randomUUID();
-        InputStream inputStream = new ByteArrayInputStream(response);
-
-        try {
-            amazonS3.putObject(bucket, filename, inputStream, metadata);
-        } catch (Exception e) {
-            log.error("응답 에러", e.getMessage());
-            throw new AwsUploadException(ExceptionCode.AWS_ERROR);
-        }
-
-        ResultSong resultSong = ResultSong.builder()
-                .generatedUrl(filename)
-                .song(song)
-                .ptrData(ptrData)
-                .build();
-
-        resultSongRepository.save(resultSong);
     }
     @Async
     @Transactional
-    public byte[] flaskRequest(String ptrKey, String songKey){
+    public void flaskRequest(PtrData ptrData, Song song){
+        String ptrKey = ptrData.getPtrUrl();
+        String songKey = song.getOriginUrl();
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://" + djangoUrl)
                 .build();
@@ -83,15 +59,41 @@ public class InferenceService {
             String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
-            return webClient.get()
-                    .uri(url)
-                    .accept(MediaType.ALL)
-                    .retrieve()
-                    .bodyToMono(byte[].class)
-                    .block();
+            webClient.get()
+                .uri(url)
+                .accept(MediaType.ALL)
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .subscribe(response->
+                        {
+                            if(response==null){
+                                throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
+                            }
+                            ObjectMetadata metadata = new ObjectMetadata();
+                            metadata.setContentLength(response.length);
+                            metadata.setContentType("audio/mpeg");
+
+                            String filename = "generate/" + UUID.randomUUID();
+                            InputStream inputStream = new ByteArrayInputStream(response);
+
+                            try {
+                                amazonS3.putObject(bucket, filename, inputStream, metadata);
+                            } catch (Exception e) {
+                                log.error("응답 에러", e.getMessage());
+                                throw new AwsUploadException(ExceptionCode.AWS_ERROR);
+                            }
+
+                            ResultSong resultSong = ResultSong.builder()
+                                    .generatedUrl(filename)
+                                    .song(song)
+                                    .ptrData(ptrData)
+                                    .build();
+
+                            resultSongRepository.save(resultSong);
+                        }
+                );
         }catch (Exception e){
-            e.printStackTrace();
-            return null;
+            throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
         }
     }
     public List<ResultSong> allResult(Long ptrId){
