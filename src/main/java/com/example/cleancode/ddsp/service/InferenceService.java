@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -49,10 +50,16 @@ public class InferenceService {
     @Async
     @Transactional
     public void flaskRequest(PtrData ptrData, Song song){
+        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(clientCodecConfigurer ->
+                        clientCodecConfigurer.defaultCodecs()
+                                .maxInMemorySize(1024*1024*20))
+                .build();
         String ptrKey = ptrData.getPtrUrl();
         String songKey = song.getOriginUrl();
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://" + djangoUrl)
+                .exchangeStrategies(exchangeStrategies)
                 .build();
         String uuid = songKey.split("/")[1];
         try {
