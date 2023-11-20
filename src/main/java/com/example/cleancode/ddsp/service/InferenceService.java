@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -75,23 +76,20 @@ public class InferenceService {
                     return Mono.error(throwable);
                 });
     }
+    @Async
     @Transactional
     public Mono<byte[]> flaskRequest(String ptrKey, String songKey){
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://" + djangoUrl)
                 .build();
-        //ptrKey는 ptr/uuid
-        //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
         try {
-            String encodedSongKey = URLEncoder.encode(songKey, "UTF-8");
-            String encodedPtrKey = URLEncoder.encode(ptrKey,"UTF-8");
-            String url = "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
-                    "&fPtrPath=" + encodedPtrKey +
+            String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
+                    "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
             return webClient.get()
                     .uri(url)
-                    .accept(MediaType.valueOf("audio/mpeg"))
+                    .accept(MediaType.ALL)
                     .retrieve()
                     .bodyToMono(byte[].class);
         }catch (Exception e){
