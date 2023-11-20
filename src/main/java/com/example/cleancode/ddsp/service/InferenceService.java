@@ -77,13 +77,16 @@ public class InferenceService {
     }
     @Transactional
     public Mono<byte[]> flaskRequest(String ptrKey, String songKey){
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://" + djangoUrl)
+                .build();
         //ptrKey는 ptr/uuid
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
         try {
             String encodedSongKey = URLEncoder.encode(songKey, "UTF-8");
             String encodedPtrKey = URLEncoder.encode(ptrKey,"UTF-8");
-            String url = "http://" + djangoUrl + "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
+            String url = "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
                     "&fPtrPath=" + encodedPtrKey +
                     "&uuid=" + uuid;
             return webClient.get()
