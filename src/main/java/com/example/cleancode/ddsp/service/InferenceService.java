@@ -81,10 +81,10 @@ public class InferenceService {
         //songKey는 Origin/uuid
         String uuid = songKey.split("/")[1];
         try {
-//            String encodedSongKey = URLEncoder.encode(songKey, "UTF-8");
-//            String encodedPtrKey = URLEncoder.encode(ptrKey,"UTF-8");
-            String url = "http://" + djangoUrl + "/songssam/voiceChangeModel/?wav_path=" + songKey +
-                    "&fPtrPath=" + ptrKey +
+            String encodedSongKey = URLEncoder.encode(songKey, "UTF-8");
+            String encodedPtrKey = URLEncoder.encode(ptrKey,"UTF-8");
+            String url = "http://" + djangoUrl + "/songssam/voiceChangeModel/?wav_path=" + encodedSongKey +
+                    "&fPtrPath=" + encodedPtrKey +
                     "&uuid=" + uuid;
             return webClient.get()
                     .uri(url)
