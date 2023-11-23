@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,12 +43,7 @@ public class InferenceService {
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
-        flaskRequest(ptrData, song);
 
-    }
-    @Async
-    @Transactional
-    public void flaskRequest(PtrData ptrData, Song song){
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(clientCodecConfigurer ->
                         clientCodecConfigurer.defaultCodecs()
@@ -66,42 +60,47 @@ public class InferenceService {
             String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
-            webClient.get()
-                .uri(url)
-                .accept(MediaType.ALL)
-                .retrieve()
-                .bodyToMono(byte[].class)
-                .subscribe(response->
-                        {
-                            if(response==null){
-                                throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
-                            }
-                            ObjectMetadata metadata = new ObjectMetadata();
-                            metadata.setContentLength(response.length);
-                            metadata.setContentType("audio/mpeg");
-
-                            String filename = "generate/" + UUID.randomUUID();
-                            InputStream inputStream = new ByteArrayInputStream(response);
-
-                            try {
-                                amazonS3.putObject(bucket, filename, inputStream, metadata);
-                            } catch (Exception e) {
-                                log.error("응답 에러", e.getMessage());
-                                throw new AwsUploadException(ExceptionCode.AWS_ERROR);
-                            }
-
-                            ResultSong resultSong = ResultSong.builder()
-                                    .generatedUrl(filename)
-                                    .song(song)
-                                    .ptrData(ptrData)
-                                    .build();
-
-                            resultSongRepository.save(resultSong);
-                        }
-                );
+            Mono<byte[]> response = webClient.get()
+                    .uri(url)
+                    .accept(MediaType.ALL)
+                    .retrieve()
+                    .bodyToMono(byte[].class);
+            flaskRequest(response ,ptrData, song);
         }catch (Exception e){
-            throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
+            throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
         }
+    }
+    @Async
+    @Transactional
+    public void flaskRequest(Mono<byte[]> response,PtrData ptrData,Song song){
+        response.subscribe(res->
+                {
+                    if(res==null){
+                        throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
+                    }
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentLength(res.length);
+                    metadata.setContentType("audio/mpeg");
+
+                    String filename = "generate/" + UUID.randomUUID();
+                    InputStream inputStream = new ByteArrayInputStream(res);
+
+                    try {
+                        amazonS3.putObject(bucket, filename, inputStream, metadata);
+                    } catch (Exception e) {
+                        log.error("응답 에러", e.getMessage());
+                        throw new AwsUploadException(ExceptionCode.AWS_ERROR);
+                    }
+
+                    ResultSong resultSong = ResultSong.builder()
+                            .generatedUrl(filename)
+                            .song(song)
+                            .ptrData(ptrData)
+                            .build();
+                    resultSongRepository.save(resultSong);
+                }
+        );
+
     }
     public List<ResultSong> allResult(Long ptrId){
         PtrData ptrData = validator.ptrDataValidator(ptrId);

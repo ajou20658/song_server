@@ -1,7 +1,6 @@
 package com.example.cleancode.user.controller;
 
-import com.amazonaws.Response;
-import com.example.cleancode.ddsp.repository.PtrDataRepository;
+import com.amazonaws.services.s3.AmazonS3;
 import com.example.cleancode.ddsp.service.TrainService;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -9,6 +8,7 @@ import com.example.cleancode.user.JpaRepository.UserRepository;
 import com.example.cleancode.user.dto.JwtDto;
 import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.entity.User;
+import com.example.cleancode.user.service.AdminService;
 import com.example.cleancode.utils.Role;
 import com.example.cleancode.utils.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +26,12 @@ import java.util.List;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
     private final SongRepository songRepository;
     private final TrainService trainService;
     private final JwtService jwtService;
+    private final AdminService adminService;
+    private final AmazonS3 amazonS3;
     @GetMapping("/generate")
     @ResponseBody
     public JwtDto getJwt(){
@@ -44,7 +46,7 @@ public class AdminController {
     }
     @GetMapping("/members")
     public String getMemberList(Model model){
-        List<User> members = memberRepository.findAll();
+        List<User> members = userRepository.findAll();
 
         model.addAttribute("members",members);
         return "member-list";
@@ -83,4 +85,13 @@ public class AdminController {
 //    ){
 //        songRepository.de
 //    }
+    @PostMapping("/delete_all_User")
+    public ResponseEntity<Object> deleteUserData(){
+        List<User> allUser = userRepository.findAll();
+        for(User i:allUser){
+            String name = adminService.deleteUser(i.getId());
+            log.info("삭제 성공 : {}", name);
+        }
+        return ResponseEntity.ok().build();
+    }
 }
