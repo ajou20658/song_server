@@ -31,10 +31,10 @@ public class AdminService {
         for(UserSong i:userSongList){
             String vocalUrl = i.getVocalUrl();
             String originUrl = i.getOriginUrl();
-            if(originUrl!=null){
+            if(originUrl!=null&&(amazonS3.doesObjectExist(bucket,originUrl))){
                 amazonS3.deleteObject(bucket,originUrl);
             }
-            if(vocalUrl!=null){
+            if(vocalUrl!=null&&(amazonS3.doesObjectExist(bucket,originUrl))){
                 amazonS3.deleteObject(bucket,vocalUrl);
             }
             userSongRepository.delete(i);
