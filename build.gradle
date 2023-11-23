@@ -40,12 +40,11 @@ dependencies {
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 	implementation 'com.googlecode.mp4parser:isoparser:1.1.22'
 	implementation group: 'javazoom', name: 'jlayer', version: '1.0.1'
-
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux:3.0.4'
 
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.1.0'
