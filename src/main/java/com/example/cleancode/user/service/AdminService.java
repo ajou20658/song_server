@@ -31,8 +31,12 @@ public class AdminService {
         for(UserSong i:userSongList){
             String vocalUrl = i.getVocalUrl();
             String originUrl = i.getOriginUrl();
-            amazonS3.deleteObject(bucket,vocalUrl);
-            amazonS3.deleteObject(bucket,originUrl);
+            if(originUrl!=null){
+                amazonS3.deleteObject(bucket,originUrl);
+            }
+            if(vocalUrl!=null){
+                amazonS3.deleteObject(bucket,vocalUrl);
+            }
             userSongRepository.delete(i);
         }
         userRepository.delete(user);
