@@ -36,6 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -137,6 +138,7 @@ public class UserService {
                             clientResponse -> Mono.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR))
                     )
                     .bodyToMono(JsonNode.class)
+                    .timeout(Duration.ofMinutes(5))
                     .handle((JsonNode, sink) -> {
                         try{
                             String message = JsonNode.get("message").asText();

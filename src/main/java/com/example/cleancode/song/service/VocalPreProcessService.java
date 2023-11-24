@@ -25,6 +25,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -147,6 +148,7 @@ public class VocalPreProcessService {
                         throw new RuntimeException(e);
                     }
                 })
+                    .timeout(Duration.ofMinutes(5))
                 .subscribe(response -> {
                     //여기 수정이 필요함
 //                    log.info("status message = {}", response);

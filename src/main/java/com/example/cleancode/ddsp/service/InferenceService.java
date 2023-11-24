@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,6 +67,7 @@ public class InferenceService {
             String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
+            inferenceQueue.pushInProgress(inferenceRedisEntity);
             Mono<byte[]> response = webClient.get()
                     .uri(url)
                     .accept(MediaType.ALL)
@@ -75,8 +77,9 @@ public class InferenceService {
                             httpStatusCode.is4xxClientError(),
                             clientResponse -> Mono.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR))
                     )
-                    .bodyToMono(byte[].class);
-            inferenceQueue.pushInProgress(inferenceRedisEntity);
+                    .bodyToMono(byte[].class)
+                    .timeout(Duration.ofMinutes(5));
+
             flaskRequest(response ,ptrData, song,inferenceRedisEntity);
         }catch (Exception e){
             inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
