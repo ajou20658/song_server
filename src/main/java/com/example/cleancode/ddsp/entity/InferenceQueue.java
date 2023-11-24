@@ -5,6 +5,7 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class InferenceQueue {
-    @Qualifier("redisTemplate1")
     private final RedisTemplate<String, ProgressStatus> redisTemplate;
 
     public String getKey(InferenceRedisEntity inferenceRedisEntity) {

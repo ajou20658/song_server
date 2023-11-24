@@ -5,6 +5,7 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +18,7 @@ public class RedisConfig {
         return new LettuceConnectionFactory();
     }
     @Bean(name = "redisTemplate1")
+    @Primary
     public RedisTemplate<String, ProgressStatus> redisTemplate1(
             @Qualifier("connectionFactory1") RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, ProgressStatus> template = new RedisTemplate<>();
