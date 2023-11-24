@@ -15,6 +15,8 @@ import com.example.cleancode.utils.CustomException.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,8 @@ public class InferenceService {
     private final static ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
             .codecs(clientCodecConfigurer ->
                     clientCodecConfigurer.defaultCodecs()
-                            .maxInMemorySize(1024*1024*20))
+                            .maxInMemorySize(1024*1024*20)
+            )
             .build();
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
@@ -73,13 +76,15 @@ public class InferenceService {
                     .accept(MediaType.ALL)
                     .retrieve()
                     .onStatus(
-                            httpStatusCode -> httpStatusCode.is5xxServerError() ||
-                            httpStatusCode.is4xxClientError(),
-                            clientResponse -> Mono.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR))
+                            HttpStatusCode::is4xxClientError,
+                            clientResponse -> Mono.error(new Exception())
+                    )
+                    .onStatus(
+                            HttpStatusCode::is5xxServerError,
+                            clientResponse -> Mono.error(new Exception())
                     )
                     .bodyToMono(byte[].class)
                     .timeout(Duration.ofMinutes(5));
-
             flaskRequest(response ,ptrData, song,inferenceRedisEntity);
         }catch (Exception e){
             inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
