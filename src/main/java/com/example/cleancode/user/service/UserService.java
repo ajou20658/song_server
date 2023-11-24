@@ -3,6 +3,9 @@ package com.example.cleancode.user.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.cleancode.ddsp.entity.InferenceQueue;
+import com.example.cleancode.ddsp.entity.PreprocessQueue;
+import com.example.cleancode.ddsp.entity.etc.PreProcessRedisEntity;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -12,16 +15,15 @@ import com.example.cleancode.user.dto.UserDto;
 import com.example.cleancode.user.dto.UserSongDto;
 import com.example.cleancode.user.dto.UserSongOutput;
 import com.example.cleancode.user.entity.*;
-import com.example.cleancode.utils.CustomException.BadRequestException;
-import com.example.cleancode.utils.CustomException.ExceptionCode;
-import com.example.cleancode.utils.CustomException.FormatException;
-import com.example.cleancode.utils.CustomException.Validator;
+import com.example.cleancode.utils.CustomException.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,8 @@ public class UserService {
     @Value("${spring.django-url}")
     private String djangoUrl;
     private final WebClient webClient;
+    private final InferenceQueue inferenceQueue;
+    private final PreprocessQueue preprocessQueue;
     public UserDto findMember(Long userId){
         User member = validator.userValidator(userId);
         return member.toMemberDto();
@@ -76,11 +80,8 @@ public class UserService {
             throw new FormatException(ExceptionCode.FORMAT_ERROR);
         }
         String filename="";
-        if(userSongOptional.isPresent()){   //기존에 존재한경우
-            filename = "origin/"+userSongOptional.get().getOriginUrl().split("/")[1];
-        }else { //기존에 없었던 경우
-            filename = "origin/"+UUID.randomUUID();
-        }
+        //존재 여부에 따라 다르게
+        filename = userSongOptional.map(userSong -> "origin/" + userSong.getOriginUrl().split("/")[1]).orElseGet(() -> "origin/" + UUID.randomUUID());
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(multipartFile.getSize());
         metadata.setContentType(multipartFile.getContentType());
@@ -108,12 +109,51 @@ public class UserService {
     public boolean preprocessStart(Long songId, Long userId){
         UserSong userSong = validator.userSongValidator(songId,userId);
         //---------전처리 시작 UserSong Status변경
+        String uuid = userSong.getOriginUrl().split("/")[1];
+        PreProcessRedisEntity preProcessRedisEntity = PreProcessRedisEntity.builder()
+                .uuid(uuid)
+                .songId(String.valueOf(songId))
+                .userId(String.valueOf(userId))
+                .build();
         try {
             //전처리 요청
-            djangoRequest(userSong);
-            log.info("django 요청 ");
+
+            MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
+            body.add("fileKey",userSong.getOriginUrl());
+            body.add("isUser","true");
+            body.add("uuid",uuid);
+
+            log.info(body.toString());
+
+            String url = "http://"+djangoUrl + "/songssam/splitter/";
+            Mono<Dataframe2Json> response = webClient.post()
+                    .uri(url)
+                    .body(BodyInserters.fromFormData(body))
+                    .retrieve()
+                    .onStatus(
+                            httpStatusCode ->
+                                    httpStatusCode.is4xxClientError()||
+                                    httpStatusCode.is5xxServerError(),
+                            clientResponse -> Mono.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR))
+                    )
+                    .bodyToMono(JsonNode.class)
+                    .handle((JsonNode, sink) -> {
+                        try{
+                            String message = JsonNode.get("message").asText();
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                            sink.next(result[0]);
+                        }catch (JsonProcessingException e){
+                            log.error("파싱 에러");
+                            sink.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR));
+                        }
+                    });
+            preprocessQueue.pushInProgress(preProcessRedisEntity);
+            djangoRequest(response, userSong,uuid);
+            log.info("preprocess(split,f0_extract) 요청 성공");
         } catch (Exception ex){
             userSong.changeStatus(ProgressStatus.ERROR);
+            preprocessQueue.changeStatus(preProcessRedisEntity,ProgressStatus.ERROR);
             userSongRepository.save(userSong);
             return false;
         }
@@ -121,54 +161,23 @@ public class UserService {
     }
     @Async
     @Transactional
-    public void djangoRequest(UserSong userSong){
-        String uuid = userSong.getOriginUrl().split("/")[1];
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
-        body.add("fileKey",userSong.getOriginUrl());
-        body.add("isUser","true");
-        body.add("uuid",uuid);
-
-        log.info(body.toString());
-
-        String url = "http://"+djangoUrl + "/songssam/splitter/";
-//        ResponseEntity<String> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.POST,
-//                requestEntity,
-//                String.class
-//        );
-        webClient.post()
-            .uri(url)
-            .body(BodyInserters.fromFormData(body))
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .map(JsonNode -> {
-                try{
-                    String message = JsonNode.get("message").asText();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
-                    return result[0];
-                }catch (JsonProcessingException e){
-                    log.error("파싱 에러");
-                    throw new RuntimeException(e);
-                }
-            })
-            .subscribe(response -> {
-                log.info("status message = {}",response.getF0_1());
-                List<Integer> res = json2List(response);
-                UserDto userDto = userSong.getUser().toMemberDto();
-                userDto.setSpectr(res);
-                UserSongDto userSongDto = userSong.toUserSongDto();
-                userSongDto.setVocalUrl("vocal/"+uuid);
-                userSongDto.setSpectr(res);
-                userSongDto.setStatus(ProgressStatus.COMPLETE);
-                userSongRepository.save(userSongDto.toUserSong());
-                userRepository.save(userDto.makeMember());
-            });
-        // userSong Status변경
-//        userSongRepository.save(userSong.changeStatus(ProgressStatus.COMPLETE));
+    public void djangoRequest(Mono<Dataframe2Json> response,UserSong userSong,String uuid){
+        PreProcessRedisEntity preProcessRedisEntity = PreProcessRedisEntity.builder()
+                .songId(String.valueOf(userSong.getSong().getId()))
+                .userId(String.valueOf(userSong.getUser().getId()))
+                .build();
+        response.subscribe(res -> {
+            log.info("status message = {}",res.getF0_1());
+            List<Integer> spectr = json2List(res);
+            UserDto userDto = userSong.getUser().toMemberDto();
+            UserSongDto userSongDto = userSong.toUserSongDto();
+            userSongDto.setVocalUrl("vocal/"+uuid);
+            userSongDto.setSpectr(spectr);
+            userSongDto.setStatus(ProgressStatus.COMPLETE);
+            userSongRepository.save(userSongDto.toUserSong());
+            userRepository.save(userDto.makeMember());
+            preprocessQueue.changeStatus(preProcessRedisEntity,ProgressStatus.COMPLETE);
+        });
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
         List<Integer> result = new ArrayList<>();
@@ -236,6 +245,7 @@ public class UserService {
         }
         return songList;
     }
+
     public List<Song> userLikeSongWithRecommand(Long userId){
         User user = validator.userValidator(userId);
         List<Long> songRecommandList = user.getRecommandSongIds();

@@ -2,10 +2,13 @@ package com.example.cleancode.ddsp.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.cleancode.ddsp.entity.InferenceQueue;
 import com.example.cleancode.ddsp.entity.PtrData;
 import com.example.cleancode.ddsp.entity.ResultSong;
+import com.example.cleancode.ddsp.entity.etc.InferenceRedisEntity;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.ddsp.repository.ResultSongRepository;
+import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.utils.CustomException.*;
@@ -29,9 +32,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class InferenceService {
-    private final SongRepository songRepository;
-    private final PtrDataRepository ptrDataRepository;
     private final ResultSongRepository resultSongRepository;
+    private final InferenceQueue inferenceQueue;
     private final Validator validator;
     private final AmazonS3 amazonS3;
     private final WebClient webClient;
@@ -39,23 +41,27 @@ public class InferenceService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
+    private final static ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+            .codecs(clientCodecConfigurer ->
+                    clientCodecConfigurer.defaultCodecs()
+                            .maxInMemorySize(1024*1024*20))
+            .build();
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
-
-        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-                .codecs(clientCodecConfigurer ->
-                        clientCodecConfigurer.defaultCodecs()
-                                .maxInMemorySize(1024*1024*20))
-                .build();
         String ptrKey = ptrData.getPtrUrl();
         String songKey = song.getOriginUrl();
+        InferenceRedisEntity inferenceRedisEntity = InferenceRedisEntity.builder()
+                .ptrId(String.valueOf(ptrId))
+                .songId(String.valueOf(songId))
+                .build();
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://" + djangoUrl)
                 .exchangeStrategies(exchangeStrategies)
                 .build();
         String uuid = songKey.split("/")[1];
+
         try {
             String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
@@ -64,15 +70,22 @@ public class InferenceService {
                     .uri(url)
                     .accept(MediaType.ALL)
                     .retrieve()
+                    .onStatus(
+                            httpStatusCode -> httpStatusCode.is5xxServerError() ||
+                            httpStatusCode.is4xxClientError(),
+                            clientResponse -> Mono.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR))
+                    )
                     .bodyToMono(byte[].class);
-            flaskRequest(response ,ptrData, song);
+            inferenceQueue.pushInProgress(inferenceRedisEntity);
+            flaskRequest(response ,ptrData, song,inferenceRedisEntity);
         }catch (Exception e){
+            inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
             throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
         }
     }
     @Async
     @Transactional
-    public void flaskRequest(Mono<byte[]> response,PtrData ptrData,Song song){
+    public void flaskRequest(Mono<byte[]> response,PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
         response.subscribe(res->
                 {
                     if(res==null){
@@ -100,7 +113,7 @@ public class InferenceService {
                     resultSongRepository.save(resultSong);
                 }
         );
-
+        inferenceQueue.changeStatus(inferenceRedisEntity, ProgressStatus.COMPLETE);
     }
     public List<ResultSong> allResult(Long ptrId){
         PtrData ptrData = validator.ptrDataValidator(ptrId);
@@ -114,5 +127,13 @@ public class InferenceService {
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
     }
+    public String showStatus(Long ptrId,Long songId){
+        InferenceRedisEntity inferenceRedisEntity = InferenceRedisEntity.builder()
+                .ptrId(String.valueOf(ptrId))
+                .songId(String.valueOf(songId))
+                .build();
+        return inferenceQueue.getData(inferenceRedisEntity).toString();
+    }
+
 
 }

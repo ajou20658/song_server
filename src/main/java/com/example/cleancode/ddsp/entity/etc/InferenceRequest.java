@@ -1,4 +1,4 @@
-package com.example.cleancode.ddsp.entity;
+package com.example.cleancode.ddsp.entity.etc;
 
 import lombok.Getter;
 import org.springframework.web.bind.annotation.GetMapping;
