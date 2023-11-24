@@ -20,7 +20,7 @@ public class RedisConfig {
     @Bean(name = "redisTemplate1")
     @Primary
     public RedisTemplate<String, ProgressStatus> redisTemplate1(
-            @Qualifier("connectionFactory1") RedisConnectionFactory redisConnectionFactory) {
+            RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, ProgressStatus> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         return template;
@@ -34,6 +34,7 @@ public class RedisConfig {
 
     // 두 번째 Redis 저장소
     @Bean //preprocess queue용도
+    @Qualifier("connectionFactory2")
     public LettuceConnectionFactory connectionFactory2() {
         return new LettuceConnectionFactory();
     }
