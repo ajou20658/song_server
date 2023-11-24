@@ -15,6 +15,7 @@ import com.example.cleancode.utils.CustomException.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
@@ -44,12 +46,6 @@ public class InferenceService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
-    private final static ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-            .codecs(clientCodecConfigurer ->
-                    clientCodecConfigurer.defaultCodecs()
-                            .maxInMemorySize(1024*1024*20)
-            )
-            .build();
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
@@ -60,33 +56,30 @@ public class InferenceService {
                 .ptrId(String.valueOf(ptrId))
                 .songId(String.valueOf(songId))
                 .build();
-        WebClient webClient = WebClient.builder()
-                .baseUrl("http://" + djangoUrl)
-                .exchangeStrategies(exchangeStrategies)
-                .build();
         String uuid = songKey.split("/")[1];
 
         try {
-            String url = "/songssam/voiceChangeModel/?wav_path=" + songKey +
+            String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
-            inferenceQueue.pushInProgress(inferenceRedisEntity);
+
             Mono<byte[]> response = webClient.get()
                     .uri(url)
                     .accept(MediaType.ALL)
                     .retrieve()
                     .onStatus(
                             HttpStatusCode::is4xxClientError,
-                            clientResponse -> Mono.error(new Exception())
+                            clientResponse -> Mono.error(new Throwable("client error"))
                     )
                     .onStatus(
                             HttpStatusCode::is5xxServerError,
-                            clientResponse -> Mono.error(new Exception())
+                            serverResponse -> Mono.error(new Throwable("server error"))
                     )
                     .bodyToMono(byte[].class)
                     .timeout(Duration.ofMinutes(5));
+            inferenceQueue.pushInProgress(inferenceRedisEntity);
             flaskRequest(response ,ptrData, song,inferenceRedisEntity);
-        }catch (Exception e){
+        }catch (Throwable e){
             inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
             throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
         }
