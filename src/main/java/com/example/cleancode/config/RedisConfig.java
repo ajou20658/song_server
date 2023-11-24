@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.SetOperations;
 @Configuration
 public class RedisConfig {
     @Bean //Inference queue용도
+    @Primary
     public LettuceConnectionFactory connectionFactory1(){
         return new LettuceConnectionFactory();
     }
