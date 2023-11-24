@@ -46,9 +46,8 @@ public class ddspController {
     public ResponseEntity<Object> showStatus(@RequestParam Long ptrId, @RequestParam Long songId){
         String result = inferenceService.showStatus(ptrId,songId);
         Map<String,Object> body = new HashMap<>();
-        List<PtrData> progressInfo = ptrDataRepository.findAll();
         body.put("status",result);
-        return ResponseEntity.ok().body(progressInfo);
+        return ResponseEntity.ok().body(body);
     }
     @PostMapping("/deleteSong")
     public ResponseEntity<Object> ddspResultDelete(@RequestBody Integer deleteId){

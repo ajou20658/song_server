@@ -12,10 +12,10 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ToString
 public enum ProgressStatus {
     NONE("NONE"),
-    UPLOADED("uploaded"),
-    PROGRESS("progress"),
-    ERROR("stop"),
-    COMPLETE("complete");
+    UPLOADED("UPLOADED"),
+    PROGRESS("PROGRESS"),
+    ERROR("ERROR"),
+    COMPLETE("COMPLETE");
 
     private final String message;
 }

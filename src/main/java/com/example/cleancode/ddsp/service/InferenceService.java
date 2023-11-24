@@ -135,7 +135,7 @@ public class InferenceService {
                 .ptrId(String.valueOf(ptrId))
                 .songId(String.valueOf(songId))
                 .build();
-        return inferenceQueue.getData(inferenceRedisEntity).toString();
+        return inferenceQueue.getData(inferenceRedisEntity).getMessage();
     }
 
 
