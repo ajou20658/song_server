@@ -8,4 +8,5 @@ import lombok.Getter;
 public class InferenceRedisEntity {
     private String songId;
     private String ptrId;
+    private String uuid;
 }

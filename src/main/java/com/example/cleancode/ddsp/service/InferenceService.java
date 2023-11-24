@@ -52,11 +52,12 @@ public class InferenceService {
         Song song = validator.songValidator(songId);
         String ptrKey = ptrData.getPtrUrl();
         String songKey = song.getOriginUrl();
+        String uuid = String.valueOf(UUID.randomUUID());
         InferenceRedisEntity inferenceRedisEntity = InferenceRedisEntity.builder()
                 .ptrId(String.valueOf(ptrId))
                 .songId(String.valueOf(songId))
+                .uuid(uuid)
                 .build();
-        String uuid = songKey.split("/")[1];
 
         try {
             String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/?wav_path=" + songKey +
@@ -96,7 +97,7 @@ public class InferenceService {
                     metadata.setContentLength(res.length);
                     metadata.setContentType("audio/mpeg");
 
-                    String filename = "generate/" + UUID.randomUUID();
+                    String filename = "generate/" + inferenceRedisEntity.getUuid();
                     InputStream inputStream = new ByteArrayInputStream(res);
 
                     try {
