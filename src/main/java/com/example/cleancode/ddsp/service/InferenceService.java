@@ -12,6 +12,8 @@ import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.utils.CustomException.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,38 +75,21 @@ public class InferenceService {
     @Transactional
     public void flaskRequest(String url,PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
 //        inferenceQueue.pushInProgress(inferenceRedisEntity);
-        webClient.get()
+        webClient.post()
                 .uri(url)
                 .accept(MediaType.ALL)
                 .retrieve()
-                .onStatus(
-                        HttpStatusCode::is4xxClientError,
-                        clientResponse -> Mono.error(new Throwable("client error"))
-                )
-                .onStatus(
-                        HttpStatusCode::is5xxServerError,
-                        serverResponse -> Mono.error(new Throwable("server error"))
-                )
-                .bodyToMono(byte[].class)
+                .bodyToMono(JsonNode.class)
                 .timeout(Duration.ofMinutes(5))
-                .subscribe(res->
-                {
-                    if(res==null){
-                        throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
+                .handle((JsonNode,sink)->{
+                    String uuid = JsonNode.get("uuid").asText();
+                    if(uuid==null){
+                        throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
                     }
-                    ObjectMetadata metadata = new ObjectMetadata();
-                    metadata.setContentLength(res.length);
-                    metadata.setContentType("audio/mpeg");
-
+                    sink.next(uuid);
+                })
+                .subscribe(res-> {
                     String filename = "generate/" + inferenceRedisEntity.getUuid();
-                    InputStream inputStream = new ByteArrayInputStream(res);
-
-                    try {
-                        amazonS3.putObject(bucket, filename, inputStream, metadata);
-                    } catch (Exception e) {
-                        log.error("응답 에러", e.getMessage());
-                        throw new AwsUploadException(ExceptionCode.AWS_ERROR);
-                    }
 
                     ResultSong resultSong = ResultSong.builder()
                             .generatedUrl(filename)
