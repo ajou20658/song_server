@@ -15,10 +15,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PreprocessQueue {
     @Qualifier("redisTemplate2")
     private RedisTemplate<String, ProgressStatus> redisTemplate;
+    @Autowired
+    public PreprocessQueue(@Qualifier("redisTemplate2")RedisTemplate<String,ProgressStatus> redisTemplate){
+        this.redisTemplate = redisTemplate;
+    }
     private String getKey(PreProcessRedisEntity preProcessRedisEntity) {
         // 여기에서 원하는 방식으로 키를 생성합니다.
         return preProcessRedisEntity.getUuid() + ":" + preProcessRedisEntity.getSongId() + ":" + preProcessRedisEntity.getUserId();
