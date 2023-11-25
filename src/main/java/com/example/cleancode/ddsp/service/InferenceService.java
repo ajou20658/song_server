@@ -49,8 +49,7 @@ public class InferenceService {
     private final WebClient webClient;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${spring.django-url}")
-    private String djangoUrl;
+
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
@@ -65,7 +64,7 @@ public class InferenceService {
                 .build();
 
         try {
-            String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/";
+            String url = "/songssam/voiceChangeModel/";
             MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
             body.add("wav_path",songKey);
             body.add("fPtrPath",ptrKey);

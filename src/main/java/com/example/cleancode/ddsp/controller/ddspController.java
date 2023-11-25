@@ -38,6 +38,7 @@ public class ddspController {
         return inferenceService.allResult(ptrId);
     }
     @PostMapping("/makesong")
+    @ResponseBody
     public ResponseEntity<Object> ddspInferenceRequest(
             @RequestBody InferenceRequest inferenceRequest) {
         inferenceService.inferenceStart(
@@ -54,6 +55,7 @@ public class ddspController {
         return ResponseEntity.ok().body(body);
     }
     @PostMapping("/deleteSong")
+    @ResponseBody
     public ResponseEntity<Object> ddspResultDelete(@RequestBody Integer deleteId){
         inferenceService.songDelete(deleteId);
         return ResponseEntity.ok().build();
