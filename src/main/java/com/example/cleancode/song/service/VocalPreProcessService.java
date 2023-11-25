@@ -37,7 +37,8 @@ public class VocalPreProcessService {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    private WebClient webClient;
+    @Value("${spring.django-url}")
+    private String djangoUrl;
     @Transactional
     public boolean songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
@@ -118,6 +119,10 @@ public class VocalPreProcessService {
     @Transactional
     public void djangoRequest(Song song){
         String uuid = song.getOriginUrl().split("/")[1];
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("http://"+djangoUrl)
+                .build();
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",song.getOriginUrl());
         body.add("isUser","false");

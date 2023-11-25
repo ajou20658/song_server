@@ -46,10 +46,10 @@ public class InferenceService {
     private final InferenceQueue inferenceQueue;
     private final Validator validator;
     private final AmazonS3 amazonS3;
-    private final WebClient webClient;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
+    @Value("${spring.django-url}")
+    private String djangoUrl;
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
@@ -79,6 +79,10 @@ public class InferenceService {
     @Transactional
     public void flaskRequest(String url,MultiValueMap<String,String> body, PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
 //        inferenceQueue.pushInProgress(inferenceRedisEntity);
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("http://"+djangoUrl)
+                .build();
         webClient.post()
                 .uri(url)
                 .body(BodyInserters.fromFormData(body))
