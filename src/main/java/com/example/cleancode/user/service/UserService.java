@@ -52,7 +52,6 @@ public class UserService {
     private String bucket;
     @Value("${spring.django-url}")
     private String djangoUrl;
-    private final WebClient webClient;
     private final InferenceQueue inferenceQueue;
     private final PreprocessQueue preprocessQueue;
     public UserDto findMember(Long userId){
@@ -116,6 +115,10 @@ public class UserService {
                 .songId(String.valueOf(songId))
                 .userId(String.valueOf(userId))
                 .build();
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("http://"+djangoUrl)
+                .build();
         try {
             //전처리 요청
 
@@ -126,7 +129,7 @@ public class UserService {
 
             log.info(body.toString());
 
-            String url = "http://"+djangoUrl + "/songssam/splitter/";
+            String url = "/songssam/splitter/";
             Mono<Dataframe2Json> response = webClient.post()
                     .uri(url)
                     .body(BodyInserters.fromFormData(body))
@@ -154,6 +157,7 @@ public class UserService {
             djangoRequest(response, userSong,uuid);
             log.info("preprocess(split,f0_extract) 요청 성공");
         } catch (Exception ex){
+
             userSong.changeStatus(ProgressStatus.ERROR);
             preprocessQueue.changeStatus(preProcessRedisEntity,ProgressStatus.ERROR);
             userSongRepository.save(userSong);
@@ -266,6 +270,9 @@ public class UserService {
     }
     private List<Long> requestRecommandSongId(Long userId){
         List<Song> songList = userLikeSongList(userId);
+        WebClient webClient = WebClient
+                .builder()
+                .build();
         //여기서 장르 추출
         GenreCountFrame user_genre = genreCount(songList);
         Spectr2DataFrame user_f0 = f02Df(userId);
