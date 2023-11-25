@@ -63,23 +63,7 @@ public class InferenceService {
             String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/?wav_path=" + songKey +
                     "&fPtrPath=" + ptrKey +
                     "&uuid=" + uuid;
-
-            Mono<byte[]> response = webClient.get()
-                    .uri(url)
-                    .accept(MediaType.ALL)
-                    .retrieve()
-                    .onStatus(
-                            HttpStatusCode::is4xxClientError,
-                            clientResponse -> Mono.error(new Throwable("client error"))
-                    )
-                    .onStatus(
-                            HttpStatusCode::is5xxServerError,
-                            serverResponse -> Mono.error(new Throwable("server error"))
-                    )
-                    .bodyToMono(byte[].class)
-                    .timeout(Duration.ofMinutes(5));
-            inferenceQueue.pushInProgress(inferenceRedisEntity);
-            flaskRequest(response ,ptrData, song,inferenceRedisEntity);
+            flaskRequest(url ,ptrData, song,inferenceRedisEntity);
         }catch (Throwable e){
             inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
             throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
@@ -87,8 +71,23 @@ public class InferenceService {
     }
     @Async
     @Transactional
-    public void flaskRequest(Mono<byte[]> response,PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
-        response.subscribe(res->
+    public void flaskRequest(String url,PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
+//        inferenceQueue.pushInProgress(inferenceRedisEntity);
+        webClient.get()
+                .uri(url)
+                .accept(MediaType.ALL)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        clientResponse -> Mono.error(new Throwable("client error"))
+                )
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        serverResponse -> Mono.error(new Throwable("server error"))
+                )
+                .bodyToMono(byte[].class)
+                .timeout(Duration.ofMinutes(5))
+                .subscribe(res->
                 {
                     if(res==null){
                         throw new NoGeneratedSongException(ExceptionCode.RESULT_SONG_ERROR);
