@@ -24,6 +24,9 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -62,10 +65,12 @@ public class InferenceService {
                 .build();
 
         try {
-            String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/?wav_path=" + songKey +
-                    "&fPtrPath=" + ptrKey +
-                    "&uuid=" + uuid;
-            flaskRequest(url ,ptrData, song,inferenceRedisEntity);
+            String url = "http://"+djangoUrl+"/songssam/voiceChangeModel/";
+            MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
+            body.add("wav_path",songKey);
+            body.add("fPtrPath",ptrKey);
+            body.add("uuid",uuid);
+            flaskRequest(url, body, ptrData, song,inferenceRedisEntity);
         }catch (Throwable e){
             inferenceQueue.changeStatus(inferenceRedisEntity,ProgressStatus.ERROR);
             throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
@@ -73,11 +78,11 @@ public class InferenceService {
     }
     @Async
     @Transactional
-    public void flaskRequest(String url,PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
+    public void flaskRequest(String url,MultiValueMap<String,String> body, PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
 //        inferenceQueue.pushInProgress(inferenceRedisEntity);
         webClient.post()
                 .uri(url)
-                .accept(MediaType.ALL)
+                .body(BodyInserters.fromFormData(body))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .timeout(Duration.ofMinutes(5))
