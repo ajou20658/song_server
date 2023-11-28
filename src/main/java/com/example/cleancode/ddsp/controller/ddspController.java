@@ -68,9 +68,9 @@ public class ddspController {
     }
     @PostMapping("/deleteSong")
     @ResponseBody
-    public ResponseEntity<Object> ddspResultDelete(@RequestBody Integer generatedSongID){
+    public ResponseEntity<Object> ddspResultDelete(@RequestBody ResultSong resultSong){
         try{
-            inferenceService.songDelete(generatedSongID);
+            inferenceService.songDelete(resultSong.getId());
         }catch (NoAwsSongException e){
             return ResponseEntity
                     .badRequest()
