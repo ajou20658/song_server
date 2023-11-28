@@ -58,7 +58,9 @@ public class SongController {
     public List<SongDto> getList2(@RequestParam String target, @RequestParam @Nullable String mode){
         try{
             log.info("아티스트명에서");
-            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"));
+            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"))
+                    .stream()
+                    .map(Song::toSongDto).toList();
         }catch(Exception ex){
             log.info("decode err: "+ex.toString());
         }
@@ -173,10 +175,10 @@ public class SongController {
                 }
                 for(String artist : lines){
                     likeIDSumCntMap = new HashMap<>();
-                    List<SongDto> songlist = melonService.search_artist(artist,"1");
+                    List<Song> songlist = melonService.search_artist(artist,"1");
 
                     List<Long> likeString=songlist.stream()
-                            .map(SongDto::getId)
+                            .map(Song::getId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -190,7 +192,7 @@ public class SongController {
                         int sumCnt = contsLikeObject.getInt("SUMMCNT");
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
-                    for(SongDto songDto :songlist){
+                    for(Song songDto :songlist){
                         if(songDto.getTitle().contains("Inst")|| songDto.getTitle().contains("inst")||
                                 songDto.getTitle().contains("Feat")|| songDto.getTitle().contains("feat")|| songDto.getTitle().contains("MR")){
                             log.info("제외된 제목 : {}", songDto.getTitle());

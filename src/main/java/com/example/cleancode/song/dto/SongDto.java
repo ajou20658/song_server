@@ -14,28 +14,9 @@ public class SongDto {
     private String title;
     private String imgUrl;
     private String artist;
-    private boolean isTop;
     private List<String> genre;
-    private List<Long> encoded_genre;
     private List<Integer> spectr;
-    private String vocalUrl;
     private String instUrl;
     private String originUrl;
     private ProgressStatus status;
-    public Song toSongEntity(){
-        return Song.builder()
-                .id(id)
-                .title(title)
-                .imgUrl(imgUrl)
-                .artist(artist)
-                .isTop(isTop)
-                .genre(genre)
-                .encoded_genre(encoded_genre)
-                .spectr(spectr)
-                .originUrl(originUrl)
-                .vocalUrl(vocalUrl)
-                .instUrl(instUrl)
-                .status(status)
-                .build();
-    }
 }

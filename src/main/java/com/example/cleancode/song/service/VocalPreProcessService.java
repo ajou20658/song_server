@@ -3,7 +3,7 @@ package com.example.cleancode.song.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cleancode.song.dto.SongDto;
+//import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -58,7 +58,7 @@ public class VocalPreProcessService {
         metadata.setContentType(multipartFile.getContentType());
 
 
-        SongDto songDto = validator.songValidator(songId).toSongDto();
+        Song songDto = validator.songValidator(songId);
         songDto.setOriginUrl(filename);
         songDto.setStatus(ProgressStatus.UPLOADED);
         try{
@@ -66,7 +66,7 @@ public class VocalPreProcessService {
         }catch (IOException | SdkClientException ex){
             throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
-        songRepository.save(songDto.toSongEntity());
+        songRepository.save(songDto);
         return true;
     }
     public void convertWavToMp3(MultipartFile multipartFile, String outputFilePath){
@@ -150,13 +150,12 @@ public class VocalPreProcessService {
                 .subscribe(response -> {
                     //여기 수정이 필요함
 //                    log.info("status message = {}", response);
-                    SongDto songDto = song.toSongDto();
+                    Song songDto = song;
                     songDto.setVocalUrl("vocal/"+uuid);
                     songDto.setInstUrl("inst/"+uuid);
                     songDto.setStatus(ProgressStatus.COMPLETE);
                     songDto.setSpectr(json2List(response));
-                    songDto.toSongEntity();
-                    songRepository.save(songDto.toSongEntity());
+                    songRepository.save(songDto);
                 });
         }catch (Exception e){
             throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);

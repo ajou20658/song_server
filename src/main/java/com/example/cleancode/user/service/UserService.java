@@ -273,7 +273,6 @@ public class UserService {
         WebClient webClient = WebClient
                 .builder()
                 .build();
-        //여기서 장르 추출
         GenreCountFrame user_genre = genreCount(songList);
         Spectr2DataFrame user_f0 = f02Df(userId);
         log.info(user_genre.toString());

@@ -5,6 +5,10 @@ import com.example.cleancode.ddsp.entity.etc.InferenceRequest;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.ddsp.service.InferenceService;
 import com.example.cleancode.ddsp.service.TrainService;
+import com.example.cleancode.song.dto.SongDto;
+import com.example.cleancode.song.entity.Song;
+import com.example.cleancode.user.entity.GenreCountFrame;
+import com.example.cleancode.user.entity.Spectr2DataFrame;
 import com.example.cleancode.utils.CustomException.AwsUploadException;
 import com.example.cleancode.utils.CustomException.DjangoRequestException;
 import com.example.cleancode.utils.CustomException.NoAwsSongException;
@@ -15,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,7 +38,10 @@ public class ddspController {
     @ResponseBody
     public ResponseEntity<Object> samplePtrList(){
         Map<String,Object> body = new HashMap<>();
-        List<PtrData> ptrDataList = ptrDataRepository.findAll();
+        List<PtrDataUserDto> ptrDataList = ptrDataRepository.findAll()
+                .stream()
+                .map(PtrData::ptrDataUserDto)
+                .toList();
         body.put("list",ptrDataList);
         return ResponseEntity.ok().body(ptrDataList);
     }
@@ -116,6 +124,18 @@ public class ddspController {
             return ResponseEntity.status(e.getExceptionCode().getStatus())
                     .body(e.getExceptionCode().getMessage());
         }
-
+    }
+    @PostMapping("/update_ptr_recommandSong")
+    @ResponseBody
+    public ResponseEntity<Object> updateRecommnad(@RequestBody PtrDataUserDto ptrDataUserDto){
+        inferenceService.updateRecommandList(ptrDataUserDto.getId());
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/recommand_ptr")
+    @ResponseBody
+    public List<SongDto> getRecommand(@RequestParam Long ptrId){
+        return inferenceService.getRecommandList(ptrId).stream()
+                .map(Song::toSongDto)
+                .toList();
     }
 }
