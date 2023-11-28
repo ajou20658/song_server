@@ -77,7 +77,11 @@ public class InferenceService {
     }
     @Async
     @Transactional
-    public void flaskRequest(String url,MultiValueMap<String,String> body, PtrData ptrData,Song song,InferenceRedisEntity inferenceRedisEntity){
+    public void flaskRequest(String url,
+                             MultiValueMap<String,String> body,
+                             PtrData ptrData,
+                             Song song,
+                             InferenceRedisEntity inferenceRedisEntity) {
 //        inferenceQueue.pushInProgress(inferenceRedisEntity);
         WebClient webClient = WebClient
                 .builder()
@@ -91,14 +95,14 @@ public class InferenceService {
                 .timeout(Duration.ofMinutes(5))
                 .handle((JsonNode,sink)->{
                     String uuid = JsonNode.get("uuid").asText();
-                    if(uuid==null){
-                        throw new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR);
+                    if(uuid==null) {
+                        sink.error(new DjangoRequestException(ExceptionCode.WEB_CLIENT_ERROR));
+                        return;
                     }
                     sink.next(uuid);
                 })
                 .subscribe(res-> {
-                    String filename = "generate/" + inferenceRedisEntity.getUuid();
-
+                    String filename = "generated/" + inferenceRedisEntity.getUuid();
                     ResultSong resultSong = ResultSong.builder()
                             .generatedUrl(filename)
                             .song(song)
@@ -113,13 +117,19 @@ public class InferenceService {
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         return resultSongRepository.findResultSongsByPtrData(ptrData);
     }
-    public void songDelete(Integer generatedSongId){
+    public void songDelete(Integer generatedSongId) throws NoAwsSongException{
         ResultSong resultSong=validator.resultSongValidator(generatedSongId);
         try{
             amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl());
         }catch (Exception e){
             throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
         }
+        try{
+            amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl().replace("generate","generated"));
+        }catch (Exception e){
+            throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
+        }
+        resultSongRepository.delete(resultSong);
     }
     public String showStatus(Long ptrId,Long songId){
         InferenceRedisEntity inferenceRedisEntity = InferenceRedisEntity.builder()

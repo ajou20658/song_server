@@ -15,7 +15,7 @@ public class ResultSong {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    @Column(name = "generateUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "generatedUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String generatedUrl;
     @ManyToOne
     @JoinColumn(name = "song_id")

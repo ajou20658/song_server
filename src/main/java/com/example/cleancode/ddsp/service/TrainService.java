@@ -6,6 +6,8 @@ import com.example.cleancode.ddsp.entity.PtrData;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.utils.CustomException.AwsUploadException;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
+import com.example.cleancode.utils.CustomException.NoPtrException;
+import com.example.cleancode.utils.CustomException.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TrainService {
     private final PtrDataRepository ptrDataRepository;
+    private final Validator validator;
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -38,5 +41,21 @@ public class TrainService {
                 .name(name)
                 .build();
         ptrDataRepository.save(ptrData);
+    }
+    @Transactional
+    public boolean ptrFileDelete(PtrData ptrData){
+        PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
+        try{
+            amazonS3.deleteObject(bucket,ptrData1.getPtrUrl());
+            ptrDataRepository.delete(ptrData1);
+            return true;
+        }catch (Exception e){
+            throw new NoPtrException(ExceptionCode.AWS_ERROR);
+        }
+    }
+    public PtrData ptrFileUpdate(PtrData ptrData){
+        PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
+        return ptrDataRepository.save(ptrData1);
+
     }
 }

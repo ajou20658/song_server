@@ -78,8 +78,8 @@ public class SongController {
     @GetMapping("/uploaded_list")
     @ResponseBody
     public List<Song> giveAvailalbleList(){
-        List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
-        song.addAll(songRepository.findByStatus(ProgressStatus.ERROR));
+        List<Song> song = songRepository.findByStatusOOrderByRand(ProgressStatus.UPLOADED,PageRequest.of(1,50));
+        song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.ERROR,PageRequest.of(1,50)));
         song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50)));
         return song;
     }
@@ -91,7 +91,7 @@ public class SongController {
     @GetMapping("/completed_list")
     @ResponseBody
     public List<Song> giveCompleteList(){
-        return songRepository.findByStatus(ProgressStatus.COMPLETE);
+        return songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE,PageRequest.of(1,50));
     }
     @GetMapping("/completed_random_list")
     @ResponseBody
