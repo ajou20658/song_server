@@ -122,14 +122,15 @@ public class InferenceService {
         try{
             amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl());
         }catch (Exception e){
-            throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
+            try{
+                amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl().replace("generate","generated"));
+            }catch (Exception e2){
+                throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
+            }
         }
-        try{
-            amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl().replace("generate","generated"));
-        }catch (Exception e){
-            throw new NoAwsSongException(ExceptionCode.AWS_ERROR);
-        }
+
         resultSongRepository.delete(resultSong);
+        return;
     }
     public String showStatus(Long ptrId,Long songId){
         InferenceRedisEntity inferenceRedisEntity = InferenceRedisEntity.builder()
