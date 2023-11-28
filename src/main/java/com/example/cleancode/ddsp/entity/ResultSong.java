@@ -15,8 +15,8 @@ public class ResultSong {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    @Column(name = "generatedUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-    private String generatedUrl;
+    @Column(name = "generateUrl", nullable = false, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    private String generateUrl;
     @ManyToOne
     @JoinColumn(name = "song_id")
     private Song song;
@@ -28,6 +28,6 @@ public class ResultSong {
                 .songName(song.getTitle())
                 .vocalName(ptrData.getName())
                 .id(id)
-                .generatedUrl(generatedUrl).build();
+                .generatedUrl(generateUrl).build();
     }
 }
