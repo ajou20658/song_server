@@ -10,6 +10,6 @@ import lombok.Setter;
 public class ResultSongDto {
     private Integer id;
     private String generatedUrl;
-    private String vocalName;
-    private String songName;
+    private String song;
+    private String ptrData;
 }

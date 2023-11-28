@@ -25,8 +25,8 @@ public class ResultSong {
     private PtrData ptrData;
     public ResultSongDto resultSongDto(){
         return ResultSongDto.builder()
-                .songName(song.getTitle())
-                .vocalName(ptrData.getName())
+                .song(song.getTitle())
+                .ptrData(ptrData.getName())
                 .id(id)
                 .generatedUrl(generateUrl).build();
     }
