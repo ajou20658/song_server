@@ -23,4 +23,11 @@ public class ResultSong {
     @ManyToOne
     @JoinColumn(name = "ptrData_id")
     private PtrData ptrData;
+    public ResultSongDto resultSongDto(){
+        return ResultSongDto.builder()
+                .songName(song.getTitle())
+                .vocalName(ptrData.getName())
+                .id(id)
+                .generatedUrl(generatedUrl).build();
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.cleancode.ddsp.controller;
 
 import com.example.cleancode.ddsp.entity.InferenceQueue;
+import com.example.cleancode.ddsp.entity.ResultSongDto;
 import com.example.cleancode.ddsp.entity.etc.InferenceRequest;
 import com.example.cleancode.ddsp.entity.PtrData;
 import com.example.cleancode.ddsp.entity.ResultSong;
@@ -41,8 +42,10 @@ public class ddspController {
     }
     @GetMapping("/generatedSongList")
     @ResponseBody
-    public List<ResultSong> resultSongList(@RequestParam Long ptrId){
-        return inferenceService.allResult(ptrId);
+    public List<ResultSongDto> resultSongList(@RequestParam Long ptrId){
+        return inferenceService.allResult(ptrId).stream()
+                .map(ResultSong::resultSongDto)
+                .toList();
     }
     @PostMapping("/makesong")
     @ResponseBody
@@ -112,7 +115,7 @@ public class ddspController {
             @RequestBody PtrData ptrData){
         try{
             Map<String,Object> body = new HashMap<>();
-            body.put("status",trainService.ptrFileUpdate(ptrData));
+            body.put("status",trainService.ptrFileUpdate(ptrData).ptrDataUserDto());
             return ResponseEntity.ok().body(body);
         }catch (NoPtrException e){
             return ResponseEntity.status(e.getExceptionCode().getStatus())
