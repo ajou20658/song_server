@@ -104,7 +104,7 @@ public class InferenceService {
                 .subscribe(res-> {
                     String filename = "generated/" + inferenceRedisEntity.getUuid();
                     ResultSong resultSong = ResultSong.builder()
-                            .generatedUrl(filename)
+                            .generateUrl(filename)
                             .song(song)
                             .ptrData(ptrData)
                             .build();
@@ -120,10 +120,10 @@ public class InferenceService {
     public void songDelete(Integer generatedSongId) throws NoAwsSongException{
         ResultSong resultSong=validator.resultSongValidator(generatedSongId);
         try{
-            amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl());
+            amazonS3.deleteObject(bucket,resultSong.getGenerateUrl());
         }catch (Exception e){
             try{
-                amazonS3.deleteObject(bucket,resultSong.getGeneratedUrl().replace("generate","generated"));
+                amazonS3.deleteObject(bucket,resultSong.getGenerateUrl().replace("generate","generated"));
             }catch (Exception e2){
                 log.error("aws에 존재하지 않음");
             }
