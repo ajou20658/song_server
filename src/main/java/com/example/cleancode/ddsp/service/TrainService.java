@@ -10,6 +10,7 @@ import com.example.cleancode.utils.CustomException.ExceptionCode;
 import com.example.cleancode.utils.CustomException.NoPtrException;
 import com.example.cleancode.utils.CustomException.Validator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.UUID;
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TrainService {
     private final PtrDataRepository ptrDataRepository;
@@ -49,10 +51,11 @@ public class TrainService {
         try{
             amazonS3.deleteObject(bucket,ptrData1.getPtrUrl());
             ptrDataRepository.delete(ptrData1);
-            return true;
         }catch (Exception e){
-            throw new NoPtrException(ExceptionCode.AWS_ERROR);
+            log.error("aws에 데이터 없음");
+            return false;
         }
+        return true;
     }
     public PtrData ptrFileUpdate(PtrDataUserDto ptrData){
         PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
