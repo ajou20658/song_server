@@ -1,10 +1,7 @@
 package com.example.cleancode.ddsp.controller;
 
-import com.example.cleancode.ddsp.entity.InferenceQueue;
-import com.example.cleancode.ddsp.entity.ResultSongDto;
+import com.example.cleancode.ddsp.entity.*;
 import com.example.cleancode.ddsp.entity.etc.InferenceRequest;
-import com.example.cleancode.ddsp.entity.PtrData;
-import com.example.cleancode.ddsp.entity.ResultSong;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.ddsp.service.InferenceService;
 import com.example.cleancode.ddsp.service.TrainService;
@@ -71,9 +68,9 @@ public class ddspController {
     }
     @PostMapping("/deleteSong")
     @ResponseBody
-    public ResponseEntity<Object> ddspResultDelete(@RequestBody ResultSong resultSong){
+    public ResponseEntity<Object> ddspResultDelete(@RequestBody ResultSongDto resultSongDto){
         try{
-            inferenceService.songDelete(resultSong.getId());
+            inferenceService.songDelete(resultSongDto.getId());
         }catch (NoAwsSongException e){
             return ResponseEntity
                     .badRequest()
@@ -99,10 +96,10 @@ public class ddspController {
     }
     @PostMapping("/delete_ptr")
     public ResponseEntity<Object> deletePtr(
-            @RequestBody PtrData ptrData
+            @RequestBody PtrDataUserDto ptrDataUserDto
     ){
         try{
-            trainService.ptrFileDelete(ptrData);
+            trainService.ptrFileDelete(ptrDataUserDto);
             return ResponseEntity.ok().build();
         }catch (NoPtrException e){
             return ResponseEntity.status(e.getExceptionCode().getStatus())
@@ -112,10 +109,10 @@ public class ddspController {
     @PostMapping("/update_ptr")
     @ResponseBody
     public ResponseEntity<Object> updatePtr(
-            @RequestBody PtrData ptrData){
+            @RequestBody PtrDataUserDto ptrDataUserDto){
         try{
             Map<String,Object> body = new HashMap<>();
-            body.put("status",trainService.ptrFileUpdate(ptrData).ptrDataUserDto());
+            body.put("status",trainService.ptrFileUpdate(ptrDataUserDto).ptrDataUserDto());
             return ResponseEntity.ok().body(body);
         }catch (NoPtrException e){
             return ResponseEntity.status(e.getExceptionCode().getStatus())

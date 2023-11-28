@@ -3,6 +3,7 @@ package com.example.cleancode.ddsp.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.cleancode.ddsp.entity.PtrData;
+import com.example.cleancode.ddsp.entity.PtrDataUserDto;
 import com.example.cleancode.ddsp.repository.PtrDataRepository;
 import com.example.cleancode.utils.CustomException.AwsUploadException;
 import com.example.cleancode.utils.CustomException.ExceptionCode;
@@ -43,7 +44,7 @@ public class TrainService {
         ptrDataRepository.save(ptrData);
     }
     @Transactional
-    public boolean ptrFileDelete(PtrData ptrData){
+    public boolean ptrFileDelete(PtrDataUserDto ptrData){
         PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
         try{
             amazonS3.deleteObject(bucket,ptrData1.getPtrUrl());
@@ -53,7 +54,7 @@ public class TrainService {
             throw new NoPtrException(ExceptionCode.AWS_ERROR);
         }
     }
-    public PtrData ptrFileUpdate(PtrData ptrData){
+    public PtrData ptrFileUpdate(PtrDataUserDto ptrData){
         PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
         return ptrDataRepository.save(ptrData1);
 
