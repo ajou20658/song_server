@@ -92,7 +92,6 @@ public class VocalPreProcessService {
                 log.error("버킷에서 이미 삭제된 파일");
             }
         }
-        songRepository.delete(song);
     }
     //이곳은 노래 전처리 요청
     @Transactional

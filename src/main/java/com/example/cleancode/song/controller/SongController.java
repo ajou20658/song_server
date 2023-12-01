@@ -87,7 +87,7 @@ public class SongController {
             return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
         }
     }
-    @DeleteMapping("/remove")
+    @DeleteMapping("/removeFile")
     @ResponseBody
     public ResponseEntity<Object> deleteSong(@RequestParam Long songId){
         try{
