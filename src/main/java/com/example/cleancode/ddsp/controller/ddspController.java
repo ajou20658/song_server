@@ -70,11 +70,11 @@ public class ddspController {
         body.put("status",result);
         return ResponseEntity.ok().body(body);
     }
-    @PostMapping("/deleteSong")
+    @DeleteMapping("/deleteSong/{resultSongId}")
     @ResponseBody
-    public ResponseEntity<Object> ddspResultDelete(@RequestBody ResultSongDto resultSongDto){
+    public ResponseEntity<Object> ddspResultDelete(@PathVariable Long resultSongId){
         try{
-            inferenceService.songDelete(resultSongDto.getId());
+            inferenceService.songDelete(Math.toIntExact(resultSongId));
         }catch (NoAwsSongException e){
             return ResponseEntity
                     .badRequest()
@@ -98,12 +98,12 @@ public class ddspController {
         }
 
     }
-    @PostMapping("/delete_ptr")
+    @DeleteMapping("/delete_ptr/{ptrId}")
     public ResponseEntity<Object> deletePtr(
-            @RequestBody PtrDataUserDto ptrDataUserDto
+            @PathVariable Long ptrId
     ){
         try{
-            trainService.ptrFileDelete(ptrDataUserDto);
+            trainService.ptrFileDelete(ptrId);
             return ResponseEntity.ok().build();
         }catch (NoPtrException e){
             return ResponseEntity.status(e.getExceptionCode().getStatus())

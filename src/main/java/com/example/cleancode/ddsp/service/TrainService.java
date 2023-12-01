@@ -46,8 +46,8 @@ public class TrainService {
         ptrDataRepository.save(ptrData);
     }
     @Transactional
-    public boolean ptrFileDelete(PtrDataUserDto ptrData){
-        PtrData ptrData1 = validator.ptrDataValidator(ptrData.getId());
+    public boolean ptrFileDelete(Long ptrId){
+        PtrData ptrData1 = validator.ptrDataValidator(ptrId);
         try{
             amazonS3.deleteObject(bucket,ptrData1.getPtrUrl());
             ptrDataRepository.delete(ptrData1);

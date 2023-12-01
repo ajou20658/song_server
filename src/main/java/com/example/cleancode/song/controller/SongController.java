@@ -87,9 +87,9 @@ public class SongController {
             return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
         }
     }
-    @DeleteMapping("/removeFile")
+    @DeleteMapping("/removeFile/{songId}")
     @ResponseBody
-    public ResponseEntity<Object> deleteSong(@RequestParam Long songId){
+    public ResponseEntity<Object> deleteSong(@PathVariable Long songId){
         try{
             vocalPreProcessService.songDelete(songId);
             return ResponseEntity.ok().build();
