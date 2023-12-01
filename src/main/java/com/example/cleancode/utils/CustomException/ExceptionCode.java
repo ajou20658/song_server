@@ -23,6 +23,7 @@ public enum ExceptionCode {
     JWT_ERROR(BAD_REQUEST,"JWT 발급 실패"),
     PTR_ERROR(BAD_REQUEST,"존재하지 않는 ptr 파일"),
     RESULT_SONG_ERROR(BAD_REQUEST,"삭제되었거나 존재하지 않는 파일"),
+    RESULT_SONG_DUP(BAD_REQUEST,"중복되는 AI보컬곡 요청입니다. 삭제후 다시 시도해주세요."),
     AWS_UPLOAD_ERROR(BAD_REQUEST,"업로드 실패"),
     DUP_UPLOAD(BAD_REQUEST,"이미 존재하는 원곡입니다. 삭제후 다시 시도해주세요."),
     NO_F0_DATA(BAD_REQUEST,"음역대 분석을 먼저 해주세요")

@@ -9,10 +9,7 @@ import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.entity.GenreCountFrame;
 import com.example.cleancode.user.entity.Spectr2DataFrame;
-import com.example.cleancode.utils.CustomException.AwsUploadException;
-import com.example.cleancode.utils.CustomException.DjangoRequestException;
-import com.example.cleancode.utils.CustomException.NoAwsSongException;
-import com.example.cleancode.utils.CustomException.NoPtrException;
+import com.example.cleancode.utils.CustomException.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -55,14 +52,15 @@ public class ddspController {
     public ResponseEntity<Object> ddspInferenceRequest(
             @RequestBody InferenceRequest inferenceRequest) {
         try{
-            inferenceService.inferenceStart(
-                    inferenceRequest.getTargetVoiceId(),
-                    inferenceRequest.getTargetSongId());
+            inferenceService.inferenceStart(inferenceRequest.getTargetVoiceId(),inferenceRequest.getTargetSongId());
+            return ResponseEntity.ok().build();
         }catch (DjangoRequestException e){
             return ResponseEntity.status(e.getExceptionCode().getStatus())
                     .body(e.getExceptionCode().getMessage());
+        }catch (BadRequestException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus())
+                    .body(e.getExceptionCode().getMessage());
         }
-        return ResponseEntity.ok().build();
     }
     @GetMapping("/progressList")
     @ResponseBody

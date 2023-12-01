@@ -58,6 +58,10 @@ public class InferenceService {
     private String djangoUrl;
     @Transactional
     public void inferenceStart(Long ptrId, Long songId) {
+        Optional<ResultSong> optionalResultSong = resultSongRepository.findResultSongsByPtrData_IdAndSong_Id(ptrId, songId);
+        if(optionalResultSong.isPresent()){
+            throw new BadRequestException(ExceptionCode.RESULT_SONG_DUP);
+        }
         PtrData ptrData = validator.ptrDataValidator(ptrId);
         Song song = validator.songValidator(songId);
         String ptrKey = ptrData.getPtrUrl();
@@ -89,6 +93,7 @@ public class InferenceService {
                              Song song,
                              InferenceRedisEntity inferenceRedisEntity) {
 //        inferenceQueue.pushInProgress(inferenceRedisEntity);
+
         WebClient webClient = WebClient
                 .builder()
                 .baseUrl("http://"+djangoUrl)

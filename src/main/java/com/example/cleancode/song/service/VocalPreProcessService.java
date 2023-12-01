@@ -14,7 +14,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.support.NullValue;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,9 +73,20 @@ public class VocalPreProcessService {
     }
     public void songDelete(Long songId) throws NoSongException{
         Song song = validator.songValidator(songId);
+        Song updateSong = Song.builder()
+                .id(song.getId())
+                .isTop(song.isTop())
+                .title(song.getTitle())
+                .genre(song.getGenre())
+                .imgUrl(song.getImgUrl())
+                .encoded_genre(song.getEncoded_genre())
+                .status(ProgressStatus.NONE)
+                .artist(song.getArtist())
+                .build();
         if(song.getVocalUrl()!=null){
             try{
                 amazonS3.deleteObject(bucket,song.getVocalUrl());
+
             }catch (SdkClientException e){
                 log.error("버킷에서 이미 삭제된 파일");
             }
@@ -92,6 +105,7 @@ public class VocalPreProcessService {
                 log.error("버킷에서 이미 삭제된 파일");
             }
         }
+        songRepository.save(updateSong);
     }
     //이곳은 노래 전처리 요청
     @Transactional
