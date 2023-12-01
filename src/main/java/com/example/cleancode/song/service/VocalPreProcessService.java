@@ -40,7 +40,7 @@ public class VocalPreProcessService {
     @Value("${spring.django-url}")
     private String djangoUrl;
     @Transactional
-    public boolean songUpload(MultipartFile multipartFile, Long songId){
+    public void songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
 
         if((!Objects.requireNonNull(type).contains("mpeg"))){
@@ -50,6 +50,7 @@ public class VocalPreProcessService {
         String filename="";
         if(song.getOriginUrl()!=null){
             filename = "origin/"+song.getOriginUrl().split("/")[1];
+            throw new BadRequestException(ExceptionCode.DUP_UPLOAD);
         }else{
             filename = "origin/"+UUID.randomUUID();
         }
@@ -67,38 +68,31 @@ public class VocalPreProcessService {
             throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
         songRepository.save(songDto);
-        return true;
     }
-    public void convertWavToMp3(MultipartFile multipartFile, String outputFilePath){
-        try{
-            File tempWavFile = File.createTempFile("temp", ".wav");
-            FileOutputStream fos = new FileOutputStream(tempWavFile);
-            fos.write(multipartFile.getBytes());
-            fos.close();
-            File mp3File = File.createTempFile("temp", ".mp3");
-            String[] lameCommand = {
-                    "lame",
-                    tempWavFile.getAbsolutePath(),
-                    mp3File.getAbsolutePath()
-            };
-            ProcessBuilder processBuilder = new ProcessBuilder(lameCommand);
-
-            // 작업 디렉토리 설정 (필요에 따라 변경 가능)
-            processBuilder.directory(new File("/path/to/lame/directory"));
-
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                System.out.println("MP3 conversion completed successfully.");
-                byte[] mp3Bytes = getBytesFromFile(mp3File);
-            } else {
-                System.out.println("MP3 conversion failed with exit code: " + exitCode);
+    public void songDelete(Long songId) throws NoSongException{
+        Song song = validator.songValidator(songId);
+        if(song.getVocalUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getVocalUrl());
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
             }
-
-        }catch (IOException | InterruptedException e){
-            e.printStackTrace();
         }
+        if(song.getInstUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getInstUrl());
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
+            }
+        }
+        if(song.getVocalUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getVocalUrl());
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
+            }
+        }
+        songRepository.delete(song);
     }
     //이곳은 노래 전처리 요청
     @Transactional

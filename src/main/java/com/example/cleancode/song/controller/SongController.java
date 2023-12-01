@@ -9,6 +9,10 @@ import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.song.service.VocalPreProcessService;
+import com.example.cleancode.utils.CustomException.AwsUploadException;
+import com.example.cleancode.utils.CustomException.BadRequestException;
+import com.example.cleancode.utils.CustomException.FormatException;
+import com.example.cleancode.utils.CustomException.NoSongException;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,12 +74,31 @@ public class SongController {
     @PostMapping("/upload")
     @ResponseBody
     public ResponseEntity<Object> uploadSong(@RequestPart("file") MultipartFile multipartFile, @RequestParam Long songId){
-        if(vocalPreProcessService.songUpload(multipartFile,songId)){
+        try{
+            vocalPreProcessService.songUpload(multipartFile,songId);
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
             return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (FormatException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
+        }catch (AwsUploadException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
+        }catch (BadRequestException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
         }
-        return ResponseEntity.badRequest().build();
+    }
+    @DeleteMapping("/remove")
+    @ResponseBody
+    public ResponseEntity<Object> deleteSong(@RequestParam Long songId){
+        try{
+            vocalPreProcessService.songDelete(songId);
+            return ResponseEntity.ok().build();
+        }catch (NoSongException e){
+            return ResponseEntity
+                    .status(e.getExceptionCode().getStatus())
+                    .body(e.getExceptionCode().getMessage());
+        }
+
     }
     @GetMapping("/uploaded_list")
     @ResponseBody

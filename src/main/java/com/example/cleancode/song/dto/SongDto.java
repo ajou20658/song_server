@@ -15,7 +15,6 @@ public class SongDto {
     private String imgUrl;
     private String artist;
     private List<String> genre;
-    private List<Integer> spectr;
     private String instUrl;
     private String originUrl;
     private ProgressStatus status;
