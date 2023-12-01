@@ -367,6 +367,7 @@ public class UserService {
     private Spectr2DataFrame f02Df(Long userId){
         User user  = validator.userValidator(userId);
         List<Integer> spectrum = user.getSpectr();
+        Collections.sort(spectrum);
         if(spectrum.isEmpty()){
             throw new BadRequestException(ExceptionCode.NO_F0_DATA);
         }
