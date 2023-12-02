@@ -1,5 +1,6 @@
 package com.example.cleancode.ddsp.entity;
 
+import com.example.cleancode.song.dto.SongDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,5 @@ import lombok.Setter;
 public class ResultSongDto {
     private Integer id;
     private String generatedUrl;
-    private String song;
-    private String ptrData;
+    private SongDto song;
 }

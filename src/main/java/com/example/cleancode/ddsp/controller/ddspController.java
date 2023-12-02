@@ -44,8 +44,10 @@ public class ddspController {
     }
     @GetMapping("/generatedSongList")
     @ResponseBody
-    public List<ResultSong> resultSongList(@RequestParam Long ptrId){
-        return inferenceService.allResult(ptrId);
+    public List<ResultSongDto> resultSongList(@RequestParam Long ptrId){
+        List<ResultSongDto> result = inferenceService.allResult(ptrId)
+                .stream().map(ResultSong::resultSongDto).toList();
+        return result;
     }
     @PostMapping("/makesong")
     @ResponseBody
