@@ -204,7 +204,9 @@ public class InferenceService {
     public List<Song> getRecommandList(Long ptrid){
         PtrData ptrData = validator.ptrDataValidator(ptrid);
         List<Long> songNumList = ptrData.getRecommandSongIds();
+        Collections.shuffle(songNumList);
         List<Song> songList = new ArrayList<>();
+
         for(Long i: songNumList){
             songList.add(validator.songValidator(i));
         }
