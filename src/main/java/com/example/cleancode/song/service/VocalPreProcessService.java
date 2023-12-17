@@ -3,7 +3,7 @@ package com.example.cleancode.song.service;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cleancode.song.dto.SongDto;
+//import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -14,7 +14,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.support.NullValue;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -39,7 +42,7 @@ public class VocalPreProcessService {
     @Value("${spring.django-url}")
     private String djangoUrl;
     @Transactional
-    public boolean songUpload(MultipartFile multipartFile, Long songId){
+    public void songUpload(MultipartFile multipartFile, Long songId){
         String type = multipartFile.getContentType();
 
         if((!Objects.requireNonNull(type).contains("mpeg"))){
@@ -49,6 +52,7 @@ public class VocalPreProcessService {
         String filename="";
         if(song.getOriginUrl()!=null){
             filename = "origin/"+song.getOriginUrl().split("/")[1];
+            throw new BadRequestException(ExceptionCode.DUP_UPLOAD);
         }else{
             filename = "origin/"+UUID.randomUUID();
         }
@@ -57,7 +61,7 @@ public class VocalPreProcessService {
         metadata.setContentType(multipartFile.getContentType());
 
 
-        SongDto songDto = validator.songValidator(songId).toSongDto();
+        Song songDto = validator.songValidator(songId);
         songDto.setOriginUrl(filename);
         songDto.setStatus(ProgressStatus.UPLOADED);
         try{
@@ -65,39 +69,43 @@ public class VocalPreProcessService {
         }catch (IOException | SdkClientException ex){
             throw new AwsUploadException(ExceptionCode.AWS_ERROR);
         }
-        songRepository.save(songDto.toSongEntity());
-        return true;
+        songRepository.save(songDto);
     }
-    public void convertWavToMp3(MultipartFile multipartFile, String outputFilePath){
-        try{
-            File tempWavFile = File.createTempFile("temp", ".wav");
-            FileOutputStream fos = new FileOutputStream(tempWavFile);
-            fos.write(multipartFile.getBytes());
-            fos.close();
-            File mp3File = File.createTempFile("temp", ".mp3");
-            String[] lameCommand = {
-                    "lame",
-                    tempWavFile.getAbsolutePath(),
-                    mp3File.getAbsolutePath()
-            };
-            ProcessBuilder processBuilder = new ProcessBuilder(lameCommand);
+    public void songDelete(Long songId) throws NoSongException{
+        Song song = validator.songValidator(songId);
+        Song updateSong = Song.builder()
+                .id(song.getId())
+                .isTop(song.isTop())
+                .title(song.getTitle())
+                .genre(song.getGenre())
+                .imgUrl(song.getImgUrl())
+                .encoded_genre(song.getEncoded_genre())
+                .status(ProgressStatus.NONE)
+                .artist(song.getArtist())
+                .build();
+        if(song.getVocalUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getVocalUrl());
 
-            // 작업 디렉토리 설정 (필요에 따라 변경 가능)
-            processBuilder.directory(new File("/path/to/lame/directory"));
-
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                System.out.println("MP3 conversion completed successfully.");
-                byte[] mp3Bytes = getBytesFromFile(mp3File);
-            } else {
-                System.out.println("MP3 conversion failed with exit code: " + exitCode);
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
             }
-
-        }catch (IOException | InterruptedException e){
-            e.printStackTrace();
         }
+        if(song.getInstUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getInstUrl());
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
+            }
+        }
+        if(song.getVocalUrl()!=null){
+            try{
+                amazonS3.deleteObject(bucket,song.getVocalUrl());
+            }catch (SdkClientException e){
+                log.error("버킷에서 이미 삭제된 파일");
+            }
+        }
+        songRepository.save(updateSong);
     }
     //이곳은 노래 전처리 요청
     @Transactional
@@ -122,8 +130,6 @@ public class VocalPreProcessService {
                 .builder()
                 .baseUrl("http://"+djangoUrl)
                 .build();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
         body.add("fileKey",song.getOriginUrl());
         body.add("isUser","false");
@@ -135,58 +141,33 @@ public class VocalPreProcessService {
                 .uri(url)
                 .body(BodyInserters.fromFormData(body))
                 .retrieve()
-                    .bodyToMono(JsonNode.class)
-                    .map(JsonNode -> {
-                        try{
-                            String message = JsonNode.get("message").asText();
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
-                            return result[0];
-                        }catch (JsonProcessingException e){
-                            log.error("파싱 에러");
-                            throw new RuntimeException(e);
-                        }
-                    })
+                .bodyToMono(JsonNode.class)
+                .map(JsonNode -> {
+                    try{
+                        String message = JsonNode.get("message").asText();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Dataframe2Json[] result = objectMapper.readValue(message,Dataframe2Json[].class);
+                        return result[0];
+                    }catch (JsonProcessingException e){
+                        log.error("파싱 에러");
+                        throw new RuntimeException(e);
+                    }
+                })
+                    .timeout(Duration.ofMinutes(5))
                 .subscribe(response -> {
                     //여기 수정이 필요함
 //                    log.info("status message = {}", response);
-                    SongDto songDto = song.toSongDto();
+                    Song songDto = song;
                     songDto.setVocalUrl("vocal/"+uuid);
                     songDto.setInstUrl("inst/"+uuid);
                     songDto.setStatus(ProgressStatus.COMPLETE);
                     songDto.setSpectr(json2List(response));
-                    songDto.toSongEntity();
-                    songRepository.save(songDto.toSongEntity());
+                    songRepository.save(songDto);
                 });
         }catch (Exception e){
             throw new DjangoRequestException(ExceptionCode.WEB_SIZE_OVER);
         }
         // userSong Status변경
-    }
-
-    @Transactional
-    public void djangoResponse(List<Integer> spetr, String uuid,Long Status){
-        if(Status.equals("200")){
-            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
-            if(songOptional.isEmpty()){
-                throw new NoSongException(ExceptionCode.SONG_INVALID);
-            }
-            SongDto songDto = songOptional.get().toSongDto();
-            songDto.setVocalUrl("vocal/"+uuid);
-            songDto.setInstUrl("inst/"+uuid);
-            songDto.setSpectr(spetr);
-            songDto.setStatus(ProgressStatus.COMPLETE);
-
-            songRepository.save(songDto.toSongEntity());
-        }else{
-            Optional<Song> songOptional = songRepository.findByOriginUrl(uuid);
-            if(songOptional.isEmpty()){
-                return;
-            }
-            SongDto songDto = songOptional.get().toSongDto();
-            songDto.setStatus(ProgressStatus.ERROR);
-            songRepository.save(songDto.toSongEntity());
-        }
     }
     private List<Integer> json2List(Dataframe2Json rawJson){
         List<Integer> result = new ArrayList<>();

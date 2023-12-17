@@ -9,6 +9,10 @@ import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
 import com.example.cleancode.song.service.MelonCrawlService;
 import com.example.cleancode.song.service.VocalPreProcessService;
+import com.example.cleancode.utils.CustomException.AwsUploadException;
+import com.example.cleancode.utils.CustomException.BadRequestException;
+import com.example.cleancode.utils.CustomException.FormatException;
+import com.example.cleancode.utils.CustomException.NoSongException;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +62,9 @@ public class SongController {
     public List<SongDto> getList2(@RequestParam String target, @RequestParam @Nullable String mode){
         try{
             log.info("아티스트명에서");
-            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"));
+            return melonService.search_artist(target, Objects.requireNonNullElse(mode, "0"))
+                    .stream()
+                    .map(Song::toSongDto).toList();
         }catch(Exception ex){
             log.info("decode err: "+ex.toString());
         }
@@ -68,18 +74,37 @@ public class SongController {
     @PostMapping("/upload")
     @ResponseBody
     public ResponseEntity<Object> uploadSong(@RequestPart("file") MultipartFile multipartFile, @RequestParam Long songId){
-        if(vocalPreProcessService.songUpload(multipartFile,songId)){
+        try{
+            vocalPreProcessService.songUpload(multipartFile,songId);
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
             return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (FormatException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
+        }catch (AwsUploadException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
+        }catch (BadRequestException e){
+            return ResponseEntity.status(e.getExceptionCode().getStatus()).body(e.getExceptionCode().getMessage());
         }
-        return ResponseEntity.badRequest().build();
+    }
+    @DeleteMapping("/removeFile/{songId}")
+    @ResponseBody
+    public ResponseEntity<Object> deleteSong(@PathVariable Long songId){
+        try{
+            vocalPreProcessService.songDelete(songId);
+            return ResponseEntity.ok().build();
+        }catch (NoSongException e){
+            return ResponseEntity
+                    .status(e.getExceptionCode().getStatus())
+                    .body(e.getExceptionCode().getMessage());
+        }
+
     }
     @GetMapping("/uploaded_list")
     @ResponseBody
     public List<Song> giveAvailalbleList(){
-        List<Song> song = songRepository.findByStatus(ProgressStatus.UPLOADED);
-        song.addAll(songRepository.findByStatus(ProgressStatus.ERROR));
+        List<Song> song = songRepository.findByStatusOOrderByRand(ProgressStatus.UPLOADED,PageRequest.of(1,50));
+        song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.ERROR,PageRequest.of(1,50)));
         song.addAll(songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE, PageRequest.of(1,50)));
         return song;
     }
@@ -91,7 +116,7 @@ public class SongController {
     @GetMapping("/completed_list")
     @ResponseBody
     public List<Song> giveCompleteList(){
-        return songRepository.findByStatus(ProgressStatus.COMPLETE);
+        return songRepository.findByStatusOOrderByRand(ProgressStatus.COMPLETE,PageRequest.of(1,50));
     }
     @GetMapping("/completed_random_list")
     @ResponseBody
@@ -143,17 +168,6 @@ public class SongController {
         }
         return ResponseEntity.badRequest().build();
     }
-    @PostMapping("/response")
-    public void djangoResponse(
-            @RequestBody List<Integer> f0,
-            @RequestBody Long status,
-            @RequestBody String uuid){
-        if(status==200){
-            vocalPreProcessService.djangoResponse(f0,uuid,status);
-            return;
-        }
-        vocalPreProcessService.djangoResponse(null,uuid,status);
-    }
 
     @Deprecated
     @GetMapping("/artist_list_crawl")
@@ -184,10 +198,10 @@ public class SongController {
                 }
                 for(String artist : lines){
                     likeIDSumCntMap = new HashMap<>();
-                    List<SongDto> songlist = melonService.search_artist(artist,"1");
+                    List<Song> songlist = melonService.search_artist(artist,"1");
 
                     List<Long> likeString=songlist.stream()
-                            .map(SongDto::getId)
+                            .map(Song::getId)
                             .collect(Collectors.toList());
                     System.out.println("likeString = " + likeString);
                     Thread.sleep(2000);
@@ -201,7 +215,7 @@ public class SongController {
                         int sumCnt = contsLikeObject.getInt("SUMMCNT");
                         likeIDSumCntMap.put(likeId,sumCnt);
                     }
-                    for(SongDto songDto :songlist){
+                    for(Song songDto :songlist){
                         if(songDto.getTitle().contains("Inst")|| songDto.getTitle().contains("inst")||
                                 songDto.getTitle().contains("Feat")|| songDto.getTitle().contains("feat")|| songDto.getTitle().contains("MR")){
                             log.info("제외된 제목 : {}", songDto.getTitle());

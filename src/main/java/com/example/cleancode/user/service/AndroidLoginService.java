@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -31,11 +32,13 @@ public class AndroidLoginService {
         kakaoTokenService.tokenfire(androidRequestParam.getAccessToken(), id);
         Optional<User> isExist = memberRepository.findById(id);
         if(isExist.isEmpty()) {
+            List<Integer> integerList = List.of(100,150,200,250,300,350,400,450);
             User member = User.builder()
                     .id(id)
                     .email(kakaoInfoResponse.getKakaoAccount().getEmail())
                     .nickname(kakaoInfoResponse.getKakaoAccount().getProfile().getNickname())
                     .profileUrl(kakaoInfoResponse.getKakaoAccount().getProfile().getThumbnail_image_url())
+                    .spectr(integerList)
                     .role(Role.ROLE_USER)
                     .build();
             log.info(member.toString());

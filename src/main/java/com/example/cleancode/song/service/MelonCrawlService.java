@@ -1,6 +1,6 @@
 package com.example.cleancode.song.service;
 
-import com.example.cleancode.song.dto.SongDto;
+//import com.example.cleancode.song.dto.SongDto;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.song.repository.SongRepository;
@@ -76,7 +76,7 @@ public class MelonCrawlService {
     @Transactional
     @Scheduled(fixedRate = 86400000) //top100인것 초기화 후 표시하기
     public void collectMelonSong() throws Exception {
-        List<SongDto> pList = new LinkedList<>();
+        List<Song> pList = new LinkedList<>();
         TopReset();
         String url = "https://www.melon.com/chart/index.htm";
 
@@ -86,21 +86,21 @@ public class MelonCrawlService {
 
         Elements element = doc.select("div.service_list_song");
         for (Element songInfo : element.select("#lst50")) {
-            SongDto songDto = top100CrawlParser(songInfo);
+            Song songDto = top100CrawlParser(songInfo);
             if(songDto!=null){  //존재하면
                 pList.add(songDto);
             }
         }
         for (Element songInfo : element.select("#lst100")) {
             // 크롤링을 통해 데이터 저장하기
-            SongDto songDto = top100CrawlParser(songInfo);
+            Song songDto = top100CrawlParser(songInfo);
             if(songDto!=null){
                 pList.add(songDto);
             }
         }
 
         String genreUrl = "https://www.melon.com/song/detail.htm?songId=";
-        for(SongDto song: pList){
+        for(Song song: pList){
             if(song.getGenre()==null){
                 String getGenreParam = String.valueOf(song.getId());
                 Document genreDoc = Jsoup.connect(genreUrl+getGenreParam)
@@ -109,7 +109,7 @@ public class MelonCrawlService {
                 Thread.sleep(500);
                 genreImgUrlParser(genreDoc,song);
             }else{
-                songRepository.save(song.toSongEntity());
+                songRepository.save(song);
             }
         }
     }
@@ -117,14 +117,13 @@ public class MelonCrawlService {
     public void TopReset(){
         List<Song> old = songRepository.findByIsTop(true);
         for(Song i : old){
-            SongDto newSong = i.toSongDto();
-            newSong.setTop(false);
-            songRepository.save(newSong.toSongEntity());
+            i.setTop(false);
+            songRepository.save(i);
         }
     }
     @Transactional
-    public List<SongDto> search_artist(String artist, String mode){
-        List<SongDto> list = new LinkedList<>();
+    public List<Song> search_artist(String artist, String mode){
+        List<Song> list = new LinkedList<>();
         Pattern localpattern = Pattern.compile("'(\\d+)'");
         String m ="";
         switch(mode){
@@ -133,9 +132,7 @@ public class MelonCrawlService {
                 List<Song> result3 = songRepository.findByArtistContainingOrTitleContaining(artist,artist);
                 if(result3.size()>=10){
                     log.info("any exists");
-                    return result3.stream()
-                            .map(Song::toSongDto)
-                            .collect(Collectors.toList());
+                    return result3;
                 }
                 break;
             case "1":
@@ -144,9 +141,7 @@ public class MelonCrawlService {
 //                log.info(result.toString());
                 if(result.size()>=10){
                     log.info("artist exists");
-                    return result.stream()
-                            .map(Song::toSongDto)
-                            .collect(Collectors.toList());
+                    return result;
                 }
                 break;
             case "2":
@@ -154,9 +149,7 @@ public class MelonCrawlService {
                 List<Song> result2 = songRepository.findByTitleContaining(artist);
                 if(result2.size()>=10){
                     log.info("title exists");
-                    return result2.stream()
-                            .map(Song::toSongDto)
-                            .collect(Collectors.toList());
+                    return result2;
                 }
                 break;
             case "3":
@@ -202,7 +195,7 @@ public class MelonCrawlService {
 
                         if(song.isEmpty()){ //Song정보가 없으면
                             log.info("search 없음");
-                            SongDto songDto = SongDto.builder()
+                            Song songk = Song.builder()
                                     .title(title)
                                     .artist(singer)
                                     .id(songId)
@@ -211,12 +204,12 @@ public class MelonCrawlService {
                             Document genreDoc = Jsoup.connect(genreUrl+parse[4])
                                     .userAgent(userAgent)
                                     .get();
-                            genreImgUrlParser(genreDoc,songDto);
+                            genreImgUrlParser(genreDoc,songk);
 
-                            SongDto songDto1 = songRepository.findById(songDto.getId()).get().toSongDto();
+                            Song songDto1 = songRepository.findById(songk.getId()).get();
                             list.add(songDto1);
                         }else{
-                            list.add(song.get().toSongDto());
+                            list.add(song.get());
                         }
                     }
                 }catch (Exception ex){
@@ -226,11 +219,7 @@ public class MelonCrawlService {
         }catch (Exception ex){
             log.error("An error occured : ", ex);
         }
-        List<SongDto> result = songRepository.findByArtistContainingOrTitleContaining(artist,artist)
-                .stream()
-                .map(Song::toSongDto)
-                .toList();
-        return result;
+        return songRepository.findByArtistContainingOrTitleContaining(artist,artist);
     }
 
     public JSONObject getLikeNum(List<Long> likeList)throws Exception{
@@ -271,7 +260,7 @@ public class MelonCrawlService {
         return values;
     }
     @Transactional
-    public void genreImgUrlParser(Document genreDoc,SongDto songDto){
+    public void genreImgUrlParser(Document genreDoc,Song songDto){
         String genre = genreDoc.select("div.meta dd").eq(2).text();
         String imgUrl = genreDoc.select("#d_song_org > a > img").attr("src");
         log.info("genre : {}",genre);
@@ -293,15 +282,15 @@ public class MelonCrawlService {
         songDto.setEncoded_genre(encodedGenre);
         songDto.setGenre(genreArray);
         songDto.setStatus(ProgressStatus.NONE);
-        songRepository.save(songDto.toSongEntity());
+        songRepository.save(songDto);
     }
-    private SongDto top100CrawlParser(Element songInfo){
+    private Song top100CrawlParser(Element songInfo){
         String songId = songInfo.attr("data-song-no");
 
         Optional<Song> tmp = songRepository.findById(Long.valueOf(songId));
         if(tmp.isPresent()){
             //log.info("top100 crawling:{}", tmp.get());
-            SongDto tmp2 = tmp.get().toSongDto();
+            Song tmp2 = tmp.get();
             tmp2.setTop(true);
             return tmp2;
         }
@@ -312,7 +301,7 @@ public class MelonCrawlService {
         if(!songRepository.findByArtistAndTitle(artist,title).isEmpty()){
             return null;
         }
-        return SongDto.builder()
+        return Song.builder()
                 .artist(artist)
                 .title(title)
                 .id(Long.valueOf(songId))
@@ -379,18 +368,18 @@ public class MelonCrawlService {
     public void replaceComma(){
         List<Song> allList = songRepository.findByArtistContainingOrTitleContaining(",",",");
         for(Song i: allList){
-            SongDto songDto = i.toSongDto();
-            songDto.setTitle(i.getTitle().replace(","," "));
-            songDto.setArtist(i.getArtist().replace(","," "));
-            songRepository.save(songDto.toSongEntity());
+            Song song = i;
+            song.setTitle(i.getTitle().replace(","," "));
+            song.setArtist(i.getArtist().replace(","," "));
+            songRepository.save(song);
         }
     }
     public void replaceStatus(){
         List<Song> allList = songRepository.findByStatusIsNull();
         for(Song i: allList){
-            SongDto songDto = i.toSongDto();
-            songDto.setStatus(ProgressStatus.NONE);
-            songRepository.save(songDto.toSongEntity());
+            Song song = i;
+            song.setStatus(ProgressStatus.NONE);
+            songRepository.save(song);
         }
     }
 }

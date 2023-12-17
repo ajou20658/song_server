@@ -9,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Getter
+@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,11 +44,7 @@ public class Song {
                 .imgUrl(imgUrl)
                 .artist(artist)
                 .genre(genre)
-                .encoded_genre(encoded_genre)
-                .isTop(isTop)
                 .originUrl(originUrl)
-                .spectr(spectr)
-                .vocalUrl(vocalUrl)
                 .instUrl(instUrl)
                 .status(status)
                 .build();

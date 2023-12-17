@@ -4,8 +4,10 @@ import com.example.cleancode.aws.service.S3UploadService;
 import com.example.cleancode.song.entity.ProgressStatus;
 import com.example.cleancode.song.entity.Song;
 import com.example.cleancode.user.dto.UserDto;
+import com.example.cleancode.utils.CustomException.Validator;
 import com.example.cleancode.utils.UserPrinciple;
 import com.example.cleancode.user.service.UserService;
+import io.lettuce.core.output.ValueListOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -27,6 +29,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final Validator validator;
     private final S3UploadService s3UploadService;
 
     /**
@@ -65,6 +68,8 @@ public class UserController {
     public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file,@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException {
         log.info("Voice Upload Req");
         if(userService.userFileUpload(file,userPrinciple.getId(),songId)){
+            userService.preprocessStart(songId,userPrinciple.getId());
+            userService.reIssueRecommandList(validator.userValidator(userPrinciple.getId()).getSelected(), userPrinciple.getId());
             Map<String,Object> response = new HashMap<>();
             response.put("response",songId);
             return new ResponseEntity<>(response,HttpStatus.OK);
@@ -72,14 +77,14 @@ public class UserController {
         return ResponseEntity.badRequest().build();
         //----------------------------------------------------------------------------------------
     }
-    @PostMapping("/preprocess")
-    public ResponseEntity<Object> djangoRequest(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException{
-        boolean result = userService.preprocessStart(songId,userPrinciple.getId());
-        if(result){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
-    }
+//    @PostMapping("/preprocess")
+//    public ResponseEntity<Object> djangoRequest(@RequestParam Long songId, @AuthenticationPrincipal UserPrinciple userPrinciple) throws IOException{
+//        boolean result = userService.preprocessStart(songId,userPrinciple.getId());
+//        if(result){
+//            return ResponseEntity.ok().build();
+//        }
+//        return ResponseEntity.badRequest().build();
+//    }
     @GetMapping("/vocal_list")
     @ResponseBody
     public ResponseEntity<Object> userVocalList(@AuthenticationPrincipal UserPrinciple userPrinciple){
